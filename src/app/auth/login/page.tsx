@@ -1,112 +1,124 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2 } from 'lucide-react';
-import { Toaster, toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import { ArrowRight, Loader2, Mail, Lock } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
+      // 1. Send Login Request
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
+      console.log("LOGIN DEBUG:", data); 
 
-      if (res.ok) {
-        // 👇 FIX: Check if a REAL token exists before proceeding
-        if (!data.token) {
-          toast.error("Server error: No token received.");
-          setLoading(false);
-          return; // Stop the function here
+      if (res.ok && data.token) {
+        // 2. ✅ CRITICAL: Save Token & User Info
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        // 3. Verify it was saved (Double Check)
+        const savedToken = localStorage.getItem('token');
+        if (!savedToken) {
+          throw new Error("Browser failed to save token");
         }
 
-        toast.success('Login successful!');
-        
-        // Only set the cookie if we have a real token
-        document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
-
-        // Force a full page reload to clear cache
-        if (data.role === 'admin') {
-          window.location.href = '/admin/users';
-        } else {
-          window.location.href = '/dashboard';
-        }
+        // 4. Redirect ONLY after confirming save
+        console.log("Token saved successfully. Redirecting...");
+        window.location.href = '/dashboard'; // Force full reload to ensure state picks up
       } else {
-        toast.error(data.error || 'Login failed');
-        setLoading(false);
+        setError(data.error || 'Invalid credentials');
       }
-    } catch (err) {
-      console.error(err);
-      toast.error('Connection failed');
+    } catch (err: any) {
+      console.error("Login Error:", err);
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
-  
-      
 
   return (
-    <div className="min-h-screen bg-[#0b1220] flex items-center justify-center p-4">
-      <Toaster position="top-center" />
-
-      <div className="w-full max-w-md bg-[#1a1f2e] border border-white/10 p-8 rounded-2xl shadow-xl">
+    <div className="min-h-screen bg-[#0b1221] text-white flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-[#1a1f2e] p-8 rounded-2xl border border-white/10 shadow-xl">
+        
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-gray-400">Log in to your account</p>
+          <h1 className="text-2xl font-bold mb-2">Welcome Back</h1>
+          <p className="text-gray-400 text-sm">Sign in to access your portfolio</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-gray-300 ml-1">Email</label>
-            <input 
-              name="email"
-              type="email" 
-              required
-              value={form.email}
-              onChange={handleChange}
-              className="w-full bg-[#0b1220] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 transition-colors"
-            />
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm text-center">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-gray-400 uppercase">Email Address</label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-[#0f1522] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-600 focus:border-blue-500 focus:outline-none transition-colors"
+                placeholder="Enter your email"
+              />
+            </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-gray-300 ml-1">Password</label>
-            <input 
-              name="password"
-              type="password" 
-              required
-              value={form.password}
-              onChange={handleChange}
-              className="w-full bg-[#0b1220] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 transition-colors"
-            />
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-gray-400 uppercase">Password</label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-[#0f1522] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-600 focus:border-blue-500 focus:outline-none transition-colors"
+                placeholder="••••••••"
+              />
+            </div>
           </div>
 
-          <button 
-            type="submit" 
+          <div className="flex justify-end">
+            <Link href="/forgot-password" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
+              Forgot password?
+            </Link>
+          </div>
+
+          <button
+            type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50 mt-2 flex items-center justify-center"
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 mt-2"
           >
-            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Log In'}
+            {loading ? <Loader2 className="animate-spin" size={20} /> : 'Sign In'}
+            {!loading && <ArrowRight size={18} />}
           </button>
         </form>
 
-        <p className="text-center text-gray-400 text-sm mt-6">
+        <p className="mt-8 text-center text-gray-400 text-sm">
           Don't have an account?{' '}
-          <Link href="/auth/signup" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
-            Sign Up
+          <Link href="/signup" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
+            Create Account
           </Link>
         </p>
       </div>
