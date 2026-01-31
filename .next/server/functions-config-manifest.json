@@ -1,1 +1,1 @@
-{"version":1,"functions":{"/api/settings":{},"/api/user/notifications":{},"/api/user/profile":{},"/api/admin/users":{},"/api/auth/logout":{},"/api/user/dashboard":{}}}
+{"version":1,"functions":{"/api/settings":{},"/api/user/dashboard":{},"/api/user/notifications":{},"/api/user/profile":{},"/api/auth/logout":{},"/api/admin/transactions":{},"/api/admin/users":{}}}
