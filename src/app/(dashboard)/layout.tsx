@@ -171,21 +171,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
+      
+
       {/* 3. MAIN CONTENT WRAPPER */}
-      {/* Dynamic Padding based on Sidebar State */}
-      <div className={`
-        flex flex-col min-h-screen transition-all duration-300 ease-in-out
-        ${isCollapsed ? 'md:pl-20' : 'md:pl-64'}
-      `}>
+      {/* FIX: Always keep padding at 'pl-20' so content never squishes. */}
+      <div className="flex flex-col min-h-screen md:pl-20 transition-all duration-300 ease-in-out">
         
         {/* Header */}
         <header className="h-20 border-b border-white/5 bg-[#0b1221] flex items-center justify-between px-6 shrink-0 sticky top-0 z-30">
           
-          {/* Mobile Menu Toggle */}
           <div className="flex items-center gap-4">
+            {/* Mobile Toggle */}
             <button 
               className="md:hidden p-2 text-gray-400 hover:text-white"
               onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <Menu size={24} />
+            </button>
+
+            {/* Desktop Toggle (Hamburger) */}
+            <button 
+              className="hidden md:block p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+              onClick={() => setIsCollapsed(!isCollapsed)}
             >
               <Menu size={24} />
             </button>
@@ -194,7 +201,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Right Side: Balance & Profile */}
           <div className="flex items-center gap-6">
             
-            {/* Live Balance Widget */}
+            {/* Balance Widget */}
             <div className="hidden md:flex items-center gap-4 bg-[#1a1f2e] border border-white/10 px-4 py-2 rounded-xl">
               <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
                 <Wallet size={18} />
