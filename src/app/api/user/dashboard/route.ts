@@ -3,7 +3,7 @@ import { prisma } from '../../../../lib/prisma';
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 
-// ⚠️ FORCE DYNAMIC: Prevents showing old cached "0" balance
+// ⚠️ FORCE FRESH DATA (Critical for balance updates)
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
@@ -17,14 +17,14 @@ export async function GET() {
 
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
     
-    // 1. Fetch User Data
+    // 1. Fetch the User
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       select: {
         id: true,
         name: true,
         email: true,
-        portfolioBalance: true, // ✅ This is the number the Admin sees
+        portfolioBalance: true, // The Real Admin Number
         availableBalance: true,
       }
     });
@@ -33,32 +33,30 @@ export async function GET() {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // 2. Fetch Recent Transactions (Last 5)
+    // 2. Fetch Transactions
     const transactions = await prisma.transaction.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: 'desc' },
       take: 5
     });
 
-    // 3. Prepare Data for Frontend
-    // ✅ FIX: Force the frontend to use portfolioBalance (matches Admin)
-    const mainBalance = user.portfolioBalance || 0;
-    
-    // Optional: Fake profit calculation for demo (15% of balance)
-    const estimatedProfit = mainBalance * 0.15; 
+    // 3. Define the Balance securely
+    // We use portfolioBalance because that is what the Admin Panel updates.
+    const secureBalance = user.portfolioBalance || 0;
+    const profit = secureBalance * 0.15; // Simulated 15% profit
 
+    // 4. Send the Response (Simplified)
     return NextResponse.json({
-      user,
-      balances: {
-        available: mainBalance, // <--- This ensures User sees what Admin sees
-        profit: estimatedProfit,
-        profitPercent: mainBalance > 0 ? "15.0" : "0"
-      },
+      user: user,
+      // We send 'balance' at the top level to make it easy to find
+      balance: secureBalance, 
+      profit: profit,
+      profitPercent: secureBalance > 0 ? "15.0" : "0",
       transactions: transactions || []
     });
 
   } catch (error) {
-    console.error("Dashboard Fetch Error:", error);
-    return NextResponse.json({ error: 'Failed to load dashboard' }, { status: 500 });
+    console.error("Dashboard Error:", error);
+    return NextResponse.json({ error: 'Server Error' }, { status: 500 });
   }
 }

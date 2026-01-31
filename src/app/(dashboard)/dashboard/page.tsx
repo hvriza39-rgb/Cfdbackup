@@ -6,7 +6,13 @@ import { ArrowUpRight, ArrowDownLeft, Wallet, TrendingUp } from 'lucide-react';
 import Watchlist from '../../components/Watchlist';
 
 export default function DashboardPage() {
-  const [user, setUser] = useState({ name: 'User', balance: 0, profit: 0, profitPercent: '0' });
+  const [data, setData] = useState({
+    name: 'User',
+    balance: 0,
+    profit: 0,
+    profitPercent: '0',
+    userId: ''
+  });
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,29 +27,28 @@ export default function DashboardPage() {
           cache: 'no-store'
         });
         
-        if (res.status === 401) return;
+        const json = await res.json();
+        console.log("Dashboard Data Received:", json); // 🔍 Check Console if balance is still 0
 
-        const data = await res.json();
-
-        if (data.user) {
-          setUser({ 
-            name: data.user.name, 
-            balance: data.balances?.available || 0,
-            profit: data.balances?.profit || 0, // NEW: Get profit from API
-            profitPercent: data.balances?.profitPercent || '0'
+        if (json.user) {
+          setData({
+            name: json.user.name || 'User',
+            // ✅ Safety Check: Look for balance in multiple places
+            balance: json.balance ?? json.user.portfolioBalance ?? 0, 
+            profit: json.profit || 0,
+            profitPercent: json.profitPercent || '0',
+            userId: json.user.id
           });
         }
-        if (data.transactions) setTransactions(data.transactions);
+        if (json.transactions) setTransactions(json.transactions);
       } catch (err) {
-        console.error(err);
+        console.error("Dashboard Load Error:", err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 10000);
-    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -57,7 +62,9 @@ export default function DashboardPage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
           <div className="relative z-10">
             <p className="text-blue-100 text-sm font-medium mb-1">Total Balance</p>
-            <h2 className="text-3xl font-bold font-mono">${user.balance.toLocaleString()}</h2>
+            <h2 className="text-3xl font-bold font-mono">
+              ${data.balance.toLocaleString()}
+            </h2>
             <div className="mt-4 flex gap-3">
               <Link href="/deposit" className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
                 <ArrowDownLeft size={16} /> Deposit
@@ -69,7 +76,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* P&L Card (NOW DYNAMIC) */}
+        {/* Profit Card */}
         <div className="bg-[#1a1f2e] border border-white/10 p-6 rounded-2xl shadow-xl">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-green-500/10 rounded-lg text-green-500">
@@ -77,38 +84,37 @@ export default function DashboardPage() {
             </div>
             <span className="text-gray-400 text-sm">Total Profit</span>
           </div>
-          <h2 className={`text-2xl font-bold font-mono ${user.profit > 0 ? 'text-green-400' : 'text-white'}`}>
-            ${user.profit.toLocaleString()}
+          <h2 className={`text-2xl font-bold font-mono ${data.profit > 0 ? 'text-green-400' : 'text-white'}`}>
+            +${data.profit.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </h2>
           <p className="text-xs text-green-400 mt-1 flex items-center gap-1">
-            +{user.profitPercent}% <span className="text-gray-500">growth</span>
+            +{data.profitPercent}% <span className="text-gray-500">growth</span>
           </p>
         </div>
 
-        {/* Active Trades Card */}
+        {/* Active Assets Card */}
         <div className="bg-[#1a1f2e] border border-white/10 p-6 rounded-2xl shadow-xl">
            <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-purple-500/10 rounded-lg text-purple-500">
               <Wallet size={20} />
             </div>
-            <span className="text-gray-400 text-sm">Active Assets</span>
+            <span className="text-gray-400 text-sm">Active Status</span>
           </div>
-          <h2 className="text-2xl font-bold text-white font-mono">0</h2>
-          <p className="text-xs text-gray-500 mt-1">
-             Assets currently in your portfolio
-          </p>
+          <h2 className="text-2xl font-bold text-white">Verified</h2>
+          <p className="text-xs text-gray-500 mt-1">Account is fully active</p>
         </div>
       </div>
 
+      {/* 2. Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* 2. Watchlist */}
+        {/* Watchlist */}
         <div className="bg-[#1a1f2e] border border-white/10 p-6 rounded-2xl shadow-xl h-full">
           <h3 className="text-lg font-bold text-white mb-4">Market Watch</h3>
           <Watchlist />
         </div>
 
-        {/* 3. Recent Transactions */}
+        {/* Recent Transactions */}
         <div className="lg:col-span-2 bg-[#1a1f2e] border border-white/10 p-6 rounded-2xl shadow-xl">
           <h3 className="text-lg font-bold text-white mb-4">Recent Transactions</h3>
           
@@ -159,8 +165,13 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-
       </div>
+      
+      {/* 🔍 DEBUG ID: Helps confirm you are editing the right user */}
+      <div className="text-center pt-10 opacity-30 text-xs text-gray-500 font-mono">
+        User ID: {data.userId || 'Loading...'}
+      </div>
+
     </div>
   );
 }
