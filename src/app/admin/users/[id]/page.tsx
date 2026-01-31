@@ -11,7 +11,6 @@ export default function AdminUserDetailsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   
-  // User Form Data
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,37 +22,34 @@ export default function AdminUserDetailsPage() {
     createdAt: ''
   });
 
-  // Modal State
   const [showBalanceModal, setShowBalanceModal] = useState(false);
   const [amount, setAmount] = useState('');
   const [action, setAction] = useState('add');
   const [processingBalance, setProcessingBalance] = useState(false);
 
-  // 1. Fetch User (FIXED: Added no-store cache)
+  // 1. FIXED FETCH: Handles nested 'user' object
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        console.log("Fetching user ID:", params.id);
-        
-        const res = await fetch(`/api/admin/users/${params.id}`, {
-          cache: 'no-store' // 🚨 IMPORTANT: Forces fresh data every time
-        });
-
-        if (!res.ok) throw new Error("Failed to fetch user");
-
+        const res = await fetch(`/api/admin/users/${params.id}`, { cache: 'no-store' });
         const data = await res.json();
-        console.log("User Data Loaded:", data); // 🔍 Check Console if this is empty
+        
+        console.log("RAW API DATA:", data); // Check this in console
 
-        if (data) {
+        // 🚨 THE FIX: Check if data is inside 'user' property or direct
+        const user = data.user || data; 
+
+        if (user) {
           setFormData({
-            name: data.name || '',
-            email: data.email || '',
-            phone: data.phone || '',
-            country: data.country || '',
-            status: data.status || 'Active',
-            verified: data.verified ? 'Verified' : 'Unverified',
-            portfolioBalance: data.portfolioBalance || 0,
-            createdAt: data.createdAt ? new Date(data.createdAt).toLocaleString() : 'N/A'
+            name: user.name || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            country: user.country || '',
+            status: user.status || 'Active',
+            verified: user.verified ? 'Verified' : 'Unverified',
+            // Handle balance coming as string or number
+            portfolioBalance: Number(user.portfolioBalance) || 0,
+            createdAt: user.createdAt ? new Date(user.createdAt).toLocaleString() : 'N/A'
           });
         }
       } catch (error) {
@@ -66,7 +62,7 @@ export default function AdminUserDetailsPage() {
     if (params.id) fetchUser();
   }, [params.id]);
 
-  // 2. Save Profile Changes
+  // 2. Save Profile
   const handleSaveProfile = async () => {
     setSaving(true);
     setMessage('');
@@ -85,16 +81,15 @@ export default function AdminUserDetailsPage() {
       });
       
       if (res.ok) {
-        setMessage('✅ Changes saved successfully');
+        setMessage('✅ Changes saved');
         setTimeout(() => setMessage(''), 3000);
       } else {
         const err = await res.json();
-        console.error("Save Error:", err);
-        setMessage('❌ Failed to save');
+        console.error("Save Failed:", err);
+        setMessage('❌ Save failed');
       }
     } catch (error) {
-      console.error("Save Network Error:", error);
-      setMessage('❌ Error saving changes');
+      setMessage('❌ Network Error');
     } finally {
       setSaving(false);
     }
@@ -117,17 +112,21 @@ export default function AdminUserDetailsPage() {
 
       if (res.ok) {
         const updatedUser = await res.json();
-        setFormData(prev => ({ ...prev, portfolioBalance: updatedUser.portfolioBalance }));
+        // Handle nested return on balance update too
+        const finalBalance = updatedUser.user ? updatedUser.user.portfolioBalance : updatedUser.portfolioBalance;
+        
+        setFormData(prev => ({ ...prev, portfolioBalance: Number(finalBalance) || 0 }));
         setShowBalanceModal(false);
         setAmount('');
         setMessage('✅ Balance updated');
         setTimeout(() => setMessage(''), 3000);
       } else {
-        console.error("Balance Update Failed:", await res.text());
-        setMessage('❌ Failed to update balance');
+        const errText = await res.text();
+        console.error("Balance Update Failed:", errText);
+        setMessage('❌ Update failed');
       }
     } catch (error) {
-      console.error("Balance Network Error:", error);
+      console.error("Network Error:", error);
       setMessage('❌ Network Error');
     } finally {
       setProcessingBalance(false);
@@ -139,12 +138,9 @@ export default function AdminUserDetailsPage() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-20">
       
-      {/* Back Button */}
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <button 
-          onClick={() => router.back()} 
-          className="flex items-center gap-2 text-gray-400 hover:text-white"
-        >
+        <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-400 hover:text-white">
           <ArrowLeft size={18} /> Back to Users
         </button>
         {message && (
@@ -154,12 +150,10 @@ export default function AdminUserDetailsPage() {
         )}
       </div>
 
-      {/* Main Form Card */}
+      {/* Main Card */}
       <div className="bg-[#0f1522] border border-white/10 rounded-2xl p-8 shadow-xl">
-        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          {/* Full Name */}
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Full name</label>
             <input 
@@ -170,7 +164,6 @@ export default function AdminUserDetailsPage() {
             />
           </div>
 
-          {/* Email */}
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Email</label>
             <input 
@@ -181,7 +174,6 @@ export default function AdminUserDetailsPage() {
             />
           </div>
 
-          {/* Phone */}
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Phone</label>
             <input 
@@ -192,7 +184,6 @@ export default function AdminUserDetailsPage() {
             />
           </div>
 
-          {/* Country */}
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Country</label>
             <input 
@@ -203,7 +194,6 @@ export default function AdminUserDetailsPage() {
             />
           </div>
 
-          {/* Account Status */}
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Account status</label>
             <select 
@@ -217,7 +207,6 @@ export default function AdminUserDetailsPage() {
             </select>
           </div>
 
-          {/* KYC Status */}
           <div className="space-y-2">
             <label className="text-sm text-gray-400">KYC status</label>
             <select 
@@ -230,12 +219,11 @@ export default function AdminUserDetailsPage() {
             </select>
           </div>
 
-          {/* Balance (With Adjust Button) */}
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Balance</label>
             <div className="flex gap-2">
               <div className="flex-1 bg-[#1a1f2e] border border-white/10 rounded-xl p-3 text-white font-mono">
-                ${(formData.portfolioBalance || 0).toLocaleString()}
+                ${(formData.portfolioBalance).toLocaleString()}
               </div>
               <button 
                 onClick={() => setShowBalanceModal(true)}
@@ -246,17 +234,14 @@ export default function AdminUserDetailsPage() {
             </div>
           </div>
 
-          {/* Created At (Read Only) */}
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Created at</label>
             <div className="w-full bg-[#1a1f2e]/50 border border-white/5 rounded-xl p-3 text-gray-500 cursor-not-allowed">
               {formData.createdAt}
             </div>
           </div>
-
         </div>
 
-        {/* Action Buttons */}
         <div className="mt-8 flex gap-4">
           <button 
             onClick={handleSaveProfile}
@@ -266,72 +251,37 @@ export default function AdminUserDetailsPage() {
             {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
             Save changes
           </button>
-          
-          <button className="bg-[#1a1f2e] hover:bg-white/5 border border-white/10 text-red-400 font-bold py-3 px-8 rounded-xl transition-all">
-            Reset password
-          </button>
         </div>
-
       </div>
 
-      {/* 🚀 FIXED MODAL: Solid Opaque Background */}
+      {/* Modal */}
       {showBalanceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-[#1a1f2e] w-full max-w-md rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
-            
             <div className="p-5 border-b border-white/10 flex justify-between items-center bg-[#151926]">
               <h3 className="text-lg font-bold text-white">Adjust User Balance</h3>
-              <button onClick={() => setShowBalanceModal(false)} className="text-gray-400 hover:text-white">
-                <X size={20} />
-              </button>
+              <button onClick={() => setShowBalanceModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
             </div>
-
             <div className="p-6 space-y-5 bg-[#1a1f2e]">
-              
               <div className="space-y-2">
                 <label className="text-sm text-gray-400">Operation</label>
-                <select 
-                  value={action}
-                  onChange={(e) => setAction(e.target.value)}
-                  className="w-full bg-[#0b1221] border border-white/10 rounded-xl p-3 text-white focus:border-blue-500 outline-none"
-                >
+                <select value={action} onChange={(e) => setAction(e.target.value)} className="w-full bg-[#0b1221] border border-white/10 rounded-xl p-3 text-white outline-none">
                   <option value="add">Add to balance</option>
                   <option value="subtract">Subtract from balance</option>
                 </select>
               </div>
-
               <div className="space-y-2">
                 <label className="text-sm text-gray-400">Amount ($)</label>
-                <input 
-                  type="number" 
-                  placeholder="0.00"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full bg-[#0b1221] border border-white/10 rounded-xl p-4 text-white text-xl font-mono focus:border-blue-500 outline-none"
-                />
+                <input type="number" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full bg-[#0b1221] border border-white/10 rounded-xl p-4 text-white text-xl font-mono outline-none" />
               </div>
-
               <div className="pt-2 flex gap-3">
-                <button 
-                  onClick={() => setShowBalanceModal(false)}
-                  className="flex-1 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium"
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={handleUpdateBalance}
-                  disabled={processingBalance || !amount}
-                  className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold flex justify-center items-center gap-2"
-                >
-                  {processingBalance ? <Loader2 className="animate-spin" /> : 'Update Balance'}
-                </button>
+                <button onClick={() => setShowBalanceModal(false)} className="flex-1 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300">Cancel</button>
+                <button onClick={handleUpdateBalance} disabled={processingBalance || !amount} className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold flex justify-center items-center gap-2">{processingBalance ? <Loader2 className="animate-spin" /> : 'Update Balance'}</button>
               </div>
-
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }
