@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Mail, Phone, MapPin, Save, Loader2, ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -22,7 +22,12 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem('token');
-      if (!token) return;
+      
+      // 🚨 FIX: If no token, Redirect to Login!
+      if (!token) {
+        router.push('/auth/login'); 
+        return;
+      }
 
       try {
         const res = await fetch('/api/user/profile', {
@@ -41,12 +46,12 @@ export default function ProfilePage() {
       } catch (err) {
         console.error(err);
       } finally {
-        setLoading(false);
+        setLoading(false); // ✅ Ensure loading stops
       }
     };
 
     fetchProfile();
-  }, []);
+  }, [router]);
 
   // 2. Handle Save
   const handleSave = async () => {
@@ -68,7 +73,7 @@ export default function ProfilePage() {
       });
 
       if (res.ok) {
-        setMessage('Success! updating...');
+        setMessage('Success! Profile updated.');
         setTimeout(() => window.location.reload(), 1000);
       } else {
         setMessage('Failed to update.');
@@ -80,26 +85,18 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) return <div className="text-white p-10">Loading...</div>;
+  if (loading) return <div className="text-white p-10">Loading Profile...</div>;
 
   return (
     <div className="max-w-4xl mx-auto text-white space-y-6">
       
-      {/* HEADER WITH CLOSE BUTTONS */}
+      {/* HEADER */}
       <div className="flex items-center justify-between mb-2">
         <button 
           onClick={() => router.push('/dashboard')}
           className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium"
         >
           <ArrowLeft size={18} /> Back to Dashboard
-        </button>
-        
-        <button 
-          onClick={() => router.push('/dashboard')}
-          className="p-2 bg-white/5 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors"
-          title="Close Settings"
-        >
-          <X size={20} />
         </button>
       </div>
 

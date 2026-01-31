@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // Added Router
 import { ArrowUpRight, ArrowDownLeft, Wallet, TrendingUp } from 'lucide-react';
 import Watchlist from '../../components/Watchlist';
 
 export default function DashboardPage() {
+  const router = useRouter(); // Initialize Router
   const [data, setData] = useState({
     name: 'User',
     balance: 0,
@@ -19,21 +21,33 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem('token');
-      if (!token) return;
+      
+      // 🚨 FIX: Redirect if no token
+      if (!token) {
+        console.log("No token found, redirecting...");
+        router.push('/auth/login');
+        return;
+      }
 
       try {
+        console.log("Fetching dashboard data...");
         const res = await fetch('/api/user/dashboard', {
           headers: { 'Authorization': `Bearer ${token}` },
           cache: 'no-store'
         });
         
+        if (res.status === 401) {
+             console.log("Token expired, redirecting...");
+             router.push('/auth/login');
+             return;
+        }
+
         const json = await res.json();
-        console.log("Dashboard Data Received:", json); // 🔍 Check Console if balance is still 0
+        console.log("✅ API Response:", json); // LOOK AT THIS IN CONSOLE
 
         if (json.user) {
           setData({
             name: json.user.name || 'User',
-            // ✅ Safety Check: Look for balance in multiple places
             balance: json.balance ?? json.user.portfolioBalance ?? 0, 
             profit: json.profit || 0,
             profitPercent: json.profitPercent || '0',
@@ -44,12 +58,14 @@ export default function DashboardPage() {
       } catch (err) {
         console.error("Dashboard Load Error:", err);
       } finally {
-        setLoading(false);
+        setLoading(false); // ✅ Always stop loading
       }
     };
 
     fetchData();
-  }, []);
+  }, [router]);
+
+  if (loading) return <div className="p-10 text-white">Loading Dashboard...</div>;
 
   return (
     <div className="space-y-6">
@@ -118,9 +134,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 bg-[#1a1f2e] border border-white/10 p-6 rounded-2xl shadow-xl">
           <h3 className="text-lg font-bold text-white mb-4">Recent Transactions</h3>
           
-          {loading ? (
-            <div className="text-gray-500 text-sm">Loading history...</div>
-          ) : transactions.length === 0 ? (
+          {transactions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-gray-500 space-y-3">
               <Wallet size={48} className="opacity-20" />
               <p>No transactions found.</p>
