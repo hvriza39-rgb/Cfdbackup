@@ -58,6 +58,7 @@ model Transaction {
 model Settings {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   btcAddress  String?
-  evmAddress  String?
+  ethAddress  String?
+  usdtAddress String?
   updatedAt   DateTime @updatedAt
 }

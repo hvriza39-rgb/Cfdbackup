@@ -1,50 +1,58 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../../../../lib/prisma'; // 👈 Fixed import
+import { prisma } from '../../../../lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
+// 1. GET Current Settings
 export async function GET() {
   try {
-    // Get the first settings row, or create one if it doesn't exist
-    let settings = await prisma.settings.findFirst();
+    // We just grab the first settings row we find
+    const settings = await prisma.settings.findFirst();
+    
+    return NextResponse.json(settings || {
+      btcAddress: '',
+      ethAddress: '',
+      usdtAddress: ''
+    });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to load settings' }, { status: 500 });
+  }
+}
 
-    if (!settings) {
-      settings = await prisma.settings.create({
+// 2. POST (Save) Settings
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+
+    // Check if settings exist
+    const existing = await prisma.settings.findFirst();
+
+    let saved;
+    if (existing) {
+      // Update existing
+      saved = await prisma.settings.update({
+        where: { id: existing.id },
         data: {
-          btcAddress: '',
-          evmAddress: ''
+          btcAddress: body.btcAddress,
+          ethAddress: body.ethAddress,
+          usdtAddress: body.usdtAddress,
+        }
+      });
+    } else {
+      // Create new
+      saved = await prisma.settings.create({
+        data: {
+          btcAddress: body.btcAddress,
+          ethAddress: body.ethAddress,
+          usdtAddress: body.usdtAddress,
         }
       });
     }
 
-    return NextResponse.json(settings);
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to load settings" }, { status: 500 });
-  }
-}
-
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    const { btcAddress, evmAddress } = body;
-
-    // Update the first settings found
-    // (In a real app, you might want a more specific ID, but this works for single-config)
-    const firstSetting = await prisma.settings.findFirst();
-    
-    if (firstSetting) {
-      const updated = await prisma.settings.update({
-        where: { id: firstSetting.id },
-        data: { btcAddress, evmAddress }
-      });
-      return NextResponse.json(updated);
-    } else {
-      // Create if missing
-      const newSettings = await prisma.settings.create({
-        data: { btcAddress, evmAddress }
-      });
-      return NextResponse.json(newSettings);
-    }
+    return NextResponse.json(saved);
 
   } catch (error) {
-    return NextResponse.json({ error: "Failed to update settings" }, { status: 500 });
+    console.error("Settings Save Error:", error);
+    return NextResponse.json({ error: 'Failed to save settings' }, { status: 500 });
   }
 }
