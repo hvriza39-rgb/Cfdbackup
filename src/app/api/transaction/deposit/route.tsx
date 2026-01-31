@@ -1,41 +1,38 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
 import { prisma } from '../../../../lib/prisma';
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const { amount } = await req.json();
-    const token = cookies().get('token')?.value;
+    const body = await request.json();
+    const { userId, amount, asset } = body;
 
-    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!userId || !amount) {
+      return NextResponse.json({ error: 'Missing data' }, { status: 400 });
+    }
 
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
-
-    // 1. Update User Balance
-    // 2. Create Transaction Record
-    const [updatedUser, transaction] = await prisma.$transaction([
+    // Update Balance & Create Transaction
+    const result = await prisma.$transaction([
       prisma.user.update({
-        where: { id: decoded.id },
-        data: {
-          availableBalance: { increment: parseFloat(amount) },
+        where: { id: userId },
+        data: { 
           portfolioBalance: { increment: parseFloat(amount) }
         }
       }),
       prisma.transaction.create({
         data: {
-          userId: decoded.id,
-          type: 'DEPOSIT',
+          userId: userId,
+          type: 'deposit',
           amount: parseFloat(amount),
-          status: 'COMPLETED',
-          description: 'Deposit via Wallet'
+          status: 'Completed',
+          asset: asset || 'USD',
+          // REMOVED: description: 'Deposit via Wallet' (This caused the error)
         }
       })
     ]);
 
-    return NextResponse.json({ success: true, balance: updatedUser.availableBalance });
+    return NextResponse.json(result);
+
   } catch (error) {
-    console.error(error);
     return NextResponse.json({ error: 'Deposit failed' }, { status: 500 });
   }
 }
