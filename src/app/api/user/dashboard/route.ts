@@ -1,23 +1,24 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 import jwt from 'jsonwebtoken';
-import { cookies } from 'next/headers';
 
-// ⚠️ FORCE FRESH DATA (Critical for balance updates)
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
+    // 1. Get Token from Header (NOT Cookies)
+    const authHeader = req.headers.get('authorization');
 
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized: No token provided' }, { status: 401 });
     }
 
+    const token = authHeader.split(' ')[1]; // Remove "Bearer " prefix
+
+    // 2. Verify Token
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
     
-    // 1. Fetch the User
+    // 3. Fetch User
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       select: {
@@ -33,22 +34,19 @@ export async function GET() {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // 2. Fetch Transactions
+    // 4. Fetch Transactions
     const transactions = await prisma.transaction.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: 'desc' },
       take: 5
     });
 
-    // 3. Define the Balance securely
-    // We use portfolioBalance because that is what the Admin Panel updates.
+    // 5. Prepare Response
     const secureBalance = user.portfolioBalance || 0;
-    const profit = secureBalance * 0.15; // Simulated 15% profit
+    const profit = secureBalance * 0.15; // Simulated Profit
 
-    // 4. Send the Response (Simplified)
     return NextResponse.json({
       user: user,
-      // We send 'balance' at the top level to make it easy to find
       balance: secureBalance, 
       profit: profit,
       profitPercent: secureBalance > 0 ? "15.0" : "0",
@@ -56,7 +54,7 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error("Dashboard Error:", error);
-    return NextResponse.json({ error: 'Server Error' }, { status: 500 });
+    console.error("Dashboard API Error:", error);
+    return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
   }
 }
