@@ -3,6 +3,7 @@ import { prisma } from '../../../../lib/prisma';
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 
+// ⚠️ FORCE DYNAMIC: Prevents showing old cached "0" balance
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
@@ -23,7 +24,7 @@ export async function GET() {
         id: true,
         name: true,
         email: true,
-        portfolioBalance: true,
+        portfolioBalance: true, // ✅ This is the number the Admin sees
         availableBalance: true,
       }
     });
@@ -39,20 +40,19 @@ export async function GET() {
       take: 5
     });
 
-    // 3. Calculate Simulated Profit (Optional Demo Logic)
-    // In a real app, you would sum up deposits vs current balance.
-    // For now, let's assume 15% of the balance is profit if balance > 0.
-    const currentBalance = user.portfolioBalance || 0;
-    const estimatedProfit = currentBalance > 0 ? currentBalance * 0.15 : 0; 
-    const profitPercent = currentBalance > 0 ? "15.0" : "0";
+    // 3. Prepare Data for Frontend
+    // ✅ FIX: Force the frontend to use portfolioBalance (matches Admin)
+    const mainBalance = user.portfolioBalance || 0;
+    
+    // Optional: Fake profit calculation for demo (15% of balance)
+    const estimatedProfit = mainBalance * 0.15; 
 
-    // 4. Send Everything
     return NextResponse.json({
       user,
       balances: {
-        available: user.availableBalance || user.portfolioBalance,
+        available: mainBalance, // <--- This ensures User sees what Admin sees
         profit: estimatedProfit,
-        profitPercent: profitPercent
+        profitPercent: mainBalance > 0 ? "15.0" : "0"
       },
       transactions: transactions || []
     });
