@@ -1,278 +1,232 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { 
+  ArrowLeft, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Shield, 
+  Wallet, 
+  Loader2, 
+  X,
+  CheckCircle,
+  AlertTriangle
+} from 'lucide-react';
 
-// 👇 FIX: Using relative paths (4 levels up) instead of "@/"
-import Card from '../../../../components/ui/Card';
-import Input from '../../../../components/ui/Input';
-import Select from '../../../../components/ui/Select';
-import Button from '../../../../components/ui/Button';
-import InlineAlert from '../../../../components/ui/InlineAlert';
-import Modal from '../../../../components/ui/Modal';
-
-type UserForm = {
-  id: string;
-  fullName: string;
-  email: string;
-  phone?: string;
-  country?: string;
-  balance: number;
-  kycStatus: string;
-  accountStatus: string;
-  createdAt: string;
-};
-
-export default function AdminUserDetailPage() {
-  const { id } = useParams<{ id: string }>();
+export default function AdminUserDetailsPage() {
+  const params = useParams();
   const router = useRouter();
-
-  const [form, setForm] = useState<UserForm | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  
+  // Modal State
+  const [showBalanceModal, setShowBalanceModal] = useState(false);
+  const [amount, setAmount] = useState('');
+  const [action, setAction] = useState('add'); // 'add' or 'subtract'
+  const [processing, setProcessing] = useState(false);
 
-  // Balance management
-  const [balanceModalOpen, setBalanceModalOpen] = useState(false);
-  const [balanceOperation, setBalanceOperation] = useState<'add' | 'subtract'>('add');
-  const [balanceAmount, setBalanceAmount] = useState('');
-  const [balanceLoading, setBalanceLoading] = useState(false);
-
+  // 1. Fetch User Data
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-
-    fetch(`/api/admin/users/${id}`)
-      .then(async (r) => {
-        if (!r.ok) {
-          const data = await r.json().catch(() => ({}));
-          throw new Error(data?.error || 'Failed to load user');
-        }
-        return r.json();
-      })
-      .then((data) => {
-        if (cancelled) return;
-        setForm(data.user);
-      })
-      .catch((e: any) => {
-        if (cancelled) return;
-        setError(e?.message || 'Failed to load user');
-      })
-      .finally(() => {
-        if (cancelled) return;
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(`/api/admin/users/${params.id}`);
+        const data = await res.json();
+        setUser(data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      } finally {
         setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
+      }
     };
-  }, [id]);
+    fetchUser();
+  }, [params.id]);
 
-  function setField<K extends keyof UserForm>(key: K, value: UserForm[K]) {
-    setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
-  }
-
-  async function onSave() {
-    if (!form) return;
-    setSaving(true);
-    setMessage(null);
-    setError(null);
+  // 2. Handle Balance Update
+  const handleUpdateBalance = async () => {
+    if (!amount) return;
+    setProcessing(true);
 
     try {
-      const res = await fetch(`/api/admin/users/${id}`, {
-        method: 'PATCH',
+      const res = await fetch(`/api/admin/users/${params.id}/balance`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fullName: form.fullName,
-          email: form.email,
-          phone: form.phone,
-          country: form.country,
-          accountStatus: form.accountStatus,
-          kycStatus: form.kycStatus,
+        body: JSON.stringify({ 
+          amount: parseFloat(amount), 
+          type: action 
         }),
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || 'Update failed');
+      if (res.ok) {
+        // Refresh local data immediately
+        const updatedUser = await res.json();
+        setUser(updatedUser); 
+        setShowBalanceModal(false);
+        setAmount('');
       }
-
-      const data = await res.json();
-      setForm(data.user);
-      setMessage('User updated');
-    } catch (e: any) {
-      setError(e?.message || 'Update failed');
+    } catch (error) {
+      console.error("Update failed", error);
     } finally {
-      setSaving(false);
+      setProcessing(false);
     }
-  }
+  };
 
-  async function onResetPassword() {
-    setMessage(null);
-    setError(null);
-
-    try {
-      const res = await fetch(`/api/admin/users/${id}/reset-password`, { method: 'POST' });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || 'Reset failed');
-      }
-      setMessage('Password reset initiated');
-    } catch (e: any) {
-      setError(e?.message || 'Reset failed');
-    }
-  }
-
-  async function onUpdateBalance() {
-    if (!form) return;
-    const amount = parseFloat(balanceAmount);
-    if (!Number.isFinite(amount) || amount <= 0) {
-      setError('Please enter a valid amount');
-      return;
-    }
-
-    setBalanceLoading(true);
-    setMessage(null);
-    setError(null);
-
-    try {
-      const res = await fetch(`/api/admin/users/${id}/balance`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ operation: balanceOperation, amount }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || 'Balance update failed');
-      }
-
-      const data = await res.json();
-      setForm(data.user);
-      setMessage(`Balance ${balanceOperation === 'add' ? 'added' : 'subtracted'} successfully`);
-      setBalanceModalOpen(false);
-      setBalanceAmount('');
-    } catch (e: any) {
-      setError(e?.message || 'Balance update failed');
-    } finally {
-      setBalanceLoading(false);
-    }
-  }
-
-  if (loading) return <div className="text-muted">Loading...</div>;
-  if (error) return <InlineAlert variant="error">{error}</InlineAlert>;
-  if (!form) return <InlineAlert variant="error">User not found</InlineAlert>;
+  if (loading) return <div className="p-10 text-white">Loading user details...</div>;
+  if (!user) return <div className="p-10 text-white">User not found</div>;
 
   return (
-    <div className="space-y-4">
-      {message && <InlineAlert variant="success">{message}</InlineAlert>}
-      {error && <InlineAlert variant="error">{error}</InlineAlert>}
-
-      <Card className="p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">User: {form.fullName}</h2>
-          <Button variant="secondary" onClick={() => router.back()}>
-            Back
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input label="Full name" value={form.fullName} onChange={(e) => setField('fullName', e.target.value)} />
-          <Input label="Email" value={form.email} onChange={(e) => setField('email', e.target.value)} />
-          <Input label="Phone" value={form.phone || ''} onChange={(e) => setField('phone', e.target.value)} />
-          <Input label="Country" value={form.country || ''} onChange={(e) => setField('country', e.target.value)} />
-
-          <Select label="Account status" value={form.accountStatus} onChange={(e) => setField('accountStatus', e.target.value)}>
-            <option value="active">Active</option>
-            <option value="suspended">Suspended</option>
-            <option value="closed">Closed</option>
-          </Select>
-
-          <Select label="KYC status" value={form.kycStatus} onChange={(e) => setField('kycStatus', e.target.value)}>
-            <option value="pending">Pending</option>
-            <option value="verified">Verified</option>
-            <option value="rejected">Rejected</option>
-          </Select>
-
-          <div className="flex items-end gap-2">
-            <div className="flex-1">
-              <Input
-                label="Balance" 
-                value={`$${form.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                readOnly
-              />
-            </div>
-            <div className="mb-[2px]">
-              <Button onClick={() => setBalanceModalOpen(true)}>Adjust</Button>
-            </div>
-          </div>
-          
-          <Input label="Created at" value={new Date(form.createdAt).toLocaleString()} readOnly />
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <Button onClick={onSave} loading={saving} disabled={saving}>
-            {saving ? 'Saving...' : 'Save changes'}
-          </Button>
-          <Button variant="danger" onClick={onResetPassword}>
-            Reset password
-          </Button>
-        </div>
-      </Card>
-
-      <Modal
-        open={balanceModalOpen}
-        title="Adjust User Balance"
-        onClose={() => {
-          setBalanceModalOpen(false);
-          setBalanceAmount('');
-        }}
+    <div className="space-y-6 max-w-4xl mx-auto pb-20">
+      
+      {/* Header */}
+      <button 
+        onClick={() => router.back()} 
+        className="flex items-center gap-2 text-gray-400 hover:text-white mb-4"
       >
-        <div className="space-y-4">
-          <div className="text-sm text-muted">
-            Current balance:{' '}
-            <span className="font-semibold text-text">
-              ${form.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
+        <ArrowLeft size={18} /> Back to Users
+      </button>
+
+      {/* User Profile Card */}
+      <div className="bg-[#1a1f2e] border border-white/10 rounded-2xl p-6 md:p-8 shadow-xl">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8 border-b border-white/10 pb-8">
+          <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-blue-900/50">
+            {user.name?.charAt(0).toUpperCase() || 'U'}
           </div>
-
-          <Select
-            label="Operation"
-            value={balanceOperation}
-            onChange={(e) => setBalanceOperation(e.target.value as 'add' | 'subtract')}
-          >
-            <option value="add">Add to balance</option>
-            <option value="subtract">Subtract from balance</option>
-          </Select>
-
-          <Input
-            label="Amount ($)"
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="0.00"
-            value={balanceAmount}
-            onChange={(e) => setBalanceAmount(e.target.value)}
-          />
-
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setBalanceModalOpen(false);
-                setBalanceAmount('');
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={onUpdateBalance} loading={balanceLoading} disabled={balanceLoading || !balanceAmount}>
-              {balanceLoading ? 'Processing...' : 'Update Balance'}
-            </Button>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-white mb-1">{user.name}</h1>
+            <p className="text-gray-400 text-sm mb-3">User ID: {user.id}</p>
+            <div className="flex gap-2">
+              <span className="px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-bold border border-green-500/20 flex items-center gap-1">
+                <Shield size={12} /> {user.status || 'Verified'}
+              </span>
+            </div>
           </div>
         </div>
-      </Modal>
+
+        {/* Details Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1">
+            <label className="text-xs uppercase text-gray-500 font-semibold">Email Address</label>
+            <div className="flex items-center gap-3 text-white bg-[#0b1221] p-3 rounded-xl border border-white/5">
+              <Mail size={18} className="text-blue-400" />
+              {user.email}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs uppercase text-gray-500 font-semibold">Phone Number</label>
+            <div className="flex items-center gap-3 text-white bg-[#0b1221] p-3 rounded-xl border border-white/5">
+              <Phone size={18} className="text-blue-400" />
+              {user.phone || 'N/A'}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs uppercase text-gray-500 font-semibold">Country</label>
+            <div className="flex items-center gap-3 text-white bg-[#0b1221] p-3 rounded-xl border border-white/5">
+              <MapPin size={18} className="text-blue-400" />
+              {user.country || 'N/A'}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs uppercase text-gray-500 font-semibold">Wallet Balance</label>
+            <div className="flex items-center justify-between text-white bg-gradient-to-r from-blue-900/40 to-[#0b1221] p-3 rounded-xl border border-blue-500/30">
+              <div className="flex items-center gap-3">
+                <Wallet size={18} className="text-blue-400" />
+                <span className="font-mono text-xl font-bold">${(user.portfolioBalance || 0).toLocaleString()}</span>
+              </div>
+              <button 
+                onClick={() => setShowBalanceModal(true)}
+                className="text-xs bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                Adjust
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 🚀 FIXED MODAL: Clean Layout & No Overlap */}
+      {showBalanceModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#1a1f2e] w-full max-w-md rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+            
+            {/* Modal Header */}
+            <div className="p-5 border-b border-white/10 flex justify-between items-center bg-[#151926]">
+              <h3 className="text-lg font-bold text-white">Adjust Balance</h3>
+              <button onClick={() => setShowBalanceModal(false)} className="text-gray-400 hover:text-white">
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-5">
+              
+              <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                <p className="text-xs text-blue-300 uppercase font-bold mb-1">Current Balance</p>
+                <p className="text-2xl font-mono text-white">${(user.portfolioBalance || 0).toLocaleString()}</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-gray-400">Action</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={() => setAction('add')}
+                    className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-all ${
+                      action === 'add' 
+                        ? 'bg-green-500/20 border-green-500 text-green-400' 
+                        : 'bg-[#0b1221] border-white/10 text-gray-400'
+                    }`}
+                  >
+                    <CheckCircle size={16} /> Add Funds
+                  </button>
+                  <button 
+                    onClick={() => setAction('subtract')}
+                    className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-all ${
+                      action === 'subtract' 
+                        ? 'bg-red-500/20 border-red-500 text-red-400' 
+                        : 'bg-[#0b1221] border-white/10 text-gray-400'
+                    }`}
+                  >
+                    <AlertTriangle size={16} /> Deduct
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-gray-400">Amount ($)</label>
+                <input 
+                  type="number" 
+                  placeholder="0.00"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="w-full bg-[#0b1221] border border-white/10 rounded-xl p-3 text-white text-lg font-mono focus:border-blue-500 outline-none"
+                />
+              </div>
+
+              {/* Modal Footer (Buttons Row) */}
+              <div className="pt-4 flex gap-3">
+                <button 
+                  onClick={() => setShowBalanceModal(false)}
+                  className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleUpdateBalance}
+                  disabled={processing || !amount}
+                  className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-colors flex justify-center items-center gap-2"
+                >
+                  {processing ? <Loader2 className="animate-spin" /> : 'Confirm Update'}
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
