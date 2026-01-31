@@ -1,55 +1,66 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../../../../../../lib/prisma'; 
+import { prisma } from '../../../../../../lib/prisma';
 
 export async function POST(
-  req: Request,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     const { id } = params;
-    const body = await req.json();
-    const { operation, amount } = body;
+    const body = await request.json();
+    const { amount, type } = body;
 
-    console.log(`Processing balance for User ${id}: ${operation} $${amount}`);
-
+    // 1. Validate Input
     if (!amount || amount <= 0) {
-      return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid amount' }, { status: 400 });
     }
 
-    // 1. Get current user to check existing balance
-    const user = await prisma.user.findUnique({ where: { id } });
+    // 2. Get Current Balance
+    const currentUser = await prisma.user.findUnique({
+      where: { id }
+    });
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!currentUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // 2. Calculate the new balance safely
-    const currentBalance = user.portfolioBalance || 0;
-    const changeAmount = Number(amount);
-    
+    const currentBalance = Number(currentUser.portfolioBalance) || 0;
     let newBalance = currentBalance;
-    
-    if (operation === 'add') {
-      newBalance += changeAmount;
-    } else if (operation === 'subtract') {
-      newBalance -= changeAmount;
+
+    // 3. Calculate New Balance
+    if (type === 'add') {
+      newBalance = currentBalance + amount;
+    } else if (type === 'subtract') {
+      newBalance = currentBalance - amount;
     }
 
-    // 3. SAVE to Database (Updating BOTH fields ensures it shows up everywhere)
+    // 4. Update Database
     const updatedUser = await prisma.user.update({
       where: { id },
       data: {
-        portfolioBalance: newBalance,
-        availableBalance: newBalance 
+        portfolioBalance: newBalance
       }
     });
 
-    console.log("Database updated successfully:", updatedUser.portfolioBalance);
+    // 5. Create Transaction Record
+    await prisma.transaction.create({
+      data: {
+        userId: id,
+        type: type === 'add' ? 'deposit' : 'withdrawal',
+        amount: amount,
+        status: 'Completed',
+        asset: 'USD',
+        // REMOVED: date: new Date() (Prisma uses createdAt automatically)
+      }
+    });
 
-    return NextResponse.json({ success: true, user: updatedUser });
+    console.log(`Balance updated. Old: ${currentBalance}, New: ${newBalance}`);
+
+    // 6. Return the UPDATED user
+    return NextResponse.json(updatedUser);
 
   } catch (error) {
-    console.error("Balance Update Failed:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("Balance API Error:", error);
+    return NextResponse.json({ error: 'Failed to update balance' }, { status: 500 });
   }
 }

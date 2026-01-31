@@ -1,86 +1,74 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../../../lib/prisma';
 
-// GET: Fetch a single user's details
+export const dynamic = 'force-dynamic';
+
+// 1. GET User Details
 export async function GET(
-  req: Request,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     const { id } = params;
-    
+
     const user = await prisma.user.findUnique({
       where: { id },
-      // Select only what we need (security best practice)
       select: {
         id: true,
-        name: true, // If your schema uses 'fullName', change this to fullName
+        name: true,
         email: true,
         phone: true,
         country: true,
         portfolioBalance: true,
         createdAt: true,
-        // If you have status fields in your schema, add them here:
-        // accountStatus: true,
-        // kycStatus: true,
+        // Removed 'status' and 'verified' because they don't exist in your DB yet
       }
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Map Prisma fields to the frontend expected format if needed
-    const formattedUser = {
+    // We manually add default values for the missing DB fields
+    // so the Frontend doesn't break
+    return NextResponse.json({
       ...user,
-      fullName: user.name, // Mapping 'name' to 'fullName' for the frontend
-      balance: user.portfolioBalance,
-      accountStatus: 'active', // Defaulting if not in schema yet
-      kycStatus: 'verified'    // Defaulting if not in schema yet
-    };
-
-    return NextResponse.json({ user: formattedUser });
+      status: 'Active',      // Default value
+      verified: true,        // Default value
+      portfolioBalance: Number(user.portfolioBalance)
+    });
 
   } catch (error) {
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("API GET Error:", error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
-// PATCH: Update user details
-export async function PATCH(
-  req: Request,
+// 2. PUT (Update) User Profile
+export async function PUT(
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     const { id } = params;
-    const body = await req.json();
-    
-    // Extract fields to update
-    const { fullName, email, phone, country } = body;
+    const body = await request.json();
 
+    // We only update the fields that ACTUALLY exist in your database
     const updatedUser = await prisma.user.update({
       where: { id },
       data: {
-        name: fullName, // Update 'name' in DB using 'fullName' from form
-        email,
-        phone,
-        country,
-      }
+        name: body.name,
+        email: body.email,
+        phone: body.phone,
+        country: body.country,
+        // We removed 'status' and 'verified' from here to fix the build error
+      },
     });
 
-    // Format response back to frontend
-    const formattedUser = {
-      ...updatedUser,
-      fullName: updatedUser.name,
-      balance: updatedUser.portfolioBalance,
-      accountStatus: 'active',
-      kycStatus: 'verified'
-    };
-
-    return NextResponse.json({ user: formattedUser });
+    return NextResponse.json(updatedUser);
 
   } catch (error) {
-    console.error("Update User Error:", error);
-    return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
+    console.error("API PUT Error:", error);
+    return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
   }
 }
