@@ -1,5 +1,5 @@
 'use client';
-import Logo from '../../components/Logo';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -12,12 +12,16 @@ import {
   Settings, 
   LogOut, 
   Menu, 
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+import Logo from '../../components/Logo';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false); // State for Desktop Collapse
   const [userData, setUserData] = useState({
     name: 'User',
     balance: 0,
@@ -73,7 +77,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="min-h-screen bg-[#0b1221] text-white flex">
+    <div className="min-h-screen bg-[#0b1221] text-white">
       
       {/* 1. MOBILE OVERLAY */}
       {isMobileMenuOpen && (
@@ -83,19 +87,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         />
       )}
 
-      {/* 2. SIDEBAR (Restored to Full Width w-64) */}
+      {/* 2. SIDEBAR */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-[#1a1f2e] border-r border-white/10 
-        transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-50 bg-[#1a1f2e] border-r border-white/10 
+        transform transition-all duration-300 ease-in-out flex flex-col
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:relative md:translate-x-0
-        flex flex-col h-full
+        md:translate-x-0 
+        ${isCollapsed ? 'w-20' : 'w-64'} 
       `}>
-       {/* Sidebar Header */}
+        {/* Sidebar Header */}
         <div className="h-20 flex items-center justify-between px-6 border-b border-white/10 shrink-0">
-          <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
-            <Logo />
+          
+          {/* Logo - Hides text when collapsed */}
+          <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 overflow-hidden">
+             {/* We use a simple div for the logo in collapsed mode to avoid layout breaks */}
+             <div className="min-w-[32px]">
+               <Logo className={isCollapsed ? "w-8 h-8" : "w-8 h-8"} />
+             </div>
           </Link>
+
           <button 
             onClick={() => setIsMobileMenuOpen(false)} 
             className="md:hidden text-gray-400 hover:text-white"
@@ -105,7 +115,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         
         {/* Navigation Links */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto overflow-x-hidden">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -113,36 +123,63 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 key={item.name}
                 href={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${
-                  isActive 
+                title={isCollapsed ? item.name : ''} // Tooltip on hover when collapsed
+                className={`
+                  flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium whitespace-nowrap
+                  ${isActive 
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
-                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                }`}
+                    : 'text-gray-400 hover:bg-white/5 hover:text-white'}
+                  ${isCollapsed ? 'justify-center px-2' : ''}
+                `}
               >
-                <item.icon size={20} />
-                <span>{item.name}</span>
+                <item.icon size={20} className="shrink-0" />
+                
+                {/* Text Label - Hidden when collapsed */}
+                <span className={`transition-opacity duration-200 ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100'}`}>
+                  {item.name}
+                </span>
               </Link>
             );
           })}
         </nav>
 
+        {/* Desktop Collapse Toggle Button */}
+        <div className="hidden md:flex justify-center p-2 border-t border-white/5">
+            <button 
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="p-2 bg-[#0b1221] rounded-lg text-gray-400 hover:text-white border border-white/10 hover:border-white/30 transition-all"
+            >
+              {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            </button>
+        </div>
+
         {/* Logout Button */}
         <div className="p-4 border-t border-white/10 shrink-0">
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors font-medium"
+            className={`
+              w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors font-medium whitespace-nowrap
+              ${isCollapsed ? 'justify-center px-2' : ''}
+            `}
+            title="Logout"
           >
-            <LogOut size={20} />
-            <span>Logout</span>
+            <LogOut size={20} className="shrink-0" />
+            <span className={`transition-opacity duration-200 ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100'}`}>
+              Logout
+            </span>
           </button>
         </div>
       </aside>
 
-      {/* 3. MAIN CONTENT */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      {/* 3. MAIN CONTENT WRAPPER */}
+      {/* Dynamic Padding based on Sidebar State */}
+      <div className={`
+        flex flex-col min-h-screen transition-all duration-300 ease-in-out
+        ${isCollapsed ? 'md:pl-20' : 'md:pl-64'}
+      `}>
         
         {/* Header */}
-        <header className="h-20 border-b border-white/5 bg-[#0b1221] flex items-center justify-between px-6 shrink-0">
+        <header className="h-20 border-b border-white/5 bg-[#0b1221] flex items-center justify-between px-6 shrink-0 sticky top-0 z-30">
           
           {/* Mobile Menu Toggle */}
           <div className="flex items-center gap-4">
@@ -152,9 +189,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             >
               <Menu size={24} />
             </button>
-            <h2 className="text-lg font-bold text-white hidden md:block">
-               {/* Optional: Show Page Title Here */}
-            </h2>
           </div>
 
           {/* Right Side: Balance & Profile */}
@@ -189,7 +223,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
           {children}
         </main>
 
