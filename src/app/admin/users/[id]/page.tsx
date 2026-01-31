@@ -26,22 +26,31 @@ export default function AdminUserDetailsPage() {
   // Modal State
   const [showBalanceModal, setShowBalanceModal] = useState(false);
   const [amount, setAmount] = useState('');
-  const [action, setAction] = useState('add'); // 'add' or 'subtract'
+  const [action, setAction] = useState('add');
   const [processingBalance, setProcessingBalance] = useState(false);
 
-  // 1. Fetch User
+  // 1. Fetch User (FIXED: Added no-store cache)
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch(`/api/admin/users/${params.id}`);
+        console.log("Fetching user ID:", params.id);
+        
+        const res = await fetch(`/api/admin/users/${params.id}`, {
+          cache: 'no-store' // 🚨 IMPORTANT: Forces fresh data every time
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch user");
+
         const data = await res.json();
+        console.log("User Data Loaded:", data); // 🔍 Check Console if this is empty
+
         if (data) {
           setFormData({
             name: data.name || '',
             email: data.email || '',
             phone: data.phone || '',
             country: data.country || '',
-            status: data.status || 'Active', // Default if missing
+            status: data.status || 'Active',
             verified: data.verified ? 'Verified' : 'Unverified',
             portfolioBalance: data.portfolioBalance || 0,
             createdAt: data.createdAt ? new Date(data.createdAt).toLocaleString() : 'N/A'
@@ -53,7 +62,8 @@ export default function AdminUserDetailsPage() {
         setLoading(false);
       }
     };
-    fetchUser();
+
+    if (params.id) fetchUser();
   }, [params.id]);
 
   // 2. Save Profile Changes
@@ -78,9 +88,12 @@ export default function AdminUserDetailsPage() {
         setMessage('✅ Changes saved successfully');
         setTimeout(() => setMessage(''), 3000);
       } else {
+        const err = await res.json();
+        console.error("Save Error:", err);
         setMessage('❌ Failed to save');
       }
     } catch (error) {
+      console.error("Save Network Error:", error);
       setMessage('❌ Error saving changes');
     } finally {
       setSaving(false);
@@ -107,9 +120,15 @@ export default function AdminUserDetailsPage() {
         setFormData(prev => ({ ...prev, portfolioBalance: updatedUser.portfolioBalance }));
         setShowBalanceModal(false);
         setAmount('');
+        setMessage('✅ Balance updated');
+        setTimeout(() => setMessage(''), 3000);
+      } else {
+        console.error("Balance Update Failed:", await res.text());
+        setMessage('❌ Failed to update balance');
       }
     } catch (error) {
-      console.error("Update failed", error);
+      console.error("Balance Network Error:", error);
+      setMessage('❌ Network Error');
     } finally {
       setProcessingBalance(false);
     }
@@ -129,7 +148,7 @@ export default function AdminUserDetailsPage() {
           <ArrowLeft size={18} /> Back to Users
         </button>
         {message && (
-          <div className={`px-4 py-2 rounded-lg text-sm font-bold ${message.includes('saved') ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+          <div className={`px-4 py-2 rounded-lg text-sm font-bold ${message.includes('saved') || message.includes('updated') ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
             {message}
           </div>
         )}
@@ -255,10 +274,9 @@ export default function AdminUserDetailsPage() {
 
       </div>
 
-      {/* 🚀 FIXED MODAL: Solid Background (No Transparency) */}
+      {/* 🚀 FIXED MODAL: Solid Opaque Background */}
       {showBalanceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          {/* Added 'bg-[#1a1f2e]' explicitly to make it Opaque */}
           <div className="bg-[#1a1f2e] w-full max-w-md rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
             
             <div className="p-5 border-b border-white/10 flex justify-between items-center bg-[#151926]">
@@ -268,7 +286,7 @@ export default function AdminUserDetailsPage() {
               </button>
             </div>
 
-            <div className="p-6 space-y-5 bg-[#1a1f2e]"> {/* Solid Background Here Too */}
+            <div className="p-6 space-y-5 bg-[#1a1f2e]">
               
               <div className="space-y-2">
                 <label className="text-sm text-gray-400">Operation</label>
