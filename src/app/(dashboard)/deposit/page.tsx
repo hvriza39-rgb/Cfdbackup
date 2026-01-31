@@ -1,122 +1,156 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Copy, Check, Bitcoin, Hexagon } from 'lucide-react';
-import { Toaster, toast } from 'react-hot-toast';
+import { Copy, CheckCircle, Wallet, AlertTriangle, Loader2 } from 'lucide-react';
 
 export default function DepositPage() {
-  const [wallets, setWallets] = useState({ btc: '', evm: '' });
-  const [loading, setLoading] = useState(true);
+  const [selectedAsset, setSelectedAsset] = useState('BTC');
+  const [amount, setAmount] = useState('');
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(true);
   
-  // Selection State: 'BTC' or 'EVM'
-  const [selectedNetwork, setSelectedNetwork] = useState<'BTC' | 'EVM'>('BTC');
+  // Store the admin wallet addresses here
+  const [adminWallets, setAdminWallets] = useState({
+    btc: '',
+    evm: '' // This will hold the ETH/USDT address
+  });
 
+  const assets = [
+    { id: 'BTC', name: 'Bitcoin', network: 'Bitcoin Network', icon: '₿' },
+    { id: 'ETH', name: 'Ethereum', network: 'ERC20 / EVM', icon: 'Ξ' },
+    { id: 'USDT', name: 'Tether (USDT)', network: 'TRC20 / ERC20', icon: '₮' },
+  ];
+
+  // 1. Fetch Admin Settings
   useEffect(() => {
-    const fetchWallet = async () => {
+    const fetchSettings = async () => {
       try {
-        const res = await fetch('/api/settings');
+        const res = await fetch('/api/admin/settings', { cache: 'no-store' });
         const data = await res.json();
         
-        // Save both addresses from the API
-        setWallets({
-          btc: data.btcAddress || '',
-          evm: data.evmAddress || ''
-        });
-      } catch (err) {
-        toast.error('Failed to load wallet addresses');
+        if (data) {
+          setAdminWallets({
+            btc: data.btcAddress || '',
+            evm: data.ethAddress || '' // Map 'ethAddress' to our generic EVM bucket
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load wallets", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchWallet();
+    fetchSettings();
   }, []);
 
-  // Determine which address to show based on the toggle
-  const currentAddress = selectedNetwork === 'BTC' ? wallets.btc : wallets.evm;
+  // 2. Determine which address to show based on selection
+  const getCurrentWalletAddress = () => {
+    if (selectedAsset === 'BTC') return adminWallets.btc;
+    // For both ETH and USDT, we use the EVM address
+    if (selectedAsset === 'ETH' || selectedAsset === 'USDT') return adminWallets.evm;
+    return '';
+  };
 
   const handleCopy = () => {
-    if (!currentAddress) return;
-    navigator.clipboard.writeText(currentAddress);
+    navigator.clipboard.writeText(getCurrentWalletAddress());
     setCopied(true);
-    toast.success('Address copied!');
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 text-white">
-      <Toaster position="bottom-center" />
+    <div className="max-w-2xl mx-auto space-y-6">
       
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold mb-2">Deposit Funds</h1>
-        <p className="text-gray-400">Select a network and send funds to the address below.</p>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-3 bg-blue-600 rounded-xl text-white">
+          <Wallet size={24} />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-white">Deposit Funds</h1>
+          <p className="text-gray-400 text-sm">Send crypto to your secure wallet address</p>
+        </div>
       </div>
 
-      <div className="bg-[#1a1f2e] border border-white/10 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+      {/* Asset Selection */}
+      <div className="grid grid-cols-3 gap-3">
+        {assets.map((asset) => (
+          <button
+            key={asset.id}
+            onClick={() => {
+              setSelectedAsset(asset.id);
+              setCopied(false);
+            }}
+            className={`p-4 rounded-xl border transition-all flex flex-col items-center gap-2 ${
+              selectedAsset === asset.id
+                ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20'
+                : 'bg-[#1a1f2e] border-white/10 text-gray-400 hover:bg-white/5'
+            }`}
+          >
+            <span className="text-2xl">{asset.icon}</span>
+            <span className="font-bold text-sm">{asset.id}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Address Display Card */}
+      <div className="bg-[#1a1f2e] border border-white/10 rounded-2xl p-6 shadow-xl relative overflow-hidden">
         
-        {/* Network Selector Buttons */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <button 
-            onClick={() => setSelectedNetwork('BTC')}
-            className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${
-              selectedNetwork === 'BTC' 
-                ? 'bg-orange-500/10 border-orange-500 text-orange-500 shadow-lg shadow-orange-900/20' 
-                : 'bg-[#0b1220] border-white/5 text-gray-400 hover:bg-white/5'
-            }`}
-          >
-            <Bitcoin size={28} />
-            <span className="font-bold">Bitcoin</span>
-          </button>
-
-          <button 
-            onClick={() => setSelectedNetwork('EVM')}
-            className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${
-              selectedNetwork === 'EVM' 
-                ? 'bg-purple-500/10 border-purple-500 text-purple-500 shadow-lg shadow-purple-900/20' 
-                : 'bg-[#0b1220] border-white/5 text-gray-400 hover:bg-white/5'
-            }`}
-          >
-            <Hexagon size={28} />
-            <span className="font-bold">USDT / ETH</span>
-          </button>
-        </div>
-
-        {/* Address Display Section */}
-        <div className="flex flex-col items-center justify-center space-y-6 relative z-10">
-          <div className="w-full">
-            <label className="block text-sm text-gray-400 mb-2 text-center">
-              Official {selectedNetwork === 'BTC' ? 'Bitcoin' : 'EVM'} Deposit Address
-            </label>
-            
-            {loading ? (
-              <div className="h-14 bg-white/5 rounded-xl animate-pulse w-full"></div>
-            ) : (
-              <div className="relative group">
-                <div className="w-full bg-[#0b1220] border border-white/10 rounded-xl p-4 text-center font-mono text-lg text-white break-all">
-                  {currentAddress || 'Contact Support for Address'}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+            <Loader2 className="animate-spin mb-2" />
+            <p>Loading wallet details...</p>
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                  {assets.find(a => a.id === selectedAsset)?.name} Deposit
+                </h3>
+                <p className="text-blue-400 text-sm mt-1">
+                  Network: {assets.find(a => a.id === selectedAsset)?.network}
+                </p>
+              </div>
+              <div className="bg-white p-2 rounded-lg">
+                {/* QR Code Placeholder - You can add a real QR library later if needed */}
+                <div className="w-16 h-16 bg-gray-200 flex items-center justify-center text-xs text-black font-bold">
+                  QR
                 </div>
-                
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs uppercase text-gray-500 font-semibold">Wallet Address</label>
+              <div className="relative group">
+                <div className="w-full bg-[#0b1221] border border-white/10 rounded-xl p-4 pr-12 text-gray-300 font-mono text-sm break-all">
+                  {getCurrentWalletAddress() || "Contact Support for Address"}
+                </div>
                 <button 
                   onClick={handleCopy}
-                  disabled={!currentAddress}
-                  className="absolute right-2 top-2 p-2 bg-[#1a1f2e] hover:bg-blue-600 rounded-lg border border-white/10 transition-all text-gray-300 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Copy Address"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-white transition-colors"
                 >
-                  {copied ? <Check size={18} className="text-green-400" /> : <Copy size={18} />}
+                  {copied ? <CheckCircle size={20} className="text-green-500" /> : <Copy size={20} />}
                 </button>
               </div>
-            )}
-          </div>
+            </div>
 
-          <div className={`border rounded-xl p-4 text-sm text-center w-full ${
-            selectedNetwork === 'BTC' 
-              ? 'bg-orange-500/10 border-orange-500/20 text-orange-200' 
-              : 'bg-purple-500/10 border-purple-500/20 text-purple-200'
-          }`}>
-            ⚠️ Send only <strong>{selectedNetwork === 'BTC' ? 'BTC (Bitcoin Network)' : 'USDT/ETH (ERC20/BEP20)'}</strong> to this address.
-          </div>
-        </div>
+            <div className="mt-6 flex items-start gap-3 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+              <AlertTriangle className="text-yellow-500 shrink-0" size={20} />
+              <p className="text-xs text-yellow-200/80 leading-relaxed">
+                Only send <strong>{selectedAsset}</strong> to this address. Sending any other asset may result in permanent loss. 
+                {selectedAsset !== 'BTC' && " Ensure you are using the correct network (ERC20/BEP20)."}
+              </p>
+            </div>
+          </>
+        )}
       </div>
+
+      {/* Payment Notification (Optional) */}
+      <div className="text-center">
+        <p className="text-gray-500 text-sm">
+          After sending, your balance will update automatically once the transaction is confirmed on the blockchain.
+        </p>
+      </div>
+
     </div>
   );
 }
