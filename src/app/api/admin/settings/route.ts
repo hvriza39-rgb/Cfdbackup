@@ -3,28 +3,21 @@ import { prisma } from '../../../../lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-// 1. GET Current Settings
 export async function GET() {
   try {
-    // We just grab the first settings row we find
     const settings = await prisma.settings.findFirst();
-    
-    return NextResponse.json(settings || {
-      btcAddress: '',
-      ethAddress: '',
-      usdtAddress: ''
-    });
+    return NextResponse.json(settings || {});
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to load settings' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to load' }, { status: 500 });
   }
 }
 
-// 2. POST (Save) Settings
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    console.log("Received Settings Update:", body); // 🔍 This prints to your terminal
 
-    // Check if settings exist
+    // Check if settings row exists
     const existing = await prisma.settings.findFirst();
 
     let saved;
@@ -34,8 +27,8 @@ export async function POST(request: Request) {
         where: { id: existing.id },
         data: {
           btcAddress: body.btcAddress,
-          ethAddress: body.ethAddress,
-          usdtAddress: body.usdtAddress,
+          ethAddress: body.ethAddress, // We use this for the "EVM" address
+          // usdtAddress is optional, we can ignore it if you only use EVM
         }
       });
     } else {
@@ -44,7 +37,6 @@ export async function POST(request: Request) {
         data: {
           btcAddress: body.btcAddress,
           ethAddress: body.ethAddress,
-          usdtAddress: body.usdtAddress,
         }
       });
     }
@@ -52,7 +44,7 @@ export async function POST(request: Request) {
     return NextResponse.json(saved);
 
   } catch (error) {
-    console.error("Settings Save Error:", error);
-    return NextResponse.json({ error: 'Failed to save settings' }, { status: 500 });
+    console.error("❌ SETTINGS SAVE ERROR:", error); // 🔍 Check your VS Code terminal for this!
+    return NextResponse.json({ error: 'Server failed to save' }, { status: 500 });
   }
 }
