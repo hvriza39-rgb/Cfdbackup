@@ -43,7 +43,6 @@ export default function WithdrawalPage() {
     fetchBalance();
   }, []);
 
-  // 2. Handle Withdrawal (API Call)
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage('');
@@ -68,22 +67,29 @@ export default function WithdrawalPage() {
         body: JSON.stringify({ amount, network, address }),
       });
 
-      const data = await res.json();
+      // Try to parse JSON, but handle HTML errors (500 crashes)
+      let data;
+      try {
+        data = await res.json();
+      } catch (jsonError) {
+        console.error("JSON Parse Error:", jsonError);
+        throw new Error("Server Error (Check Terminal)");
+      }
 
       if (res.ok) {
-        // Success! Update local balance immediately
         setBalance(data.newBalance);
         setAmount('');
         setAddress('');
         setMessage('Withdrawal request submitted successfully!');
       } else {
-        // Show error from server (e.g., "Insufficient funds")
         setIsError(true);
         setMessage(data.error || 'Withdrawal failed.');
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Submit Error:", error);
       setIsError(true);
-      setMessage('Network error. Please try again.');
+      // Show the actual error message if available
+      setMessage(error.message || 'Network error. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

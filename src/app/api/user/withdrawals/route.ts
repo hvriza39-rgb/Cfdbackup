@@ -7,11 +7,14 @@ const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 
 export async function POST(request: Request) {
   try {
-    // 1. Authenticate User
+    console.log("1. Processing Withdrawal Request...");
+
+    // 1. Authenticate
     const headersList = headers();
     const token = headersList.get('authorization')?.split(' ')[1];
 
     if (!token) {
+      console.log("❌ No token provided");
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -19,11 +22,16 @@ export async function POST(request: Request) {
     try {
       decoded = jwt.verify(token, SECRET_KEY);
     } catch (err) {
+      console.log("❌ Invalid token");
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const userId = decoded.userId || decoded.id; // Adjust based on your token payload
+    const userId = decoded.userId || decoded.id;
+    
+    // 2. Parse Body
     const body = await request.json();
+    console.log("2. Request Body:", body);
+
     const { amount, network, address } = body;
     const withdrawAmount = parseFloat(amount);
 
@@ -31,48 +39,53 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid amount' }, { status: 400 });
     }
 
-    // 2. Check Balance
+    // 3. Check Balance
     const user = await prisma.user.findUnique({ where: { id: userId } });
     
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const currentBalance = Number(user.portfolioBalance);
-
-    if (currentBalance < withdrawAmount) {
+    if (Number(user.portfolioBalance) < withdrawAmount) {
       return NextResponse.json({ error: 'Insufficient funds' }, { status: 400 });
     }
 
-    // 3. Process Withdrawal (Deduct Money)
-    const newBalance = currentBalance - withdrawAmount;
+    console.log("3. User has funds. Creating transaction...");
 
-    // Transaction: Update User Balance & Create Record
+    // 4. Run Transaction (Update Balance + Create Record)
     const result = await prisma.$transaction([
+      // Deduct Balance
       prisma.user.update({
         where: { id: userId },
-        data: { portfolioBalance: newBalance }
+        data: { 
+          portfolioBalance: { decrement: withdrawAmount }
+        }
       }),
+      // Create History Record
       prisma.transaction.create({
         data: {
           userId: userId,
           type: 'withdrawal',
           amount: withdrawAmount,
-          status: 'Pending', // Withdrawals usually need admin approval
+          status: 'Pending',
           asset: 'USD',
-          // You can add network/address fields to your schema if you want to save them
+          network: network || 'Bank',
+          address: address || 'N/A'
         }
       })
     ]);
 
-    // 4. Return new balance
+    console.log("✅ Withdrawal Successful:", result);
+
     return NextResponse.json({ 
       success: true, 
-      newBalance: result[0].portfolioBalance 
+      newBalance: Number(result[0].portfolioBalance)
     });
 
-  } catch (error) {
-    console.error("Withdrawal Error:", error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  } catch (error: any) {
+    console.error("❌ WITHDRAWAL API CRASH:", error); // Look for this in your terminal!
+    return NextResponse.json({ 
+      error: error.message || 'Internal Server Error' 
+    }, { status: 500 });
   }
 }
