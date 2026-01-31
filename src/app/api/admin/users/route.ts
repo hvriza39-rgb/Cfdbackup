@@ -1,27 +1,30 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 
-// Force dynamic so it doesn't cache old data
+// ⚠️ THIS LINE FIXES THE "ZERO BALANCE" BUG
+// It forces Next.js to fetch fresh data from the DB every time you refresh.
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Fetch all users sorted by newest first
     const users = await prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
         name: true,
         email: true,
-        role: true,      // <--- We need this for the Admin Badge
+        role: true,
+        portfolioBalance: true, // Getting the real balance
+        availableBalance: true,
+        
         createdAt: true,
-        // You can add 'balance' or 'isVerified' here if you want to see those too
-      },
+        // Add any other fields your admin table needs
+      }
     });
 
     return NextResponse.json(users);
   } catch (error) {
-    console.error("Fetch Users Error:", error);
+    console.error("Admin Users Fetch Error:", error);
     return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
   }
 }

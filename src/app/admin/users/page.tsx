@@ -41,6 +41,31 @@ export default function UsersPage() {
     }
   }
 
+  // ✅ NEW: Fetch single user with fresh data from database
+  async function fetchSingleUser(userId: string) {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.user || data;
+    } catch (err) {
+      console.error("Failed to fetch user:", err);
+      return null;
+    }
+  }
+
+  // ✅ NEW: Open modal with fresh user data
+  async function openUserModal(user: any) {
+    setSelectedUser(user); // Set immediately for responsive UI
+    setActiveTab('details');
+    
+    // Fetch fresh data in background
+    const freshUser = await fetchSingleUser(user.id);
+    if (freshUser) {
+      setSelectedUser(freshUser);
+    }
+  }
+
   useEffect(() => { fetchUsers(); }, []);
 
   // Clear status after 3 seconds
@@ -64,18 +89,26 @@ export default function UsersPage() {
         body: JSON.stringify({ operation, amount: parseFloat(amount) }),
       });
 
-      const data = await res.json(); // Get the response data
+      const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || 'Update failed');
 
-      // ✅ KEY FIX: Update the modal with the NEW user data from the server
+      // ✅ Update modal with fresh data from server
       if (data.user) {
-        setSelectedUser(data.user); 
+        setSelectedUser(data.user);
+      } else {
+        // Fallback: Fetch fresh user data if not returned
+        const freshUser = await fetchSingleUser(selectedUser.id);
+        if (freshUser) {
+          setSelectedUser(freshUser);
+        }
       }
 
       setStatus({ type: 'success', text: `Successfully ${operation === 'add' ? 'added' : 'deducted'} $${amount}` });
       setAmount('');
-      fetchUsers(); // Refresh background list
+      
+      // Refresh the users list in background
+      fetchUsers();
     } catch (error: any) {
       setStatus({ type: 'error', text: error.message || 'Failed to update balance' });
     } finally {
@@ -128,7 +161,8 @@ export default function UsersPage() {
                 <p className="text-sm text-gray-400">{user.email}</p>
               </div>
               
-              <Button onClick={() => { setSelectedUser(user); setActiveTab('details'); }} className="bg-gray-700 hover:bg-gray-600">
+              {/* ✅ FIXED: Now fetches fresh data when opening modal */}
+              <Button onClick={() => openUserModal(user)} className="bg-gray-700 hover:bg-gray-600">
                 Manage User
               </Button>
             </Card>
