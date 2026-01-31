@@ -1,300 +1,157 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Card from '../../../components/ui/Card';
-import Button from '../../../components/ui/Button';
-import Input from '../../../components/ui/Input';
+import Link from 'next/link';
+import { Search, Edit, Trash2, Shield, ShieldAlert, Loader2 } from 'lucide-react';
 
-// Icons (Optional: you can remove these imports if you don't have lucide-react)
-import { User, Wallet, MessageSquare, X, CheckCircle } from 'lucide-react';
-
-export default function UsersPage() {
-  const [users, setUsers] = useState<any[]>([]);
+export default function AdminUsersPage() {
+  const [users, setUsers] = useState([]);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
-  
-  // Modal State
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
-  const [activeTab, setActiveTab] = useState<'details' | 'wallet' | 'message'>('details');
-  
-  // Wallet Form State
-  const [amount, setAmount] = useState('');
-  
-  // Message Form State
-  const [msgTitle, setMsgTitle] = useState('');
-  const [msgBody, setMsgBody] = useState('');
 
-  // Status Feedback (No more alerts!)
-  const [status, setStatus] = useState<{type: 'success' | 'error', text: string} | null>(null);
-  const [processing, setProcessing] = useState(false);
-
-  // Fetch Users
-  async function fetchUsers() {
-    try {
-      const res = await fetch('/api/admin/users');
-      const data = await res.json();
-      const userList = Array.isArray(data) ? data : (data.users || []);
-      setUsers(userList);
-    } catch (err) {
-      console.error("Failed to fetch users:", err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // ✅ NEW: Fetch single user with fresh data from database
-  async function fetchSingleUser(userId: string) {
-    try {
-      const res = await fetch(`/api/admin/users/${userId}`);
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data.user || data;
-    } catch (err) {
-      console.error("Failed to fetch user:", err);
-      return null;
-    }
-  }
-
-  // ✅ NEW: Open modal with fresh user data
-  async function openUserModal(user: any) {
-    setSelectedUser(user); // Set immediately for responsive UI
-    setActiveTab('details');
-    
-    // Fetch fresh data in background
-    const freshUser = await fetchSingleUser(user.id);
-    if (freshUser) {
-      setSelectedUser(freshUser);
-    }
-  }
-
-  useEffect(() => { fetchUsers(); }, []);
-
-  // Clear status after 3 seconds
+  // 1. Fetch Users
   useEffect(() => {
-    if (status) {
-      const timer = setTimeout(() => setStatus(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [status]);
-
-  // 1. Handle Wallet Update
-  async function handleBalanceUpdate(operation: 'add' | 'subtract') {
-    if (!selectedUser || !amount) return;
-    setProcessing(true);
-    setStatus(null);
-
-    try {
-      const res = await fetch(`/api/admin/users/${selectedUser.id}/balance`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ operation, amount: parseFloat(amount) }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.error || 'Update failed');
-
-      // ✅ Update modal with fresh data from server
-      if (data.user) {
-        setSelectedUser(data.user);
-      } else {
-        // Fallback: Fetch fresh user data if not returned
-        const freshUser = await fetchSingleUser(selectedUser.id);
-        if (freshUser) {
-          setSelectedUser(freshUser);
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch('/api/admin/users', {
+            cache: 'no-store' 
+        });
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setUsers(data);
         }
+      } catch (error) {
+        console.error("Failed to load users", error);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setStatus({ type: 'success', text: `Successfully ${operation === 'add' ? 'added' : 'deducted'} $${amount}` });
-      setAmount('');
-      
-      // Refresh the users list in background
-      fetchUsers();
-    } catch (error: any) {
-      setStatus({ type: 'error', text: error.message || 'Failed to update balance' });
-    } finally {
-      setProcessing(false);
-    }
-  }
+    fetchUsers();
+  }, []);
 
-  // 2. Handle Send Message
-  async function handleSendMessage(e: React.FormEvent) {
-    e.preventDefault();
-    if (!selectedUser || !msgBody) return;
-    setProcessing(true);
-    
-    try {
-      const res = await fetch(`/api/admin/users/message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: selectedUser.id, title: msgTitle, message: msgBody }),
-      });
-
-      if (!res.ok) throw new Error('Failed to send');
-
-      setStatus({ type: 'success', text: 'Message sent to user dashboard.' });
-      setMsgTitle('');
-      setMsgBody('');
-    } catch (error) {
-      setStatus({ type: 'error', text: 'Could not send message.' });
-    } finally {
-      setProcessing(false);
-    }
-  }
-
-  if (loading) return <div className="p-6 text-white">Loading users...</div>;
+  // 2. Search Filter
+  const filteredUsers = users.filter((user: any) => 
+    user.email?.toLowerCase().includes(search.toLowerCase()) ||
+    user.name?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="p-6 relative min-h-screen">
-      <h1 className="text-2xl font-bold text-white mb-6">User Management</h1>
+    <div className="space-y-6">
       
-      {/* User List */}
-      <div className="grid gap-4">
-        {users.map((user) => (
-            <Card key={user.id} className="p-4 flex flex-col md:flex-row justify-between items-center gap-4 hover:border-blue-500/50 transition-colors">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-bold text-white text-lg">{user.name || 'Unnamed'}</p>
-                  <span className={`px-2 py-0.5 rounded text-xs ${user.role === 'admin' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
-                    {user.role}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-400">{user.email}</p>
-              </div>
-              
-              {/* ✅ FIXED: Now fetches fresh data when opening modal */}
-              <Button onClick={() => openUserModal(user)} className="bg-gray-700 hover:bg-gray-600">
-                Manage User
-              </Button>
-            </Card>
-        ))}
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">User Management</h1>
+          <p className="text-gray-400 text-sm">Total Users: {users.length}</p>
+        </div>
+        
+        {/* Search Bar */}
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+          <input 
+            type="text" 
+            placeholder="Search users by name or email..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-[#1a1f2e] border border-white/10 rounded-xl py-2 pl-10 pr-4 text-white focus:outline-none focus:border-blue-500 transition-colors"
+          />
+        </div>
       </div>
 
-      {/* MASTER MODAL */}
-      {selectedUser && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="bg-[#1a1f2e] border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[500px]">
-            
-            {/* Sidebar Tabs */}
-            <div className="w-full md:w-1/3 bg-white/5 p-4 flex flex-col gap-2 border-r border-white/10">
-              <div className="mb-6">
-                <h2 className="font-bold text-white truncate">{selectedUser.name}</h2>
-                <p className="text-xs text-gray-400 truncate">{selectedUser.email}</p>
-              </div>
-              
-              <button onClick={() => setActiveTab('details')} className={`p-3 rounded-lg text-left text-sm font-medium transition-colors ${activeTab === 'details' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}>
-                User Details
-              </button>
-              <button onClick={() => setActiveTab('wallet')} className={`p-3 rounded-lg text-left text-sm font-medium transition-colors ${activeTab === 'wallet' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}>
-                Wallet & Balance
-              </button>
-              <button onClick={() => setActiveTab('message')} className={`p-3 rounded-lg text-left text-sm font-medium transition-colors ${activeTab === 'message' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}>
-                Send Message
-              </button>
-            </div>
-
-            {/* Main Content Area */}
-            <div className="flex-1 p-6 relative bg-[#1a1f2e] overflow-y-auto">
-              {/* Close Button */}
-              <button onClick={() => setSelectedUser(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
-                ✕
-              </button>
-
-              {/* Status Message */}
-              {status && (
-                <div className={`mb-4 p-3 rounded-lg text-sm font-medium ${status.type === 'success' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                  {status.text}
-                </div>
-              )}
-
-              {/* TAB 1: DETAILS */}
-              {activeTab === 'details' && (
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-white">Profile Information</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 bg-white/5 rounded-lg">
-                      <p className="text-xs text-gray-500">User ID</p>
-                      <p className="text-sm text-gray-300 font-mono truncate">{selectedUser.id}</p>
+      {/* Users Table Container */}
+      <div className="bg-[#1a1f2e] border border-white/10 rounded-xl overflow-hidden shadow-xl">
+        
+        {/* 🚨 MOBILE FIX: This div allows horizontal scrolling */}
+        <div className="overflow-x-auto">
+          
+          <table className="w-full text-left border-collapse min-w-[800px]">
+            <thead>
+              <tr className="bg-black/20 text-gray-400 text-xs uppercase font-semibold border-b border-white/10">
+                <th className="p-4">User</th>
+                <th className="p-4">Country</th>
+                <th className="p-4">Status</th>
+                <th className="p-4">Wallet Balance</th>
+                <th className="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-gray-500">
+                    <div className="flex justify-center items-center gap-2">
+                      <Loader2 className="animate-spin" size={20} /> Loading users...
                     </div>
-                    <div className="p-3 bg-white/5 rounded-lg">
-                      <p className="text-xs text-gray-500">Role</p>
-                      <p className="text-sm text-gray-300 capitalize">{selectedUser.role}</p>
-                    </div>
-                    <div className="p-3 bg-white/5 rounded-lg col-span-2">
-                      <p className="text-xs text-gray-500">Email</p>
-                      <p className="text-sm text-gray-300">{selectedUser.email}</p>
-                    </div>
-                    <div className="p-3 bg-white/5 rounded-lg col-span-2">
-                      <p className="text-xs text-gray-500">Current Balance</p>
-                      <p className="text-2xl font-bold text-green-400">${selectedUser.portfolioBalance?.toLocaleString() || '0.00'}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 2: WALLET */}
-              {activeTab === 'wallet' && (
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-white">Adjust Wallet Balance</h3>
-                  
-                  <div className="p-4 bg-black/20 rounded-xl mb-6">
-                     <p className="text-sm text-gray-400 mb-1">Current Balance</p>
-                     <p className="text-3xl font-bold text-white">${selectedUser.portfolioBalance?.toLocaleString() || '0'}</p>
-                  </div>
-
-                  <Input 
-                    label="Amount ($)" 
-                    type="number" 
-                    value={amount} 
-                    onChange={(e) => setAmount(e.target.value)} 
-                    placeholder="0.00"
-                  />
-                  
-                  <div className="grid grid-cols-2 gap-3 pt-2">
-                    <Button onClick={() => handleBalanceUpdate('add')} disabled={processing} className="bg-green-600 hover:bg-green-500">
-                      + Deposit
-                    </Button>
-                    <Button onClick={() => handleBalanceUpdate('subtract')} disabled={processing} className="bg-red-600 hover:bg-red-500">
-                      - Withdraw
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 3: MESSAGES */}
-              {activeTab === 'message' && (
-                <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-white">Send Notification</h3>
-                  <p className="text-sm text-gray-400">This message will appear in the user's dashboard.</p>
-                  
-                  <form onSubmit={handleSendMessage} className="space-y-4">
-                    <Input 
-                      label="Title / Subject" 
-                      value={msgTitle} 
-                      onChange={(e) => setMsgTitle(e.target.value)} 
-                      placeholder="e.g. Deposit Confirmation"
-                    />
+                  </td>
+                </tr>
+              ) : filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-gray-500">No users found matching "{search}"</td>
+                </tr>
+              ) : (
+                filteredUsers.map((user: any) => (
+                  <tr key={user.id} className="hover:bg-white/5 transition-colors group">
                     
-                    <div>
-                      <label className="text-sm text-gray-400 block mb-2">Message Body</label>
-                      <textarea 
-                        className="w-full bg-[#0B0E14] border border-white/10 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-blue-500 min-h-[120px]"
-                        value={msgBody}
-                        onChange={(e) => setMsgBody(e.target.value)}
-                        placeholder="Type your message here..."
-                      />
-                    </div>
+                    {/* User Info */}
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-400 font-bold">
+                          {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <div>
+                          <div className="text-white font-medium">{user.name || 'Unnamed User'}</div>
+                          <div className="text-xs text-gray-500">{user.email}</div>
+                        </div>
+                      </div>
+                    </td>
 
-                    <Button type="submit" disabled={processing} className="w-full bg-blue-600 hover:bg-blue-500">
-                      {processing ? 'Sending...' : 'Send Message'}
-                    </Button>
-                  </form>
-                </div>
+                    {/* Country */}
+                    <td className="p-4 text-gray-400 text-sm">
+                      {user.country || 'N/A'}
+                    </td>
+
+                    {/* Status Badge */}
+                    <td className="p-4">
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border ${
+                        user.status === 'Verified' || user.status === 'Active'
+                          ? 'bg-green-500/10 text-green-400 border-green-500/20' 
+                          : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                      }`}>
+                        {user.status === 'Verified' ? <Shield size={12} /> : <ShieldAlert size={12} />}
+                        {user.status || 'Unverified'}
+                      </span>
+                    </td>
+
+                    {/* Balance */}
+                    <td className="p-4 font-mono font-medium text-white">
+                      ${(user.portfolioBalance || 0).toLocaleString()}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="p-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link 
+                          href={`/admin/users/${user.id}`}
+                          className="p-2 bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white rounded-lg transition-colors"
+                          title="Edit User"
+                        >
+                          <Edit size={16} />
+                        </Link>
+                        {/* Add Delete logic later if needed */}
+                        {/* <button className="p-2 bg-red-600/10 text-red-400 hover:bg-red-600 hover:text-white rounded-lg transition-colors">
+                          <Trash2 size={16} />
+                        </button> */}
+                      </div>
+                    </td>
+
+                  </tr>
+                ))
               )}
+            </tbody>
+          </table>
 
-            </div>
-          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
