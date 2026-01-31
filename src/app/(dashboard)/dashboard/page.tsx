@@ -59,13 +59,14 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold text-white">
           Welcome back, {user.name}
         </h1>
-        <p className="text-gray-400 mt-1">Here is your portfolio overview for today.</p>
+
       </div>
 
       {/* 2. MAIN STATS GRID */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         {/* CARD 1: BALANCE & ACTIONS (The Fix is Here) */}
+        {/* CARD 1: BALANCE & ACTIONS (Clean Icon Version) */}
         <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-6 md:p-8 text-white shadow-2xl shadow-blue-900/20 relative overflow-hidden">
           
           {/* Background Decor */}
@@ -76,6 +77,29 @@ export default function DashboardPage() {
             <h2 className="text-4xl md:text-5xl font-bold font-mono tracking-tight mb-8">
               ${user.balance.toLocaleString()}
             </h2>
+
+            {/* ✅ FIXED: Clean Circular Action Buttons */}
+            <div className="flex items-center gap-8">
+              
+              {/* Deposit Action */}
+              <Link href="/deposit" className="flex flex-col items-center gap-2 group">
+                <div className="w-14 h-14 bg-white/20 hover:bg-white/30 border border-white/10 backdrop-blur-md rounded-full flex items-center justify-center transition-all group-hover:scale-110 shadow-lg">
+                  <ArrowDownLeft size={24} className="text-white" />
+                </div>
+                <span className="text-sm font-semibold text-blue-100 group-hover:text-white transition-colors">Deposit</span>
+              </Link>
+              
+              {/* Withdraw Action */}
+              <Link href="/withdrawal" className="flex flex-col items-center gap-2 group">
+                <div className="w-14 h-14 bg-white text-blue-600 hover:bg-blue-50 border border-white/10 rounded-full flex items-center justify-center transition-all group-hover:scale-110 shadow-lg">
+                  <ArrowUpRight size={24} />
+                </div>
+                <span className="text-sm font-semibold text-blue-100 group-hover:text-white transition-colors">Withdraw</span>
+              </Link>
+
+            </div>
+
+          
 
             {/* ✅ FIXED: Use Flexbox instead of Grid to prevent overlap */}
             <div className="flex flex-col sm:flex-row gap-4">
