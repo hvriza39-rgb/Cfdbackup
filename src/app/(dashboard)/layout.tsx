@@ -1,5 +1,5 @@
 'use client';
-
+import Logo from '../../components/Logo';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -91,14 +91,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         md:relative md:translate-x-0
         flex flex-col h-full
       `}>
-        {/* Sidebar Header */}
+       {/* Sidebar Header */}
         <div className="h-20 flex items-center justify-between px-6 border-b border-white/10 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-blue-900/50">
-              CB
-            </div>
-            <span className="font-bold text-lg tracking-wide">CRYPTO BROKER</span>
-          </div>
+          <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+            <Logo />
+          </Link>
           <button 
             onClick={() => setIsMobileMenuOpen(false)} 
             className="md:hidden text-gray-400 hover:text-white"

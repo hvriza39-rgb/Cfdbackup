@@ -5,10 +5,8 @@ import Link from 'next/link';
 import { 
   ArrowUpRight, 
   ArrowDownLeft, 
-  Wallet, 
   TrendingUp, 
   Activity,
-  Clock,
   ChevronRight 
 } from 'lucide-react';
 
@@ -67,7 +65,7 @@ export default function DashboardPage() {
       {/* 2. MAIN STATS GRID */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        {/* CARD 1: BALANCE & ACTIONS (Fixed Buttons) */}
+        {/* CARD 1: BALANCE & ACTIONS (The Fix is Here) */}
         <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-6 md:p-8 text-white shadow-2xl shadow-blue-900/20 relative overflow-hidden">
           
           {/* Background Decor */}
@@ -79,9 +77,10 @@ export default function DashboardPage() {
               ${user.balance.toLocaleString()}
             </h2>
 
-            {/* ✅ FIXED: Buttons now use GRID to be perfectly equal & aligned */}
-            <div className="grid grid-cols-2 gap-4">
-              <Link href="/deposit">
+            {/* ✅ FIXED: Use Flexbox instead of Grid to prevent overlap */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              
+              <Link href="/deposit" className="flex-1">
                 <button className="w-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all group">
                   <div className="bg-white/20 p-1.5 rounded-lg group-hover:rotate-45 transition-transform">
                     <ArrowDownLeft size={18} />
@@ -90,7 +89,7 @@ export default function DashboardPage() {
                 </button>
               </Link>
               
-              <Link href="/withdrawal">
+              <Link href="/withdrawal" className="flex-1">
                 <button className="w-full bg-white text-blue-600 hover:bg-blue-50 py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-black/10 group">
                   <div className="bg-blue-100 p-1.5 rounded-lg text-blue-600 group-hover:-rotate-45 transition-transform">
                     <ArrowUpRight size={18} />
@@ -99,6 +98,7 @@ export default function DashboardPage() {
                 </button>
               </Link>
             </div>
+
           </div>
         </div>
 
