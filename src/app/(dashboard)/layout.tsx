@@ -10,10 +10,9 @@ import {
   LineChart, 
   User, 
   Settings, 
-  LogOut,
-  Menu,
-  X,
-  Bell
+  LogOut, 
+  Menu, 
+  X
 } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -26,7 +25,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     initial: 'U'
   });
 
-  // 1. Fetch User Data for the Top Bar
+  // 1. Fetch User Data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -56,7 +55,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
 
     fetchUserData();
-  }, [pathname]); // Re-fetch when page changes to keep balance updated
+  }, [pathname]);
 
   const navItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
@@ -67,30 +66,49 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Settings', href: '/settings/account', icon: Settings },
   ];
 
-  // Helper to get current date formatted like "Saturday, January 31"
-  const today = new Date().toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    month: 'long', 
-    day: 'numeric' 
-  });
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/auth/login';
+  };
 
   return (
     <div className="min-h-screen bg-[#0b1221] text-white flex">
       
-      {/* 1. SIDEBAR NAVIGATION */}
+      {/* 1. MOBILE OVERLAY */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/80 z-40 md:hidden backdrop-blur-sm"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* 2. SIDEBAR (Restored to Full Width w-64) */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-20 md:w-24 bg-[#1a1f2e] border-r border-white/5 flex flex-col items-center py-8
+        fixed inset-y-0 left-0 z-50 w-64 bg-[#1a1f2e] border-r border-white/10 
         transform transition-transform duration-300 ease-in-out
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:translate-x-0
+        md:relative md:translate-x-0
+        flex flex-col h-full
       `}>
-        {/* Logo Icon */}
-        <div className="mb-10 p-3 bg-blue-600 rounded-xl shadow-lg shadow-blue-900/50">
-          <LayoutGrid size={24} className="text-white" />
+        {/* Sidebar Header */}
+        <div className="h-20 flex items-center justify-between px-6 border-b border-white/10 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-blue-900/50">
+              CB
+            </div>
+            <span className="font-bold text-lg tracking-wide">CRYPTO BROKER</span>
+          </div>
+          <button 
+            onClick={() => setIsMobileMenuOpen(false)} 
+            className="md:hidden text-gray-400 hover:text-white"
+          >
+            <X size={24} />
+          </button>
         </div>
-
-        {/* Nav Links */}
-        <nav className="flex-1 flex flex-col gap-6 w-full px-4">
+        
+        {/* Navigation Links */}
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -98,52 +116,54 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 key={item.name}
                 href={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`
-                  p-3 rounded-xl flex flex-col items-center justify-center gap-1 transition-all group
-                  ${isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'text-gray-500 hover:bg-white/5 hover:text-white'}
-                `}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${
+                  isActive 
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
+                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                }`}
               >
                 <item.icon size={20} />
+                <span>{item.name}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Logout */}
-        <button 
-          onClick={() => {
-            localStorage.removeItem('token');
-            window.location.href = '/auth/login';
-          }}
-          className="mt-auto p-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
-        >
-          <LogOut size={20} />
-        </button>
+        {/* Logout Button */}
+        <div className="p-4 border-t border-white/10 shrink-0">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors font-medium"
+          >
+            <LogOut size={20} />
+            <span>Logout</span>
+          </button>
+        </div>
       </aside>
 
-      {/* 2. MAIN CONTENT WRAPPER */}
-      <div className="flex-1 flex flex-col md:pl-24 h-screen overflow-hidden">
+      {/* 3. MAIN CONTENT */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         
-        {/* TOP HEADER */}
+        {/* Header */}
         <header className="h-20 border-b border-white/5 bg-[#0b1221] flex items-center justify-between px-6 shrink-0">
           
-          {/* Mobile Menu Toggle & Date */}
+          {/* Mobile Menu Toggle */}
           <div className="flex items-center gap-4">
             <button 
               className="md:hidden p-2 text-gray-400 hover:text-white"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => setIsMobileMenuOpen(true)}
             >
-              {isMobileMenuOpen ? <X /> : <Menu />}
+              <Menu size={24} />
             </button>
-            <div className="hidden md:block text-gray-400 text-sm font-medium">
-              {today}
-            </div>
+            <h2 className="text-lg font-bold text-white hidden md:block">
+               {/* Optional: Show Page Title Here */}
+            </h2>
           </div>
 
-          {/* Right Side: Balance Widget & Profile */}
+          {/* Right Side: Balance & Profile */}
           <div className="flex items-center gap-6">
             
-            {/* 💰 AVAILABLE BALANCE WIDGET */}
+            {/* Live Balance Widget */}
             <div className="hidden md:flex items-center gap-4 bg-[#1a1f2e] border border-white/10 px-4 py-2 rounded-xl">
               <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
                 <Wallet size={18} />
@@ -166,16 +186,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
               <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-900/20">
                 {userData.initial}
-                {userData.verified && (
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#0b1221] rounded-full translate-x-1 translate-y-1"></div>
-                )}
               </div>
             </div>
-
           </div>
         </header>
 
-        {/* PAGE CONTENT */}
+        {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
           {children}
         </main>
