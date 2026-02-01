@@ -58,28 +58,35 @@ export default function WithdrawalPage() {
         return;
       }
 
+      // ✅ FIX: Convert amount to Number (parseFloat) so the server doesn't crash
+      const numericAmount = parseFloat(amount);
+      if (isNaN(numericAmount) || numericAmount <= 0) {
+        throw new Error('Please enter a valid amount.');
+      }
+
       const res = await fetch('/api/user/withdraw', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ amount, network, address }),
+        // Sending 'numericAmount' ensures the backend receives a Number
+        body: JSON.stringify({ amount: numericAmount, network, address }),
       });
 
-      // Try to parse JSON, but handle HTML errors (500 crashes)
+      // Handle response
       let data;
       try {
         data = await res.json();
-      } catch (jsonError) {
-        console.error("JSON Parse Error:", jsonError);
-        throw new Error("Server Error (Check Terminal)");
+      } catch (err) {
+        throw new Error("Server Error: The backend crashed. Check your terminal for details.");
       }
 
       if (res.ok) {
         setBalance(data.newBalance);
         setAmount('');
         setAddress('');
+        setIsError(false);
         setMessage('Withdrawal request submitted successfully!');
       } else {
         setIsError(true);
@@ -88,7 +95,6 @@ export default function WithdrawalPage() {
     } catch (error: any) {
       console.error("Submit Error:", error);
       setIsError(true);
-      // Show the actual error message if available
       setMessage(error.message || 'Network error. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -183,7 +189,7 @@ export default function WithdrawalPage() {
             />
           </div>
 
-          {/* Message Area (Replaces Alert) */}
+          {/* Message Area */}
           {message && (
             <div className={`p-4 rounded-xl flex items-center gap-3 ${isError ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-green-500/10 text-green-400 border border-green-500/20'}`}>
               {isError ? <XCircle size={20} /> : <CheckCircle size={20} />}
