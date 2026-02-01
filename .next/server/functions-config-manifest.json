@@ -1,1 +1,1 @@
-{"version":1,"functions":{"/api/admin/users":{},"/api/admin/transactions":{},"/api/settings":{},"/api/user/dashboard":{},"/api/user/notifications":{},"/api/user/profile":{},"/api/admin/settings":{},"/api/admin/users/[id]":{},"/api/auth/logout":{}}}
+{"version":1,"functions":{"/api/admin/users":{},"/api/auth/logout":{},"/api/settings":{},"/api/user/dashboard":{},"/api/user/notifications":{},"/api/user/profile":{},"/api/admin/users/[id]":{},"/api/admin/transactions":{},"/api/admin/settings":{}}}

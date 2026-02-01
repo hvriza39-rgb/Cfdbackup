@@ -91,8 +91,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0
       `}>
-        {/* Sidebar Header */}
-        <div className="h-24 flex items-center justify-between px-6 border-b border-white/10 shrink-0">
+        {/* Sidebar Header (Reduced Height h-24 -> h-16) */}
+        <div className="h-16 flex items-center justify-between px-6 border-b border-white/10 shrink-0">
           <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
              <Logo />
           </Link>
@@ -105,7 +105,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         
         {/* Navigation Links */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -114,7 +114,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 href={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`
-                  flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium
+                  flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-medium
                   ${isActive 
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
                     : 'text-gray-400 hover:bg-white/5 hover:text-white'}
@@ -127,11 +127,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        {/* Logout Button */}
-        <div className="p-4 border-t border-white/10 shrink-0">
+        {/* Logout Button (Reduced Padding) */}
+        <div className="p-3 border-t border-white/10 shrink-0">
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors font-medium"
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors font-medium"
           >
             <LogOut size={20} className="shrink-0" />
             <span>Logout</span>
@@ -143,7 +143,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex-1 flex flex-col min-w-0 md:pl-64 transition-all duration-300">
         
         {/* Header */}
-        <header className="h-24 border-b border-white/5 bg-[#0b1221] flex items-center justify-between px-6 shrink-0 sticky top-0 z-30">
+        <header className="h-16 border-b border-white/5 bg-[#0b1221] flex items-center justify-between px-6 shrink-0 sticky top-0 z-30">
           
           <div className="flex items-center gap-4">
             <button 
@@ -156,13 +156,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* Right Side: Balance & Profile */}
           <div className="flex items-center gap-6">
-            <div className="hidden md:flex items-center gap-4 bg-[#1a1f2e] border border-white/10 px-4 py-2 rounded-xl">
-              <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
-                <Wallet size={18} />
+            <div className="hidden md:flex items-center gap-4 bg-[#1a1f2e] border border-white/10 px-4 py-1.5 rounded-xl">
+              <div className="p-1.5 bg-blue-500/10 rounded-lg text-blue-400">
+                <Wallet size={16} />
               </div>
               <div>
                 <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Available Balance</p>
-                <p className="text-white font-mono font-bold">
+                <p className="text-white font-mono font-bold text-sm">
                   ${userData.balance.toLocaleString()}
                 </p>
               </div>
@@ -175,7 +175,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {userData.verified ? 'Verified' : 'Unverified'}
                 </p>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-900/20">
+              <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-900/20">
                 {userData.initial}
               </div>
             </div>
