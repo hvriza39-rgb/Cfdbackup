@@ -1,268 +1,156 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Users, 
-  ArrowUpRight, 
-  AlertCircle, 
-  Search, 
-  CheckCircle, 
-  XCircle,
-  TrendingUp,
-  Wallet,
-  Loader2
-} from 'lucide-react';
+import Link from 'next/link';
+import { Search, Edit, Trash2, Shield, ShieldAlert, Loader2 } from 'lucide-react';
 
-// ✅ 1. Define the Shape of Data (Fixes the "never[]" error)
-interface Withdrawal {
-  id: string;
-  user: { name: string; email?: string };
-  amount: number;
-  network: string;
-  address: string;
-  status: string;
-  createdAt?: string;
-}
-
-interface DashboardStats {
-  totalUsers: number;
-  totalDeposits: number;
-  pendingWithdrawals: number;
-  activeUsers: number;
-}
-
-export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalDeposits: 0,
-    pendingWithdrawals: 0,
-    activeUsers: 0
-  });
-  
-  // ✅ 2. Use the Interface in useState (Critical Fix)
-  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
+export default function AdminUsersPage() {
+  const [users, setUsers] = useState([]);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // 3. Fetch Admin Data
+  // 1. Fetch Users
   useEffect(() => {
-    const fetchAdminData = async () => {
+    const fetchUsers = async () => {
       try {
-        const token = localStorage.getItem('token');
-        
-        // Fetch Dashboard Data
-        const res = await fetch('/api/admin/dashboard', {
-          headers: { 'Authorization': `Bearer ${token}` }
+        const res = await fetch('/api/admin/users', {
+            cache: 'no-store' 
         });
-
-        if (res.ok) {
-          const data = await res.json();
-          setStats(data.stats || { 
-            totalUsers: 0, 
-            totalDeposits: 0, 
-            pendingWithdrawals: 0, 
-            activeUsers: 0 
-          });
-          // Safely set withdrawals
-          setWithdrawals(data.pendingWithdrawals || []);
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setUsers(data);
         }
       } catch (error) {
-        console.error("Admin Load Error", error);
+        console.error("Failed to load users", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAdminData();
+    fetchUsers();
   }, []);
 
+  // 2. Search Filter
+  const filteredUsers = users.filter((user: any) => 
+    user.email?.toLowerCase().includes(search.toLowerCase()) ||
+    user.name?.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       
-      {/* HEADER */}
+      {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-          <p className="text-gray-400">Overview of platform performance and pending actions.</p>
+          <h1 className="text-2xl font-bold text-white">User Management</h1>
+          <p className="text-gray-400 text-sm">Total Users: {users.length}</p>
         </div>
-        <div className="flex items-center gap-2 bg-[#1a1f2e] border border-white/10 p-2 rounded-xl">
-          <Search size={20} className="text-gray-400 ml-2" />
+        
+        {/* Search Bar */}
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
           <input 
             type="text" 
-            placeholder="Search users..." 
-            className="bg-transparent border-none text-white outline-none placeholder-gray-500 w-64"
+            placeholder="Search users by name or email..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-[#1a1f2e] border border-white/10 rounded-xl py-2 pl-10 pr-4 text-white focus:outline-none focus:border-blue-500 transition-colors"
           />
         </div>
       </div>
 
-      {/* KEY METRICS GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {/* Users Table Container */}
+      <div className="bg-[#1a1f2e] border border-white/10 rounded-xl overflow-hidden shadow-xl">
         
-        {/* Total Users */}
-        <div className="bg-[#1a1f2e] border border-white/5 p-6 rounded-2xl shadow-xl flex items-center gap-4">
-          <div className="p-4 bg-blue-500/10 text-blue-400 rounded-xl">
-            <Users size={24} />
-          </div>
-          <div>
-            <p className="text-gray-400 text-sm font-medium">Total Users</p>
-            {loading ? <Loader2 className="animate-spin h-6 w-6 text-gray-500" /> : (
-              <h3 className="text-2xl font-bold text-white">{stats.totalUsers.toLocaleString()}</h3>
-            )}
-          </div>
-        </div>
-
-        {/* Total Deposits */}
-        <div className="bg-[#1a1f2e] border border-white/5 p-6 rounded-2xl shadow-xl flex items-center gap-4">
-          <div className="p-4 bg-green-500/10 text-green-400 rounded-xl">
-            <TrendingUp size={24} />
-          </div>
-          <div>
-            <p className="text-gray-400 text-sm font-medium">Total Deposits</p>
-            {loading ? <Loader2 className="animate-spin h-6 w-6 text-gray-500" /> : (
-              <h3 className="text-2xl font-bold text-white">${stats.totalDeposits.toLocaleString()}</h3>
-            )}
-          </div>
-        </div>
-
-        {/* Pending Withdrawals */}
-        <div className="bg-[#1a1f2e] border border-orange-500/20 p-6 rounded-2xl shadow-xl flex items-center gap-4 relative overflow-hidden">
-          <div className="absolute right-0 top-0 p-3 opacity-10">
-            <AlertCircle size={100} className="text-orange-500" />
-          </div>
-          <div className="p-4 bg-orange-500/10 text-orange-400 rounded-xl z-10">
-            <AlertCircle size={24} />
-          </div>
-          <div className="z-10">
-            <p className="text-orange-200 text-sm font-medium">Pending Withdrawals</p>
-            {loading ? <Loader2 className="animate-spin h-6 w-6 text-gray-500" /> : (
-              <h3 className="text-2xl font-bold text-white">{stats.pendingWithdrawals}</h3>
-            )}
-          </div>
-        </div>
-
-        {/* System Status */}
-        <div className="bg-[#1a1f2e] border border-white/5 p-6 rounded-2xl shadow-xl flex items-center gap-4">
-          <div className="p-4 bg-purple-500/10 text-purple-400 rounded-xl">
-            <Wallet size={24} />
-          </div>
-          <div>
-            <p className="text-gray-400 text-sm font-medium">Active Wallets</p>
-            {loading ? <Loader2 className="animate-spin h-6 w-6 text-gray-500" /> : (
-              <h3 className="text-2xl font-bold text-white">{stats.activeUsers}</h3>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* PENDING ACTIONS SECTION */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Pending Withdrawals List */}
-        <div className="lg:col-span-2 bg-[#1a1f2e] border border-white/5 rounded-3xl p-6 md:p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <ArrowUpRight size={20} className="text-orange-400" /> 
-              Withdrawal Requests
-            </h3>
-            <button className="text-sm text-blue-400 hover:text-white transition-colors">View All</button>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="text-xs text-gray-500 uppercase border-b border-white/5">
-                  <th className="pb-4 pl-2">User</th>
-                  <th className="pb-4">Amount</th>
-                  <th className="pb-4">Network</th>
-                  <th className="pb-4">Address</th>
-                  <th className="pb-4 text-right">Action</th>
+        {/* 🚨 MOBILE FIX: This div allows horizontal scrolling */}
+        <div className="overflow-x-auto">
+          
+          <table className="w-full text-left border-collapse min-w-[800px]">
+            <thead>
+              <tr className="bg-black/20 text-gray-400 text-xs uppercase font-semibold border-b border-white/10">
+                <th className="p-4">User</th>
+                <th className="p-4">Country</th>
+                <th className="p-4">Status</th>
+                <th className="p-4">Wallet Balance</th>
+                <th className="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-gray-500">
+                    <div className="flex justify-center items-center gap-2">
+                      <Loader2 className="animate-spin" size={20} /> Loading users...
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="space-y-4">
-                {loading ? (
-                   <tr>
-                     <td colSpan={5} className="text-center py-8">
-                       <Loader2 className="animate-spin h-8 w-8 text-blue-500 mx-auto" />
-                     </td>
-                   </tr>
-                ) : withdrawals.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="text-center py-8 text-gray-500">
-                      No pending withdrawals found.
+              ) : filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-gray-500">No users found matching "{search}"</td>
+                </tr>
+              ) : (
+                filteredUsers.map((user: any) => (
+                  <tr key={user.id} className="hover:bg-white/5 transition-colors group">
+                    
+                    {/* User Info */}
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-400 font-bold">
+                          {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <div>
+                          <div className="text-white font-medium">{user.name || 'Unnamed User'}</div>
+                          <div className="text-xs text-gray-500">{user.email}</div>
+                        </div>
+                      </div>
                     </td>
+
+                    {/* Country */}
+                    <td className="p-4 text-gray-400 text-sm">
+                      {user.country || 'N/A'}
+                    </td>
+
+                    {/* Status Badge */}
+                    <td className="p-4">
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border ${
+                        user.status === 'Verified' || user.status === 'Active'
+                          ? 'bg-green-500/10 text-green-400 border-green-500/20' 
+                          : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                      }`}>
+                        {user.status === 'Verified' ? <Shield size={12} /> : <ShieldAlert size={12} />}
+                        {user.status || 'Unverified'}
+                      </span>
+                    </td>
+
+                    {/* Balance */}
+                    <td className="p-4 font-mono font-medium text-white">
+                      ${(user.portfolioBalance || 0).toLocaleString()}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="p-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link 
+                          href={`/admin/users/${user.id}`}
+                          className="p-2 bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white rounded-lg transition-colors"
+                          title="Edit User"
+                        >
+                          <Edit size={16} />
+                        </Link>
+                        {/* Add Delete logic later if needed */}
+                        {/* <button className="p-2 bg-red-600/10 text-red-400 hover:bg-red-600 hover:text-white rounded-lg transition-colors">
+                          <Trash2 size={16} />
+                        </button> */}
+                      </div>
+                    </td>
+
                   </tr>
-                ) : (
-                  withdrawals.map((tx) => (
-                    <tr key={tx.id} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
-                      <td className="py-4 pl-2 font-medium text-white">{tx.user?.name || 'Unknown'}</td>
-                      <td className="py-4 font-mono text-white">${tx.amount.toLocaleString()}</td>
-                      <td className="py-4 text-gray-400 text-sm">{tx.network}</td>
-                      <td className="py-4">
-                        <span className="text-xs text-gray-500 font-mono bg-black/30 px-2 py-1 rounded">
-                          {tx.address ? `${tx.address.substring(0,6)}...${tx.address.substring(tx.address.length-4)}` : 'N/A'}
-                        </span>
-                      </td>
-                      <td className="py-4 text-right flex items-center justify-end gap-2">
-                        <button className="p-2 bg-green-500/10 text-green-400 rounded-lg hover:bg-green-500 hover:text-white transition-all" title="Approve">
-                          <CheckCircle size={18} />
-                        </button>
-                        <button className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500 hover:text-white transition-all" title="Reject">
-                          <XCircle size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
+
         </div>
-
-        {/* Recent Activity Logs */}
-        <div className="bg-[#1a1f2e] border border-white/5 rounded-3xl p-6">
-          <h3 className="text-lg font-bold text-white mb-6">Recent Activity</h3>
-          <div className="space-y-6">
-            
-            {/* Mock Activity Item 1 */}
-            <div className="flex gap-4 relative">
-              <div className="absolute left-[11px] top-8 bottom-[-24px] w-0.5 bg-white/5"></div>
-              <div className="z-10 w-6 h-6 rounded-full bg-blue-500/20 border border-blue-500 flex items-center justify-center shrink-0">
-                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-300">New user registration</p>
-                <p className="text-xs text-gray-500 mt-1">John Doe joined via referral</p>
-                <p className="text-[10px] text-gray-600 mt-2 font-mono">2 mins ago</p>
-              </div>
-            </div>
-
-            {/* Mock Activity Item 2 */}
-            <div className="flex gap-4 relative">
-              <div className="absolute left-[11px] top-8 bottom-[-24px] w-0.5 bg-white/5"></div>
-              <div className="z-10 w-6 h-6 rounded-full bg-green-500/20 border border-green-500 flex items-center justify-center shrink-0">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-300">Deposit Confirmed</p>
-                <p className="text-xs text-gray-500 mt-1">+$5,000.00 BTC (User: Sarah)</p>
-                <p className="text-[10px] text-gray-600 mt-2 font-mono">15 mins ago</p>
-              </div>
-            </div>
-
-            {/* Mock Activity Item 3 */}
-            <div className="flex gap-4">
-              <div className="z-10 w-6 h-6 rounded-full bg-orange-500/20 border border-orange-500 flex items-center justify-center shrink-0">
-                <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-300">New Withdrawal Request</p>
-                <p className="text-xs text-gray-500 mt-1">User requested $1,200 via ETH</p>
-                <p className="text-[10px] text-gray-600 mt-2 font-mono">1 hour ago</p>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
       </div>
     </div>
   );
