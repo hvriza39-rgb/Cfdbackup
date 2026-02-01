@@ -10,10 +10,11 @@ import {
   AlertCircle, 
   Loader2,
   Search,
-  Save
+  Save,
+  RotateCcw
 } from 'lucide-react';
 
-// 1. Define Data Types (Added Phone/Country/AccountStatus)
+// Data Types
 interface UserData {
   id: string;
   name: string;
@@ -21,7 +22,7 @@ interface UserData {
   role: string;
   portfolioBalance: number;
   verified: boolean;
-  status: string; // 'active', 'suspended', etc.
+  status: string;
   phone?: string;
   country?: string;
 }
@@ -31,26 +32,13 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Modal State
+  // Modal & Form State
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [activeTab, setActiveTab] = useState<'details' | 'wallet' | 'message'>('details');
   
-  // -- FORMS STATE --
-  
-  // 1. Edit Profile Form
-  const [editForm, setEditForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    country: '',
-    status: 'active',
-    verified: false
-  });
-
-  // 2. Wallet Form
+  // Forms
+  const [editForm, setEditForm] = useState({ name: '', email: '', phone: '', country: '', status: 'active', verified: false });
   const [amount, setAmount] = useState('');
-  
-  // 3. Message Form
   const [msgTitle, setMsgTitle] = useState('');
   const [msgBody, setMsgBody] = useState('');
 
@@ -58,29 +46,41 @@ export default function UsersPage() {
   const [status, setStatus] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [processing, setProcessing] = useState(false);
 
-  // Fetch Users
+  // 1. Fetch Users (Added cache: 'no-store' to fix stale data)
   async function fetchUsers() {
     try {
-      const res = await fetch('/api/admin/users');
+      const res = await fetch('/api/admin/users', { cache: 'no-store' });
       const data = await res.json();
+      // Handle different API response structures safely
       const userList = Array.isArray(data) ? data : (data.users || []);
       setUsers(userList);
     } catch (err) {
       console.error("Failed to fetch users:", err);
-      setUsers([]);
     } finally {
       setLoading(false);
     }
   }
 
-  // Fetch Single User & Populate Forms
+  // 2. Fetch Single User (Get fresh data from server)
+  async function fetchSingleUser(userId: string) {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, { cache: 'no-store' });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.user || data;
+    } catch (err) {
+      console.error("Failed to fetch user:", err);
+      return null;
+    }
+  }
+
+  // Open Modal
   async function openUserModal(user: UserData) {
-    // 1. Set basic data immediately
     setSelectedUser(user);
     setActiveTab('details');
     setStatus(null);
     
-    // 2. Populate Edit Form with current values
+    // Init Edit Form
     setEditForm({
       name: user.name || '',
       email: user.email || '',
@@ -90,30 +90,24 @@ export default function UsersPage() {
       verified: user.verified || false
     });
 
-    // 3. Fetch fresh data from API to ensure accuracy
-    try {
-      const res = await fetch(`/api/admin/users/${user.id}`);
-      if (res.ok) {
-        const data = await res.json();
-        const fresh = data.user || data;
-        setSelectedUser(fresh);
+    // Background refresh to get absolute latest data
+    const freshData = await fetchSingleUser(user.id);
+    if (freshData) {
+        setSelectedUser(freshData);
         setEditForm({
-            name: fresh.name || '',
-            email: fresh.email || '',
-            phone: fresh.phone || '',
-            country: fresh.country || '',
-            status: fresh.status || 'active',
-            verified: fresh.verified || false
+            name: freshData.name || '',
+            email: freshData.email || '',
+            phone: freshData.phone || '',
+            country: freshData.country || '',
+            status: freshData.status || 'active',
+            verified: freshData.verified || false
         });
-      }
-    } catch (err) {
-      console.error("Fetch fresh user failed", err);
     }
   }
 
   useEffect(() => { fetchUsers(); }, []);
 
-  // Filter Users
+  // Filter
   const filteredUsers = users.filter(user => 
     (user.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
     (user.email?.toLowerCase() || '').includes(searchTerm.toLowerCase())
@@ -134,27 +128,26 @@ export default function UsersPage() {
     e.preventDefault();
     if (!selectedUser) return;
     setProcessing(true);
-    setStatus(null);
-
+    
     try {
       const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
-        method: 'PATCH', // or PUT depending on your backend
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm),
       });
-
-      if (!res.ok) throw new Error('Failed to update profile');
+      if (!res.ok) throw new Error('Update failed');
       
-      setStatus({ type: 'success', text: 'Profile updated successfully!' });
-      fetchUsers(); // Refresh list
+      setStatus({ type: 'success', text: 'Profile updated!' });
+      // Refresh both list and modal
+      fetchUsers();
     } catch (error) {
-      setStatus({ type: 'error', text: 'Update failed. Check connection.' });
+      setStatus({ type: 'error', text: 'Failed to update.' });
     } finally {
       setProcessing(false);
     }
   }
 
-  // 2. Balance Update
+  // 2. Balance Update (FIXED LOGIC)
   async function handleBalanceUpdate(operation: 'add' | 'subtract') {
     if (!selectedUser || !amount) return;
     setProcessing(true);
@@ -170,24 +163,37 @@ export default function UsersPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Update failed');
 
-      // Update local view
-      const updatedBalance = data.newBalance ?? (
-         operation === 'add' 
-         ? selectedUser.portfolioBalance + parseFloat(amount) 
-         : selectedUser.portfolioBalance - parseFloat(amount)
-      );
+      // ✅ FIX: Force update the UI state immediately
+      let newBalance = selectedUser.portfolioBalance;
       
-      setSelectedUser({ ...selectedUser, portfolioBalance: updatedBalance });
-      setStatus({ type: 'success', text: `Success: ${operation === 'add' ? 'Added' : 'Deducted'} $${amount}` });
+      // If server returns the new balance, use it. 
+      if (data.newBalance !== undefined) {
+         newBalance = Number(data.newBalance);
+      } else if (data.user && data.user.portfolioBalance !== undefined) {
+         newBalance = Number(data.user.portfolioBalance);
+      } else {
+         // Fallback: Calculate locally if server didn't send back the number
+         const change = parseFloat(amount);
+         newBalance = operation === 'add' ? newBalance + change : newBalance - change;
+      }
+
+      // Update Modal State
+      setSelectedUser(prev => prev ? ({ ...prev, portfolioBalance: newBalance }) : null);
+      
+      // Update List State (so background table updates too)
+      setUsers(prevUsers => prevUsers.map(u => 
+        u.id === selectedUser.id ? { ...u, portfolioBalance: newBalance } : u
+      ));
+
+      setStatus({ type: 'success', text: `Successfully ${operation === 'add' ? 'added' : 'deducted'} $${amount}` });
       setAmount('');
-      fetchUsers();
+      
     } catch (error: any) {
       setStatus({ type: 'error', text: error.message || 'Failed' });
     } finally {
       setProcessing(false);
     }
   }
-  //updahhh
 
   // 3. Send Message
   async function handleSendMessage(e: React.FormEvent) {
@@ -201,14 +207,11 @@ export default function UsersPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: selectedUser.id, title: msgTitle, message: msgBody }),
       });
-
-      if (!res.ok) throw new Error('Failed to send');
-
-      setStatus({ type: 'success', text: 'Message sent to user.' });
-      setMsgTitle('');
-      setMsgBody('');
+      if (!res.ok) throw new Error('Failed');
+      setStatus({ type: 'success', text: 'Message sent!' });
+      setMsgTitle(''); setMsgBody('');
     } catch (error) {
-      setStatus({ type: 'error', text: 'Could not send message.' });
+      setStatus({ type: 'error', text: 'Failed to send message.' });
     } finally {
       setProcessing(false);
     }
@@ -219,17 +222,17 @@ export default function UsersPage() {
   return (
     <div className="p-6 md:p-8 space-y-6">
       
-      {/* Header & Search */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">User Management</h1>
-          <p className="text-gray-400">Manage accounts, balances, and details.</p>
+          <p className="text-gray-400">Total Users: {users.length}</p>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
           <input 
             type="text" 
-            placeholder="Search name or email..." 
+            placeholder="Search users..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-[#1a1f2e] border border-white/10 text-white rounded-xl pl-10 pr-4 py-3 w-full md:w-80 focus:outline-none focus:border-blue-500 transition-colors"
@@ -237,7 +240,7 @@ export default function UsersPage() {
         </div>
       </div>
       
-      {/* User Table */}
+      {/* Table */}
       <div className="bg-[#1a1f2e] border border-white/10 rounded-2xl overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -252,7 +255,7 @@ export default function UsersPage() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-white/5 transition-colors group">
+                <tr key={user.id} className="hover:bg-white/5 transition-colors">
                   <td className="p-4 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
                       {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
@@ -270,7 +273,7 @@ export default function UsersPage() {
                   <td className="p-4 text-white font-mono">${user.portfolioBalance?.toLocaleString()}</td>
                   <td className="p-4 text-gray-300 capitalize">{user.role}</td>
                   <td className="p-4 text-right">
-                    <button onClick={() => openUserModal(user)} className="text-blue-400 hover:text-white hover:bg-blue-600/20 px-3 py-1.5 rounded-lg transition-all text-sm font-medium">
+                    <button onClick={() => openUserModal(user)} className="text-blue-400 hover:bg-blue-600/20 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">
                       Manage
                     </button>
                   </td>
@@ -281,12 +284,12 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* MASTER MODAL */}
+      {/* MODAL */}
       {selectedUser && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
           <div className="bg-[#1a1f2e] border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[600px] md:h-[550px]">
             
-            {/* Sidebar Tabs */}
+            {/* Sidebar */}
             <div className="w-full md:w-1/3 bg-[#0b1221] p-4 flex flex-col gap-2 border-r border-white/10">
               <div className="mb-6 pt-2 text-center md:text-left">
                 <div className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-2xl mb-3 shadow-lg mx-auto md:mx-0">
@@ -296,22 +299,20 @@ export default function UsersPage() {
                 <p className="text-xs text-gray-400 truncate">{selectedUser.email}</p>
               </div>
               
-              <button onClick={() => setActiveTab('details')} className={`w-full p-3 rounded-xl text-left text-sm font-medium transition-colors flex items-center gap-3 ${activeTab === 'details' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}>
+              <button onClick={() => setActiveTab('details')} className={`w-full p-3 rounded-xl text-left text-sm font-medium flex gap-3 ${activeTab === 'details' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}>
                 <User size={18} /> Edit Profile
               </button>
-              <button onClick={() => setActiveTab('wallet')} className={`w-full p-3 rounded-xl text-left text-sm font-medium transition-colors flex items-center gap-3 ${activeTab === 'wallet' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}>
+              <button onClick={() => setActiveTab('wallet')} className={`w-full p-3 rounded-xl text-left text-sm font-medium flex gap-3 ${activeTab === 'wallet' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}>
                 <Wallet size={18} /> Wallet Balance
               </button>
-              <button onClick={() => setActiveTab('message')} className={`w-full p-3 rounded-xl text-left text-sm font-medium transition-colors flex items-center gap-3 ${activeTab === 'message' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}>
+              <button onClick={() => setActiveTab('message')} className={`w-full p-3 rounded-xl text-left text-sm font-medium flex gap-3 ${activeTab === 'message' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}>
                 <MessageSquare size={18} /> Send Message
               </button>
             </div>
 
-            {/* Main Content Area */}
+            {/* Content */}
             <div className="flex-1 p-6 relative bg-[#1a1f2e] overflow-y-auto">
-              <button onClick={() => setSelectedUser(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white p-1">
-                <X size={24} />
-              </button>
+              <button onClick={() => setSelectedUser(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white p-1"><X size={24} /></button>
 
               {status && (
                 <div className={`mb-6 p-4 rounded-xl text-sm font-medium flex items-center gap-3 border ${status.type === 'success' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
@@ -320,52 +321,49 @@ export default function UsersPage() {
                 </div>
               )}
 
-              {/* TAB 1: EDIT DETAILS (Now Matches Screenshot) */}
+              {/* EDIT DETAILS */}
               {activeTab === 'details' && (
                 <form onSubmit={handleUpdateProfile} className="space-y-4 pt-2">
                   <h3 className="text-xl font-bold text-white border-b border-white/10 pb-4">Edit User Details</h3>
-                  
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                        <label className="text-xs text-gray-400 uppercase font-bold">Full Name</label>
-                       <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full bg-[#0b1221] border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none" />
+                       <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full bg-[#0b1221] border border-white/10 rounded-lg p-3 text-white outline-none focus:border-blue-500" />
                     </div>
                     <div className="space-y-1">
                        <label className="text-xs text-gray-400 uppercase font-bold">Email</label>
-                       <input type="email" value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} className="w-full bg-[#0b1221] border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none" />
+                       <input type="email" value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} className="w-full bg-[#0b1221] border border-white/10 rounded-lg p-3 text-white outline-none focus:border-blue-500" />
                     </div>
                     <div className="space-y-1">
                        <label className="text-xs text-gray-400 uppercase font-bold">Phone</label>
-                       <input type="text" value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} placeholder="+1 234..." className="w-full bg-[#0b1221] border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none" />
+                       <input type="text" value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="w-full bg-[#0b1221] border border-white/10 rounded-lg p-3 text-white outline-none focus:border-blue-500" />
                     </div>
                     <div className="space-y-1">
                        <label className="text-xs text-gray-400 uppercase font-bold">Country</label>
-                       <input type="text" value={editForm.country} onChange={e => setEditForm({...editForm, country: e.target.value})} placeholder="USA" className="w-full bg-[#0b1221] border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none" />
+                       <input type="text" value={editForm.country} onChange={e => setEditForm({...editForm, country: e.target.value})} className="w-full bg-[#0b1221] border border-white/10 rounded-lg p-3 text-white outline-none focus:border-blue-500" />
                     </div>
                     <div className="space-y-1">
-                       <label className="text-xs text-gray-400 uppercase font-bold">Account Status</label>
-                       <select value={editForm.status} onChange={e => setEditForm({...editForm, status: e.target.value})} className="w-full bg-[#0b1221] border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none">
+                       <label className="text-xs text-gray-400 uppercase font-bold">Status</label>
+                       <select value={editForm.status} onChange={e => setEditForm({...editForm, status: e.target.value})} className="w-full bg-[#0b1221] border border-white/10 rounded-lg p-3 text-white outline-none focus:border-blue-500">
                           <option value="active">Active</option>
                           <option value="suspended">Suspended</option>
-                          <option value="banned">Banned</option>
                        </select>
                     </div>
                     <div className="space-y-1">
-                       <label className="text-xs text-gray-400 uppercase font-bold">KYC Status</label>
-                       <select value={editForm.verified ? 'true' : 'false'} onChange={e => setEditForm({...editForm, verified: e.target.value === 'true'})} className="w-full bg-[#0b1221] border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none">
+                       <label className="text-xs text-gray-400 uppercase font-bold">KYC</label>
+                       <select value={editForm.verified ? 'true' : 'false'} onChange={e => setEditForm({...editForm, verified: e.target.value === 'true'})} className="w-full bg-[#0b1221] border border-white/10 rounded-lg p-3 text-white outline-none focus:border-blue-500">
                           <option value="true">Verified</option>
                           <option value="false">Unverified</option>
                        </select>
                     </div>
                   </div>
-
-                  <button type="submit" disabled={processing} className="w-full mt-4 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-white transition-all flex justify-center items-center gap-2">
+                  <button type="submit" disabled={processing} className="w-full mt-4 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-white flex justify-center items-center gap-2">
                     {processing ? <Loader2 className="animate-spin w-4 h-4"/> : <><Save size={18} /> Save Changes</>}
                   </button>
                 </form>
               )}
 
-              {/* TAB 2: WALLET */}
+              {/* WALLET */}
               {activeTab === 'wallet' && (
                 <div className="space-y-6 pt-2">
                   <h3 className="text-xl font-bold text-white border-b border-white/10 pb-4">Manage Funds</h3>
@@ -377,7 +375,7 @@ export default function UsersPage() {
                      </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-300">Amount to Adjust</label>
+                    <label className="text-sm font-medium text-gray-300">Amount</label>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                       <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="w-full bg-[#0b1221] border border-white/10 rounded-xl py-3 pl-8 pr-4 text-white text-lg font-mono outline-none focus:border-blue-500" />
@@ -390,7 +388,7 @@ export default function UsersPage() {
                 </div>
               )}
 
-              {/* TAB 3: MESSAGES */}
+              {/* MESSAGE */}
               {activeTab === 'message' && (
                 <form onSubmit={handleSendMessage} className="space-y-4 pt-2">
                   <h3 className="text-xl font-bold text-white border-b border-white/10 pb-4">Send Notification</h3>
