@@ -12,16 +12,13 @@ import {
   Settings, 
   LogOut, 
   Menu, 
-  X,
-  ChevronLeft,
-  ChevronRight
+  X
 } from 'lucide-react';
 import Logo from '../../components/Logo';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false); // State for Desktop Collapse
   const [userData, setUserData] = useState({
     name: 'User',
     balance: 0,
@@ -77,7 +74,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="min-h-screen bg-[#0b1221] text-white">
+    <div className="min-h-screen bg-[#0b1221] text-white flex">
       
       {/* 1. MOBILE OVERLAY */}
       {isMobileMenuOpen && (
@@ -87,25 +84,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         />
       )}
 
-      {/* 2. SIDEBAR */}
+      {/* 2. SIDEBAR (Fixed Width 64 - Stable) */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 bg-[#1a1f2e] border-r border-white/10 
-        transform transition-all duration-300 ease-in-out flex flex-col
+        fixed inset-y-0 left-0 z-50 w-64 bg-[#1a1f2e] border-r border-white/10 
+        transform transition-transform duration-300 ease-in-out flex flex-col
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:translate-x-0 
-        ${isCollapsed ? 'w-20' : 'w-64'} 
+        md:translate-x-0
       `}>
         {/* Sidebar Header */}
-        <div className="h-20 flex items-center justify-between px-6 border-b border-white/10 shrink-0">
-          
-          {/* Logo - Hides text when collapsed */}
-          <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 overflow-hidden">
-             {/* We use a simple div for the logo in collapsed mode to avoid layout breaks */}
-             <div className="min-w-[32px]">
-               <Logo className={isCollapsed ? "w-8 h-8" : "w-8 h-8"} />
-             </div>
+        <div className="h-24 flex items-center justify-between px-6 border-b border-white/10 shrink-0">
+          <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+             <Logo />
           </Link>
-
           <button 
             onClick={() => setIsMobileMenuOpen(false)} 
             className="md:hidden text-gray-400 hover:text-white"
@@ -115,7 +105,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         
         {/* Navigation Links */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto overflow-x-hidden">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -123,76 +113,42 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 key={item.name}
                 href={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                title={isCollapsed ? item.name : ''} // Tooltip on hover when collapsed
                 className={`
-                  flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium whitespace-nowrap
+                  flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium
                   ${isActive 
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
                     : 'text-gray-400 hover:bg-white/5 hover:text-white'}
-                  ${isCollapsed ? 'justify-center px-2' : ''}
                 `}
               >
                 <item.icon size={20} className="shrink-0" />
-                
-                {/* Text Label - Hidden when collapsed */}
-                <span className={`transition-opacity duration-200 ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100'}`}>
-                  {item.name}
-                </span>
+                <span>{item.name}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Desktop Collapse Toggle Button */}
-        <div className="hidden md:flex justify-center p-2 border-t border-white/5">
-            <button 
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-2 bg-[#0b1221] rounded-lg text-gray-400 hover:text-white border border-white/10 hover:border-white/30 transition-all"
-            >
-              {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-            </button>
-        </div>
-
         {/* Logout Button */}
         <div className="p-4 border-t border-white/10 shrink-0">
           <button 
             onClick={handleLogout}
-            className={`
-              w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors font-medium whitespace-nowrap
-              ${isCollapsed ? 'justify-center px-2' : ''}
-            `}
-            title="Logout"
+            className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors font-medium"
           >
             <LogOut size={20} className="shrink-0" />
-            <span className={`transition-opacity duration-200 ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100'}`}>
-              Logout
-            </span>
+            <span>Logout</span>
           </button>
         </div>
       </aside>
 
-      
-
-      {/* 3. MAIN CONTENT WRAPPER */}
-      {/* FIX: Always keep padding at 'pl-20' so content never squishes. */}
-      <div className="flex flex-col min-h-screen md:pl-20 transition-all duration-300 ease-in-out">
+      {/* 3. MAIN CONTENT (Pushed Right by 64) */}
+      <div className="flex-1 flex flex-col min-w-0 md:pl-64 transition-all duration-300">
         
         {/* Header */}
-        <header className="h-20 border-b border-white/5 bg-[#0b1221] flex items-center justify-between px-6 shrink-0 sticky top-0 z-30">
+        <header className="h-24 border-b border-white/5 bg-[#0b1221] flex items-center justify-between px-6 shrink-0 sticky top-0 z-30">
           
           <div className="flex items-center gap-4">
-            {/* Mobile Toggle */}
             <button 
               className="md:hidden p-2 text-gray-400 hover:text-white"
               onClick={() => setIsMobileMenuOpen(true)}
-            >
-              <Menu size={24} />
-            </button>
-
-            {/* Desktop Toggle (Hamburger) */}
-            <button 
-              className="hidden md:block p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-              onClick={() => setIsCollapsed(!isCollapsed)}
             >
               <Menu size={24} />
             </button>
@@ -200,8 +156,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* Right Side: Balance & Profile */}
           <div className="flex items-center gap-6">
-            
-            {/* Balance Widget */}
             <div className="hidden md:flex items-center gap-4 bg-[#1a1f2e] border border-white/10 px-4 py-2 rounded-xl">
               <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
                 <Wallet size={18} />
@@ -214,12 +168,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             </div>
 
-            {/* Profile Info */}
             <div className="flex items-center gap-3 pl-6 border-l border-white/5">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-bold text-white leading-none mb-1">{userData.name}</p>
                 <p className={`text-xs font-medium ${userData.verified ? 'text-green-400' : 'text-yellow-400'}`}>
-                  {userData.verified ? 'Verified Account' : 'Unverified'}
+                  {userData.verified ? 'Verified' : 'Unverified'}
                 </p>
               </div>
               <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-900/20">
