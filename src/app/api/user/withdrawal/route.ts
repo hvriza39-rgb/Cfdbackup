@@ -8,13 +8,13 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { amount, address, network, email } = body; // 👈 Now receiving Email
+    const { amount, address, network, email } = body; 
 
     if (!amount || !address || !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // ✅ FIX: Find the SPECIFIC user by email
+    // ✅ FIX: Find the user by the specific EMAIL sent from frontend
     const user = await prisma.user.findUnique({
       where: { email: email }
     });
@@ -23,19 +23,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Check Funds
     const withdrawAmount = parseFloat(amount);
     const currentBalance = Number(user.portfolioBalance) || 0;
-
-    // Debug Log (Optional - view in terminal)
-    console.log(`Processing withdraw for: ${email}`);
-    console.log(`Current Balance: ${currentBalance}, Request: ${withdrawAmount}`);
 
     if (currentBalance < withdrawAmount) {
       return NextResponse.json({ error: 'Insufficient funds' }, { status: 400 });
     }
 
-    // Create Transaction
+    // Create Transaction Record
     const transaction = await prisma.transaction.create({
       data: {
         userId: user.id,

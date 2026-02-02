@@ -1,43 +1,49 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { verify } from 'jsonwebtoken'; // You might need to install: npm install jsonwebtoken @types/jsonwebtoken
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 const prisma = globalForPrisma.prisma || new PrismaClient();
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
+const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key'; // Ensure this matches your login secret
+
 export async function GET(req: Request) {
   try {
     const authHeader = req.headers.get('authorization');
-    if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!authHeader) {
+        return NextResponse.json({ error: 'No token provided' }, { status: 401 });
+    }
 
-    // In a real app, verify token here. For demo, we get the first user.
-    // If you are using JWT, decode it to get the userId.
-    
-    // NOTE: To make this dynamic for the logged-in user, we assume the token IS the email 
-    // or we fetch the user by the email stored in the token. 
-    // Since we are simulating auth, let's find the user by the common email '2@3.3' or just the first user.
-    
-    // For a robust fix, let's just get the First User for now (like previous steps)
-    // OR if you are sending email in headers, use that.
-    const user = await prisma.user.findFirst(); 
+    const token = authHeader.split(' ')[1]; // Remove "Bearer "
+    let decoded: any;
+
+    try {
+        decoded = verify(token, SECRET_KEY);
+    } catch (err) {
+        return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    // Now we use the ID/Email from the token to find the REAL user
+    const user = await prisma.user.findUnique({
+      where: { email: decoded.email } // Assumes your token stores 'email'
+    });
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // ✅ FETCH RECENT TRANSACTIONS
+    // Fetch user's specific transactions
     const recentTransactions = await prisma.transaction.findMany({
       where: { userId: user.id },
-      take: 5,                  // Limit to 5
-      orderBy: { createdAt: 'desc' } // Newest first
+      take: 5,
+      orderBy: { createdAt: 'desc' }
     });
 
-    return NextResponse.json({ 
-      user, 
-      transactions: recentTransactions 
-    });
+    return NextResponse.json({ user, transactions: recentTransactions });
 
   } catch (error) {
+    console.error("Dashboard Error:", error);
     return NextResponse.json({ error: 'Server Error' }, { status: 500 });
   }
 }
