@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link'; // 👈 Added this import
 import { 
   ArrowUpRight, 
   ArrowDownLeft, 
@@ -29,7 +30,7 @@ export default function DashboardPage() {
         if (res.ok) {
           const data = await res.json();
           setUser(data.user);
-          setTransactions(data.transactions || []); // ✅ Load Real Transactions
+          setTransactions(data.transactions || []);
         }
       } catch (error) {
         console.error("Dashboard Load Error", error);
@@ -56,7 +57,8 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Balance Card */}
+        
+        {/* ✅ FIXED: Balance Card with Working Links */}
         <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 shadow-xl text-white relative overflow-hidden">
           <div className="relative z-10">
             <p className="text-blue-100 font-medium mb-1">Total Balance</p>
@@ -64,12 +66,21 @@ export default function DashboardPage() {
               ${user?.portfolioBalance?.toLocaleString() || '0.00'}
             </h2>
             <div className="flex gap-3">
-              <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-bold transition-all backdrop-blur-sm">
+              {/* Deposit Button */}
+              <Link 
+                href="/deposit" 
+                className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-bold transition-all backdrop-blur-sm text-center inline-block"
+              >
                 Deposit
-              </button>
-              <button className="bg-black/20 hover:bg-black/30 px-4 py-2 rounded-lg text-sm font-bold transition-all backdrop-blur-sm">
+              </Link>
+              
+              {/* Withdraw Button */}
+              <Link 
+                href="/withdrawal" 
+                className="bg-black/20 hover:bg-black/30 px-4 py-2 rounded-lg text-sm font-bold transition-all backdrop-blur-sm text-center inline-block"
+              >
                 Withdraw
-              </button>
+              </Link>
             </div>
           </div>
           <Wallet className="absolute -bottom-4 -right-4 text-white/10 w-32 h-32" />
@@ -100,7 +111,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* RECENT TRANSACTIONS (REAL DATA) */}
+      {/* RECENT TRANSACTIONS */}
       <div className="bg-[#1a1f2e] border border-white/10 rounded-2xl p-6 shadow-xl">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-bold text-white">Recent Transactions</h3>
