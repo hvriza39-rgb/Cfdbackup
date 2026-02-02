@@ -58,19 +58,19 @@ export default function WithdrawalPage() {
         return;
       }
 
-      // ✅ FIX: Convert amount to Number (parseFloat) so the server doesn't crash
+      // Convert amount to Number
       const numericAmount = parseFloat(amount);
       if (isNaN(numericAmount) || numericAmount <= 0) {
         throw new Error('Please enter a valid amount.');
       }
 
-      const res = await fetch('/api/user/withdraw', {
+      // ✅ FIXED: Added 'al' to match the folder 'src/app/api/user/withdrawal'
+      const res = await fetch('/api/user/withdrawal', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        // Sending 'numericAmount' ensures the backend receives a Number
         body: JSON.stringify({ amount: numericAmount, network, address }),
       });
 
