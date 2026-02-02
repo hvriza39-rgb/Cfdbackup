@@ -5,6 +5,7 @@ import { ArrowRightLeft, Wallet, AlertCircle, Loader2, CheckCircle, XCircle } fr
 
 export default function WithdrawalPage() {
   const [balance, setBalance] = useState(0);
+  const [userEmail, setUserEmail] = useState(''); // 👈 New State for Email
   const [loadingBalance, setLoadingBalance] = useState(true);
   
   // Form State
@@ -17,9 +18,9 @@ export default function WithdrawalPage() {
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
 
-  // 1. Fetch Real User Balance
+  // 1. Fetch User Data (Balance AND Email)
   useEffect(() => {
-    const fetchBalance = async () => {
+    const fetchUserData = async () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -32,15 +33,16 @@ export default function WithdrawalPage() {
         if (res.ok) {
           const data = await res.json();
           setBalance(Number(data.user.portfolioBalance) || 0);
+          setUserEmail(data.user.email); // 👈 Store the email
         }
       } catch (error) {
-        console.error("Failed to load balance", error);
+        console.error("Failed to load user data", error);
       } finally {
         setLoadingBalance(false);
       }
     };
 
-    fetchBalance();
+    fetchUserData();
   }, []);
 
   const handleWithdraw = async (e: React.FormEvent) => {
@@ -51,30 +53,33 @@ export default function WithdrawalPage() {
 
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
+      if (!token || !userEmail) { // 👈 Check for email
         setIsError(true);
-        setMessage('You are not logged in.');
+        setMessage('Session invalid. Please refresh or login again.');
         setIsSubmitting(false);
         return;
       }
 
-      // Convert amount to Number
       const numericAmount = parseFloat(amount);
       if (isNaN(numericAmount) || numericAmount <= 0) {
         throw new Error('Please enter a valid amount.');
       }
 
-      // ✅ FIXED: Added 'al' to match the folder 'src/app/api/user/withdrawal'
       const res = await fetch('/api/user/withdrawal', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ amount: numericAmount, network, address }),
+        // 👇 Sending 'email' so backend finds the RIGHT user
+        body: JSON.stringify({ 
+            amount: numericAmount, 
+            network, 
+            address, 
+            email: userEmail 
+        }),
       });
 
-      // Handle response
       let data;
       try {
         data = await res.json();
@@ -104,16 +109,13 @@ export default function WithdrawalPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       
-      {/* Page Title */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Withdraw Funds</h1>
         <p className="text-gray-400">Transfer crypto to your external wallet securely.</p>
       </div>
 
-      {/* Main Withdrawal Card */}
       <div className="bg-[#1a1f2e] border border-white/10 rounded-2xl p-6 md:p-8 shadow-xl">
         
-        {/* Available Balance */}
         <div className="bg-[#0b1221] border border-blue-500/30 rounded-xl p-6 mb-8 flex items-center gap-4">
           <div className="p-3 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-900/40">
             <Wallet size={28} />
@@ -130,10 +132,8 @@ export default function WithdrawalPage() {
           </div>
         </div>
 
-        {/* Withdrawal Form */}
         <form onSubmit={handleWithdraw} className="space-y-6">
           
-          {/* Amount Input */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">Amount (USD)</label>
             <div className="relative">
@@ -147,7 +147,6 @@ export default function WithdrawalPage() {
                 required
               />
             </div>
-            {/* Quick Select Buttons */}
             <div className="flex gap-2">
               {[25, 50, 75, 100].map((pct) => (
                 <button
@@ -162,7 +161,6 @@ export default function WithdrawalPage() {
             </div>
           </div>
 
-          {/* Network Selection */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">Network</label>
             <select 
@@ -176,7 +174,6 @@ export default function WithdrawalPage() {
             </select>
           </div>
 
-          {/* Wallet Address Input */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">Wallet Address</label>
             <input 
@@ -189,7 +186,6 @@ export default function WithdrawalPage() {
             />
           </div>
 
-          {/* Message Area */}
           {message && (
             <div className={`p-4 rounded-xl flex items-center gap-3 ${isError ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-green-500/10 text-green-400 border border-green-500/20'}`}>
               {isError ? <XCircle size={20} /> : <CheckCircle size={20} />}
@@ -197,7 +193,6 @@ export default function WithdrawalPage() {
             </div>
           )}
 
-          {/* Warning Box */}
           <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-start gap-3">
             <AlertCircle className="text-yellow-500 shrink-0 mt-0.5" size={18} />
             <p className="text-xs text-yellow-200/80 leading-relaxed">
@@ -205,7 +200,6 @@ export default function WithdrawalPage() {
             </p>
           </div>
 
-          {/* Submit Button */}
           <button 
             type="submit"
             disabled={isSubmitting || !amount || parseFloat(amount) <= 0}

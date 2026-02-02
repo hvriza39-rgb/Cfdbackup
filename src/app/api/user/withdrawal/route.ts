@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-// 1. Safe Prisma Initialization
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 const prisma = globalForPrisma.prisma || new PrismaClient();
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
@@ -9,31 +8,34 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    // The frontend sends: { amount, address, network }
-    const { amount, address, network } = body;
+    const { amount, address, network, email } = body; // 👈 Now receiving Email
 
-    // 2. Validate Input
-    if (!amount || !address) {
+    if (!amount || !address || !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // 3. Find the User
-    // (In a real app, you would verify the token here. For now, we find the first user.)
-    const user = await prisma.user.findFirst();
+    // ✅ FIX: Find the SPECIFIC user by email
+    const user = await prisma.user.findUnique({
+      where: { email: email }
+    });
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // 4. Check Funds
+    // Check Funds
     const withdrawAmount = parseFloat(amount);
     const currentBalance = Number(user.portfolioBalance) || 0;
+
+    // Debug Log (Optional - view in terminal)
+    console.log(`Processing withdraw for: ${email}`);
+    console.log(`Current Balance: ${currentBalance}, Request: ${withdrawAmount}`);
 
     if (currentBalance < withdrawAmount) {
       return NextResponse.json({ error: 'Insufficient funds' }, { status: 400 });
     }
 
-    // 5. Create "Pending" Transaction (So Admin sees it)
+    // Create Transaction
     const transaction = await prisma.transaction.create({
       data: {
         userId: user.id,
@@ -44,7 +46,7 @@ export async function POST(req: Request) {
       }
     });
 
-    // 6. Deduct Balance Immediately
+    // Deduct Balance
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: {
