@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { compare } from 'bcryptjs'; // 👈 Import bcrypt to check passwords
+import { compare } from 'bcryptjs';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 const prisma = globalForPrisma.prisma || new PrismaClient();
@@ -9,7 +9,6 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    // 👇 We now expect 'password' in the body
     const { amount, address, network, email, password } = body; 
 
     if (!amount || !address || !email || !password) {
@@ -25,9 +24,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // 2. 🔒 VERIFY PASSWORD
-    // This compares the typed password with the hashed one in the database
-    const isPasswordValid = await compare(password, user.password);
+    // 2. 🔒 VERIFY PASSWORD (FIXED)
+    // We changed 'user.password' to 'user.hashedPassword' to match your database schema
+    const isPasswordValid = await compare(password, user.hashedPassword);
 
     if (!isPasswordValid) {
       return NextResponse.json({ error: 'Incorrect password' }, { status: 401 });
