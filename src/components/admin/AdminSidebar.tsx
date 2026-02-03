@@ -6,6 +6,7 @@ import clsx from 'clsx';
 
 const nav = [
   { href: '/admin/users', label: 'Users' },
+  { href: '/admin/messages/new', label: 'Send Message' }, // 👈 Added this button!
   { href: '/admin/transactions', label: 'Transactions' },
   { href: '/admin/settings', label: 'Settings' },
 ];

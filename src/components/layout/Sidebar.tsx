@@ -15,10 +15,12 @@ import {
   Menu,
   X,
   LogOut,
+  Mail // 👈 Added Mail Icon
 } from "lucide-react";
 
 const items = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/messages", label: "Messages", icon: Mail }, // 👈 Added Messages Button here
   { href: "/deposit", label: "Deposit", icon: Wallet },
   { href: "/withdrawal", label: "Withdrawal", icon: ArrowLeftRight },
   { href: "/trade", label: "Trade", icon: TrendingUp },
@@ -33,15 +35,9 @@ export default function Sidebar() {
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
 
   useEffect(() => setMobileOpen(false), [pathname]);
-// Inside your Sidebar component...
 
- // Inside your Sidebar component...
-
- // src/components/Sidebar.tsx
-
- const handleLogout = () => {
+  const handleLogout = () => {
     localStorage.clear();
-    // Go directly to the "Shotgun" API
     window.location.href = '/api/auth/logout';
   };
 
