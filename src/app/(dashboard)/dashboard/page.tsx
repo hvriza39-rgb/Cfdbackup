@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link'; // 👈 Added this import
+import Link from 'next/link';
 import { 
-  ArrowUpRight, 
-  ArrowDownLeft, 
   TrendingUp, 
   Wallet, 
   Activity,
-  Loader2
+  Loader2,
+  ArrowDownLeft, // Added missing imports
+  ArrowUpRight   // Added missing imports
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -58,7 +58,7 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        {/* ✅ FIXED: Balance Card with Working Links */}
+        {/* Balance Card */}
         <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 shadow-xl text-white relative overflow-hidden">
           <div className="relative z-10">
             <p className="text-blue-100 font-medium mb-1">Total Balance</p>
@@ -66,15 +66,12 @@ export default function DashboardPage() {
               ${user?.portfolioBalance?.toLocaleString() || '0.00'}
             </h2>
             <div className="flex gap-3">
-              {/* Deposit Button */}
               <Link 
                 href="/deposit" 
                 className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-bold transition-all backdrop-blur-sm text-center inline-block"
               >
                 Deposit
               </Link>
-              
-              {/* Withdraw Button */}
               <Link 
                 href="/withdrawal" 
                 className="bg-black/20 hover:bg-black/30 px-4 py-2 rounded-lg text-sm font-bold transition-all backdrop-blur-sm text-center inline-block"
@@ -86,7 +83,7 @@ export default function DashboardPage() {
           <Wallet className="absolute -bottom-4 -right-4 text-white/10 w-32 h-32" />
         </div>
 
-        {/* Profit Card */}
+        {/* Profit Card (NOW MATCHES BALANCE) */}
         <div className="bg-[#1a1f2e] border border-white/10 rounded-2xl p-6 shadow-xl">
           <div className="flex items-start justify-between mb-4">
             <div className="p-3 bg-green-500/10 rounded-xl text-green-400">
@@ -95,7 +92,10 @@ export default function DashboardPage() {
             <span className="text-green-400 text-xs font-bold bg-green-500/10 px-2 py-1 rounded-lg">+15.0%</span>
           </div>
           <p className="text-gray-400 text-sm">Total Profit</p>
-          <h3 className="text-2xl font-bold text-white mt-1">$1,240.50</h3>
+          {/* ✅ UPDATED: Uses portfolioBalance variable instead of hardcoded number */}
+          <h3 className="text-2xl font-bold text-white mt-1">
+            ${user?.portfolioBalance?.toLocaleString() || '0.00'}
+          </h3>
         </div>
 
         {/* Active Trades Card */}
