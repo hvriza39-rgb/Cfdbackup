@@ -5,21 +5,21 @@ import { useState, useEffect } from 'react';
 
 // Real Market Data (Snapshot)
 const INITIAL_COINS = [
-  { id: 'btc', sym: 'BTC / USD', price: 78710.27, change: 1.93 }, // Data from Source 1.2
-  { id: 'eth', sym: 'ETH / USD', price: 2341.12, change: 2.72 },  // Data from Source 1.2
-  { id: 'sol', sym: 'SOL / USD', price: 130.45, change: 3.50 },   // Data from Source 1.3
-  { id: 'xrp', sym: 'XRP / USD', price: 1.61, change: 2.10 },     // Data from Source 1.3
+  { id: 'btc', sym: 'BTC / USD', price: 78710.27, change: 1.93 },
+  { id: 'eth', sym: 'ETH / USD', price: 2341.12, change: 2.72 },
+  { id: 'sol', sym: 'SOL / USD', price: 130.45, change: 3.50 },
+  { id: 'xrp', sym: 'XRP / USD', price: 1.61, change: 2.10 },
 ];
 
 export default function LandingPage() {
   const [coins, setCoins] = useState(INITIAL_COINS);
 
-  // The "Heartbeat" Effect (Simulates live market movement)
+  // The "Heartbeat" Effect
   useEffect(() => {
     const interval = setInterval(() => {
       setCoins(currentCoins => 
         currentCoins.map(coin => {
-          const move = (Math.random() - 0.5) * 0.2; // Reduced volatility for realism
+          const move = (Math.random() - 0.5) * 0.2; 
           const newPrice = coin.price * (1 + move / 100);
           const newChange = coin.change + move;
 
@@ -42,8 +42,29 @@ export default function LandingPage() {
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-600/10 blur-[100px] rounded-full pointer-events-none" />
 
+      {/* ✅ NEW: Navbar / Logo Section */}
+      <nav className="relative z-50 max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
+        {/* Logo */}
+        <div className="flex items-center gap-2">
+            {/* Optional Icon */}
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/30">
+                X
+            </div>
+            <span className="text-2xl font-bold text-white tracking-tight">
+                CMX<span className="text-blue-500">TRADE</span>
+            </span>
+        </div>
+
+        {/* Optional: Top right shortcut */}
+        <div className="hidden md:block">
+            <Link href="/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                Sign In &rarr;
+            </Link>
+        </div>
+      </nav>
+
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 pt-12 lg:pt-24 pb-12 w-full relative z-10">
+      <main className="max-w-7xl mx-auto px-6 pt-8 lg:pt-16 pb-12 w-full relative z-10">
         
         {/* HERO SECTION */}
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-24">
@@ -52,12 +73,12 @@ export default function LandingPage() {
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-medium">
               <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-              Voted #1 Most Secure Platform 2025
+              Voted TOP Platform 2024
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.15]">
               Trade crypto with <br className="hidden lg:block" />
-              <span className="text-blue-500">confidence</span> on BrokerX
+              <span className="text-blue-500">confidence</span> on CMXTRADE
             </h1>
             
             <p className="text-lg text-gray-400 max-w-lg leading-relaxed">
@@ -96,7 +117,6 @@ export default function LandingPage() {
               {coins.map((coin) => {
                 const isPositive = coin.change >= 0;
                 const colorClass = isPositive ? 'text-green-400' : 'text-red-400';
-                // Dynamic background opacity based on trend
                 const bgClass = isPositive ? 'bg-green-500/10' : 'bg-red-500/10';
                 const iconBg = isPositive ? 'bg-green-500/20' : 'bg-red-500/20';
 
@@ -129,11 +149,11 @@ export default function LandingPage() {
         {/* CERTIFICATIONS SECTION */}
         <section className="border-t border-white/5 pt-12">
           <p className="text-center text-sm text-gray-500 mb-8 uppercase tracking-widest font-medium">
-            Trusted by Institutions & Regulated Globally
+            Trusted  Globally
           </p>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-items-center opacity-60">
-            {/* Cert 1: SOC 2 */}
+            {/* Cert 1 */}
             <div className="flex flex-col items-center gap-2 group hover:opacity-100 transition-opacity">
               <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-blue-500/50 transition-colors">
                 <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -143,7 +163,7 @@ export default function LandingPage() {
               <span className="text-xs font-semibold text-gray-400">SOC 2 Type II</span>
             </div>
 
-            {/* Cert 2: SSL Secured */}
+            {/* Cert 2 */}
             <div className="flex flex-col items-center gap-2 group hover:opacity-100 transition-opacity">
               <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-green-500/50 transition-colors">
                 <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -153,7 +173,7 @@ export default function LandingPage() {
               <span className="text-xs font-semibold text-gray-400">256-bit SSL</span>
             </div>
 
-            {/* Cert 3: EU Regulated */}
+            {/* Cert 3 */}
             <div className="flex flex-col items-center gap-2 group hover:opacity-100 transition-opacity">
               <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-purple-500/50 transition-colors">
                 <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -163,7 +183,7 @@ export default function LandingPage() {
               <span className="text-xs font-semibold text-gray-400">EU Regulated</span>
             </div>
 
-            {/* Cert 4: ISO Certified */}
+            {/* Cert 4 */}
             <div className="flex flex-col items-center gap-2 group hover:opacity-100 transition-opacity">
               <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-yellow-500/50 transition-colors">
                 <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
