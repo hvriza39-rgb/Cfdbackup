@@ -48,7 +48,7 @@ export default function LandingPage() {
         <div className="flex items-center gap-2">
             {/* Optional Icon */}
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/30">
-                X
+                CT
             </div>
             <span className="text-2xl font-bold text-white tracking-tight">
                 CMX<span className="text-blue-500">TRADE</span>
