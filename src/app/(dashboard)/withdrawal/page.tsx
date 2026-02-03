@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowRightLeft, Wallet, AlertCircle, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowRightLeft, Wallet, AlertCircle, Loader2, CheckCircle, XCircle, Lock } from 'lucide-react';
 
 export default function WithdrawalPage() {
   const [balance, setBalance] = useState(0);
-  const [userEmail, setUserEmail] = useState(''); // 👈 New State for Email
+  const [userEmail, setUserEmail] = useState('');
   const [loadingBalance, setLoadingBalance] = useState(true);
   
   // Form State
   const [amount, setAmount] = useState('');
   const [address, setAddress] = useState('');
+  const [password, setPassword] = useState(''); // 👈 New Password State
   const [network, setNetwork] = useState('BTC');
   
   // Status State
@@ -18,7 +19,7 @@ export default function WithdrawalPage() {
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
 
-  // 1. Fetch User Data (Balance AND Email)
+  // Fetch Data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -33,7 +34,7 @@ export default function WithdrawalPage() {
         if (res.ok) {
           const data = await res.json();
           setBalance(Number(data.user.portfolioBalance) || 0);
-          setUserEmail(data.user.email); // 👈 Store the email
+          setUserEmail(data.user.email);
         }
       } catch (error) {
         console.error("Failed to load user data", error);
@@ -53,9 +54,9 @@ export default function WithdrawalPage() {
 
     try {
       const token = localStorage.getItem('token');
-      if (!token || !userEmail) { // 👈 Check for email
+      if (!token || !userEmail) {
         setIsError(true);
-        setMessage('Session invalid. Please refresh or login again.');
+        setMessage('Session invalid. Please login again.');
         setIsSubmitting(false);
         return;
       }
@@ -64,6 +65,9 @@ export default function WithdrawalPage() {
       if (isNaN(numericAmount) || numericAmount <= 0) {
         throw new Error('Please enter a valid amount.');
       }
+      if (!password) {
+        throw new Error('Please enter your password to confirm.');
+      }
 
       const res = await fetch('/api/user/withdrawal', {
         method: 'POST',
@@ -71,26 +75,23 @@ export default function WithdrawalPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        // 👇 Sending 'email' so backend finds the RIGHT user
+        // 👇 Sending 'password' to backend
         body: JSON.stringify({ 
             amount: numericAmount, 
             network, 
             address, 
-            email: userEmail 
+            email: userEmail,
+            password: password 
         }),
       });
 
-      let data;
-      try {
-        data = await res.json();
-      } catch (err) {
-        throw new Error("Server Error: The backend crashed. Check your terminal for details.");
-      }
+      const data = await res.json();
 
       if (res.ok) {
         setBalance(data.newBalance);
         setAmount('');
         setAddress('');
+        setPassword(''); // Clear password field
         setIsError(false);
         setMessage('Withdrawal request submitted successfully!');
       } else {
@@ -98,9 +99,8 @@ export default function WithdrawalPage() {
         setMessage(data.error || 'Withdrawal failed.');
       }
     } catch (error: any) {
-      console.error("Submit Error:", error);
       setIsError(true);
-      setMessage(error.message || 'Network error. Please try again.');
+      setMessage(error.message || 'Network error.');
     } finally {
       setIsSubmitting(false);
     }
@@ -186,6 +186,24 @@ export default function WithdrawalPage() {
             />
           </div>
 
+          {/* ✅ NEW PASSWORD FIELD */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Confirm Password</label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                <Lock size={18} />
+              </span>
+              <input 
+                type="password" 
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-[#0b1221] border border-white/10 rounded-xl p-4 pl-12 text-white focus:border-blue-500 outline-none transition-all"
+                required
+              />
+            </div>
+          </div>
+
           {message && (
             <div className={`p-4 rounded-xl flex items-center gap-3 ${isError ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-green-500/10 text-green-400 border border-green-500/20'}`}>
               {isError ? <XCircle size={20} /> : <CheckCircle size={20} />}
@@ -193,16 +211,9 @@ export default function WithdrawalPage() {
             </div>
           )}
 
-          <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-start gap-3">
-            <AlertCircle className="text-yellow-500 shrink-0 mt-0.5" size={18} />
-            <p className="text-xs text-yellow-200/80 leading-relaxed">
-              Ensure the network matches your wallet address. Withdrawals are processed automatically but may take up to 24 hours for security verification.
-            </p>
-          </div>
-
           <button 
             type="submit"
-            disabled={isSubmitting || !amount || parseFloat(amount) <= 0}
+            disabled={isSubmitting || !amount || !password}
             className={`w-full font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 ${
               isSubmitting 
                 ? 'bg-blue-800 text-gray-400 cursor-not-allowed' 
