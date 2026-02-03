@@ -11,7 +11,7 @@ export default function WithdrawalPage() {
   // Form State
   const [amount, setAmount] = useState('');
   const [address, setAddress] = useState('');
-  const [password, setPassword] = useState(''); // 👈 New Password State
+  const [password, setPassword] = useState('');
   const [network, setNetwork] = useState('BTC');
   
   // Status State
@@ -19,7 +19,6 @@ export default function WithdrawalPage() {
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
 
-  // Fetch Data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -75,7 +74,6 @@ export default function WithdrawalPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        // 👇 Sending 'password' to backend
         body: JSON.stringify({ 
             amount: numericAmount, 
             network, 
@@ -91,7 +89,7 @@ export default function WithdrawalPage() {
         setBalance(data.newBalance);
         setAmount('');
         setAddress('');
-        setPassword(''); // Clear password field
+        setPassword('');
         setIsError(false);
         setMessage('Withdrawal request submitted successfully!');
       } else {
@@ -132,8 +130,15 @@ export default function WithdrawalPage() {
           </div>
         </div>
 
-        <form onSubmit={handleWithdraw} className="space-y-6">
+        {/* 🛑 BROWSER TRICK: 
+           We add autocomplete="off" to the form and invisible inputs 
+           so the browser fills THESE instead of your real fields. 
+        */}
+        <form onSubmit={handleWithdraw} className="space-y-6" autoComplete="off">
           
+          <input type="text" name="fakeusernameremembered" style={{ display: 'none' }} autoComplete="off" />
+          <input type="password" name="fakepasswordremembered" style={{ display: 'none' }} autoComplete="off" />
+
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">Amount (USD)</label>
             <div className="relative">
@@ -145,6 +150,8 @@ export default function WithdrawalPage() {
                 onChange={(e) => setAmount(e.target.value)}
                 className="w-full bg-[#0b1221] border border-white/10 rounded-xl py-4 pl-8 pr-4 text-white text-lg font-mono focus:border-blue-500 outline-none transition-all"
                 required
+                name="amount_field_no_fill"
+                autoComplete="off"
               />
             </div>
             <div className="flex gap-2">
@@ -176,8 +183,13 @@ export default function WithdrawalPage() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">Wallet Address</label>
+            {/* ✅ Added name="wallet_address_custom" and autoComplete="off"
+               This breaks the link to the email autofill
+            */}
             <input 
               type="text" 
+              name="wallet_address_custom"
+              autoComplete="off"
               placeholder="Paste your wallet address here"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
@@ -186,15 +198,19 @@ export default function WithdrawalPage() {
             />
           </div>
 
-          {/* ✅ NEW PASSWORD FIELD */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">Confirm Password</label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
                 <Lock size={18} />
               </span>
+              {/* ✅ Added autoComplete="new-password"
+                 This tells the browser: "Do not auto-fill, this is a distinct password field."
+              */}
               <input 
                 type="password" 
+                name="confirm_withdrawal_password"
+                autoComplete="new-password"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
