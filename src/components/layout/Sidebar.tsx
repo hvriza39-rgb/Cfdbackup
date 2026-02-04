@@ -15,12 +15,12 @@ import {
   Menu,
   X,
   LogOut,
-  Mail // 👈 Added Mail Icon
+  Mail // 👈 Includes Mail icon
 } from "lucide-react";
 
 const items = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/messages", label: "Messages", icon: Mail }, // 👈 Added Messages Button here
+  { href: "/messages", label: "Messages", icon: Mail }, // 👈 The Button for Users
   { href: "/deposit", label: "Deposit", icon: Wallet },
   { href: "/withdrawal", label: "Withdrawal", icon: ArrowLeftRight },
   { href: "/trade", label: "Trade", icon: TrendingUp },
@@ -145,3 +145,4 @@ export default function Sidebar() {
     </>
   );
 }
+// Force update user sidebar
