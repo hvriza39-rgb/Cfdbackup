@@ -9,6 +9,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   // Form State
   const [formData, setFormData] = useState({
@@ -31,20 +32,24 @@ export default function ProfilePage() {
 
       try {
         const res = await fetch('/api/user/profile', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'Authorization': `Bearer ${token}` },
+          cache: 'no-store'
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         
-        if (res.ok) {
+        if (res.ok && data.user) {
           setFormData({
-            name: data.name || '',
-            email: data.email || '',
-            phone: data.phone || '',
-            country: data.country || ''
+            name: data.user.name || '',
+            email: data.user.email || '',
+            phone: data.user.phone || '',
+            country: data.user.country || ''
           });
+          setError('');
+        } else {
+          setError(data.error || 'Failed to load profile.');
         }
       } catch (err) {
-        console.error(err);
+        setError('Failed to load profile.');
       } finally {
         setLoading(false); // ✅ Ensure loading stops
       }
@@ -56,6 +61,8 @@ export default function ProfilePage() {
   // 2. Handle Save
   const handleSave = async () => {
     setSaving(true);
+    setMessage('');
+    setError('');
     const token = localStorage.getItem('token');
 
     try {
@@ -72,14 +79,21 @@ export default function ProfilePage() {
         })
       });
 
-      if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.user) {
         setMessage('Success! Profile updated.');
-        setTimeout(() => window.location.reload(), 1000);
+        setFormData({
+          name: data.user.name || '',
+          email: data.user.email || '',
+          phone: data.user.phone || '',
+          country: data.user.country || ''
+        });
       } else {
-        setMessage('Failed to update.');
+        setError(data.error || 'Failed to update.');
       }
     } catch (err) {
-      setMessage('Error saving profile.');
+      setError('Error saving profile.');
     } finally {
       setSaving(false);
     }
@@ -105,6 +119,11 @@ export default function ProfilePage() {
       {message && (
         <div className={`p-4 rounded-xl ${message.includes('Success') ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
           {message}
+        </div>
+      )}
+      {error && (
+        <div className="p-4 rounded-xl bg-red-500/10 text-red-400">
+          {error}
         </div>
       )}
 

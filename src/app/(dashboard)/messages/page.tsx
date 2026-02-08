@@ -122,7 +122,7 @@ export default function MessagesPage() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-white mb-2">Messages</h1>
-        <p className="text-gray-400">Your latest updates from the admin team.</p>
+        <p className="text-gray-400">Your latest updates.</p>
       </div>
 
       <div className="bg-[#1a1f2e] border border-white/10 rounded-2xl p-6 shadow-xl">
