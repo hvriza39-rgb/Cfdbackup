@@ -8,6 +8,7 @@ import {
   Users, 
   ArrowRightLeft, 
   Settings, 
+  Mail,
   Menu, 
   X, 
   LogOut 
@@ -46,6 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+    { name: 'Messages', href: '/admin/messages', icon: Mail },
     { name: 'Transactions', href: '/admin/transactions', icon: ArrowRightLeft },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
