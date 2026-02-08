@@ -18,11 +18,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
 
-  // 1. Safety Check: Kick user out if no token is found
+  // 1. Safety Check: Kick user out if no token or non-admin
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/auth/login');
+    const rawUser = localStorage.getItem('user');
+    let role = '';
+    try {
+      role = rawUser ? JSON.parse(rawUser)?.role : '';
+    } catch {
+      role = '';
+    }
+
+    if (!token || role !== 'admin') {
+      router.push('/admin/login');
     }
   }, [router]);
 
@@ -33,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     localStorage.removeItem('user');
     
     // Force redirect to login
-    window.location.href = '/auth/login';
+    window.location.href = '/admin/login';
   };
 
   const navItems = [
