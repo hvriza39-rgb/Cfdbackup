@@ -42,9 +42,12 @@ function LoginForm() {
         throw new Error("Server error: No token received.");
       }
       
-      // 1. Save Token Securely
+      // 1. Save Token + User Info
       document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
       localStorage.setItem('token', data.token); // Backup for client-side checks
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
 
       // 2. Smart Redirect based on Role
       // If the user is an admin, send them to the users list
