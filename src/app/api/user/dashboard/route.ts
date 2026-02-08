@@ -6,6 +6,8 @@ const globalForPrisma = global as unknown as { prisma: PrismaClient };
 const prisma = globalForPrisma.prisma || new PrismaClient();
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
+export const dynamic = 'force-dynamic';
+
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key'; // Ensure this matches your login secret
 
 export async function GET(req: Request) {

@@ -19,7 +19,7 @@ export default function SecuritySettingsPage() {
       const rnd = Math.floor(Math.random() * 9000) + 1000;
       return `RC-${1000 + i}-${rnd}`;
     });
-  }, [twoFA]);
+  }, []);
 
   return (
     <div className="space-y-6">

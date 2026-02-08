@@ -9,37 +9,40 @@ datasource db {
 
 // ✅ 1. User Model
 model User {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  email            String   @unique
-  hashedPassword   String
-  name             String?
-  role             String   @default("user") // "admin" or "user"
-  phone            String?
-  country          String?
-  
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  email          String  @unique
+  hashedPassword String
+  name           String?
+  role           String  @default("user") // "admin" or "user"
+  phone          String?
+  country        String?
+
   // Balance Fields
-  portfolioBalance Float    @default(0.0)
-  availableBalance Float    @default(0.0)
-  pnl              Float    @default(0.0)
-  
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  portfolioBalance Float @default(0.0)
+  availableBalance Float @default(0.0)
+  pnl              Float @default(0.0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  transactions     Transaction[]
-  notifications    Notification[] 
-  messages         Message[]
+  transactions  Transaction[]
+  notifications Notification[]
+  messages      Message[]
 }
 
-// ✅ 2. Message Model (Only one definition now)
 model Message {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
-  user      User     @relation(fields: [userId], references: [id])
-  subject   String
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  title     String?
   body      String
-  isRead    Boolean  @default(false)
+  read      Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 // ✅ 3. Notification Model
@@ -57,15 +60,15 @@ model Notification {
 model Transaction {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
-  type      String   // "deposit" or "withdrawal"
+  type      String // "deposit" or "withdrawal"
   amount    Float
-  status    String   // "Pending", "Completed", "Failed"
-  asset     String   // "USD", "BTC", "ETH"
-  network   String?  // New field for "BTC", "ERC20", etc.
-  address   String?  // New field for the wallet address
+  status    String // "Pending", "Completed", "Failed"
+  asset     String // "USD", "BTC", "ETH"
+  network   String? // New field for "BTC", "ERC20", etc.
+  address   String? // New field for the wallet address
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 // ✅ 5. Settings Model

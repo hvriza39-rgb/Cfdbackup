@@ -9,7 +9,8 @@ import {
   ArrowRightLeft, 
   LineChart, 
   User, 
-  Settings, 
+  Settings,
+  Mail,
   LogOut, 
   Menu, 
   X
@@ -60,6 +61,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const navItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
+    { name: 'Messages', href: '/messages', icon: Mail },
     { name: 'Deposit', href: '/deposit', icon: Wallet },
     { name: 'Withdraw', href: '/withdrawal', icon: ArrowRightLeft },
     { name: 'Trade', href: '/trade', icon: LineChart },

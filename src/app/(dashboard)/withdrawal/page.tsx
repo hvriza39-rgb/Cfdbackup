@@ -60,11 +60,20 @@ export default function WithdrawalPage() {
         return;
       }
 
+      const trimmedAddress = address.trim();
+      const trimmedPassword = password.trim();
       const numericAmount = parseFloat(amount);
+
       if (isNaN(numericAmount) || numericAmount <= 0) {
-        throw new Error('Please enter a valid amount.');
+        throw new Error('Please enter a valid withdrawal amount.');
       }
-      if (!password) {
+      if (numericAmount > balance) {
+        throw new Error('Withdrawal amount exceeds your available balance.');
+      }
+      if (!trimmedAddress) {
+        throw new Error('Please enter your wallet address.');
+      }
+      if (!trimmedPassword) {
         throw new Error('Please enter your password to confirm.');
       }
 
@@ -77,9 +86,9 @@ export default function WithdrawalPage() {
         body: JSON.stringify({ 
             amount: numericAmount, 
             network, 
-            address, 
+            address: trimmedAddress, 
             email: userEmail,
-            password: password 
+            password: trimmedPassword 
         }),
       });
 

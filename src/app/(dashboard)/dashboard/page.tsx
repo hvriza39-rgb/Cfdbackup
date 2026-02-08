@@ -51,7 +51,7 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Welcome back, {user?.name || 'Trader'}</h1>
-          <p className="text-gray-400">Here's what's happening with your portfolio today.</p>
+          <p className="text-gray-400">Here&apos;s what&apos;s happening with your portfolio today.</p>
         </div>
       </div>
 

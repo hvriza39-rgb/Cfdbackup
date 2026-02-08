@@ -86,7 +86,7 @@ export default function AdminUsersPage() {
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-500">No users found matching "{search}"</td>
+                  <td colSpan={5} className="p-8 text-center text-gray-500">No users found matching &quot;{search}&quot;</td>
                 </tr>
               ) : (
                 filteredUsers.map((user: any) => (

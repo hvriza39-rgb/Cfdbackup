@@ -46,9 +46,19 @@ export default function ComposeMessagePage() {
     setStatus(null);
 
     try {
-      const res = await fetch('/api/admin/messages/send', {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setStatus({ type: 'error', text: 'Session expired. Please log in again.' });
+        setIsSending(false);
+        return;
+      }
+
+      const res = await fetch('/api/admin/messages', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
             userId: selectedUserId,
             subject,
@@ -56,13 +66,15 @@ export default function ComposeMessagePage() {
         }),
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (res.ok) {
         setStatus({ type: 'success', text: 'Message sent successfully!' });
         setSubject('');
         setBody('');
         setSelectedUserId(''); // Reset selection
       } else {
-        throw new Error('Failed to send');
+        throw new Error(data.error || 'Failed to send');
       }
     } catch (error) {
       setStatus({ type: 'error', text: 'Server error. Could not send message.' });
@@ -77,7 +89,7 @@ export default function ComposeMessagePage() {
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-white mb-2">Compose Message</h1>
-        <p className="text-gray-400">Send secure notifications directly to a user's dashboard.</p>
+        <p className="text-gray-400">Send secure notifications directly to a user&apos;s dashboard.</p>
       </div>
 
       <div className="bg-[#1a1f2e] border border-white/10 rounded-2xl p-6 md:p-8 shadow-xl">
