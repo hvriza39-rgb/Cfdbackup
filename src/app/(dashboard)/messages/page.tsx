@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { CheckCircle, Loader2, Mail } from 'lucide-react';
+import { CheckCircle, ChevronDown, Loader2, Mail } from 'lucide-react';
 
 type Message = {
   id: string;
@@ -15,6 +15,7 @@ export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const inFlightRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -108,6 +109,15 @@ export default function MessagesPage() {
     }
   };
 
+  const handleToggle = (msg: Message) => {
+    const isOpen = expandedId === msg.id;
+    setExpandedId(isOpen ? null : msg.id);
+
+    if (!isOpen && msg.read === false) {
+      markAsRead(msg.id);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
@@ -135,19 +145,22 @@ export default function MessagesPage() {
           <div className="space-y-4">
             {messages.map((msg) => {
               const isRead = msg.read === true;
+              const isOpen = expandedId === msg.id;
               return (
                 <div
                   key={msg.id}
-                  className={`border rounded-xl p-4 transition-colors cursor-pointer ${
+                  className={`border rounded-xl transition-colors ${
                     isRead
                       ? 'border-white/10 bg-[#0b1221]'
                       : 'border-blue-500/40 bg-blue-500/5'
                   }`}
-                  onClick={() => {
-                    if (!isRead) markAsRead(msg.id);
-                  }}
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <button
+                    type="button"
+                    onClick={() => handleToggle(msg)}
+                    className="w-full text-left p-4 flex items-start justify-between gap-4"
+                    aria-expanded={isOpen}
+                  >
                     <div className="flex items-center gap-2">
                       <Mail size={16} className={isRead ? 'text-gray-500' : 'text-blue-400'} />
                       <h3 className={`font-semibold ${isRead ? 'text-white' : 'text-blue-100'}`}>
@@ -161,9 +174,19 @@ export default function MessagesPage() {
                         </span>
                       )}
                       <span>{new Date(msg.createdAt).toLocaleString()}</span>
+                      <ChevronDown
+                        size={16}
+                        className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                      />
                     </div>
+                  </button>
+                  <div
+                    className={`px-4 pb-4 overflow-hidden transition-all duration-200 ${
+                      isOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
+                    }`}
+                  >
+                    <p className="text-gray-300 text-sm leading-relaxed">{msg.body}</p>
                   </div>
-                  <p className="text-gray-300 text-sm mt-2 leading-relaxed">{msg.body}</p>
                 </div>
               );
             })}
