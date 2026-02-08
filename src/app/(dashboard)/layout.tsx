@@ -26,6 +26,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     verified: false,
     initial: 'U'
   });
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // 1. Fetch User Data
   useEffect(() => {
@@ -58,6 +59,45 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     fetchUserData();
   }, [pathname]);
+
+  useEffect(() => {
+    let mounted = true;
+    let interval: NodeJS.Timeout | null = null;
+
+    const fetchUnreadCount = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const res = await fetch('/api/user/messages/unread-count', {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store',
+        });
+
+        if (!res.ok) return;
+        const data = await res.json().catch(() => ({}));
+        if (mounted && typeof data?.count === 'number') {
+          setUnreadCount(data.count);
+        }
+      } catch {
+        // Ignore errors to avoid blocking UI.
+      }
+    };
+
+    const handleRefresh = () => {
+      fetchUnreadCount();
+    };
+
+    fetchUnreadCount();
+    interval = setInterval(fetchUnreadCount, 30000);
+    window.addEventListener('messages:unread-refresh', handleRefresh);
+
+    return () => {
+      mounted = false;
+      if (interval) clearInterval(interval);
+      window.removeEventListener('messages:unread-refresh', handleRefresh);
+    };
+  }, []);
 
   const navItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
@@ -123,7 +163,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 `}
               >
                 <item.icon size={20} className="shrink-0" />
-                <span>{item.name}</span>
+                <span className="flex items-center gap-2">
+                  {item.name}
+                  {item.href === '/messages' && unreadCount > 0 && (
+                    <span className="inline-flex items-center rounded-full bg-red-500 text-white text-[10px] font-bold px-2 py-0.5">
+                      {unreadCount}
+                    </span>
+                  )}
+                </span>
               </Link>
             );
           })}

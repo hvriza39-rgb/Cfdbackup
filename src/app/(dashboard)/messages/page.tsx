@@ -102,6 +102,7 @@ export default function MessagesPage() {
       setMessages((prev) =>
         prev.map((msg) => (msg.id === id ? { ...msg, read: true } : msg)),
       );
+      window.dispatchEvent(new Event('messages:unread-refresh'));
     } catch (err) {
       setError('Network error. Please try again.');
     }
