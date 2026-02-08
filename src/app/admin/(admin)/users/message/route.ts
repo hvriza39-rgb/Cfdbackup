@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../../../../lib/prisma'; // ✅ Fixed Import
+import { prisma } from '../../../../../lib/prisma'; // ✅ Fixed Import
 
 export async function POST(req: Request) {
   try {

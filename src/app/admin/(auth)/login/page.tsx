@@ -2,10 +2,10 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, Suspense } from 'react';
-import Button from '../../../components/ui/Button';
-import Card from '../../../components/ui/Card';
-import Input from '../../../components/ui/Input';
-import InlineAlert from '../../../components/ui/InlineAlert';
+import Button from '../../../../components/ui/Button';
+import Card from '../../../../components/ui/Card';
+import Input from '../../../../components/ui/Input';
+import InlineAlert from '../../../../components/ui/InlineAlert';
 
 function LoginForm() {
   const router = useRouter();
