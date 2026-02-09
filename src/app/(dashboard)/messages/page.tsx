@@ -146,6 +146,10 @@ export default function MessagesPage() {
             {messages.map((msg) => {
               const isRead = msg.read === true;
               const isOpen = expandedId === msg.id;
+              const paragraphs = msg.body
+                .split(/\n\s*\n/)
+                .map((paragraph) => paragraph.trim())
+                .filter(Boolean);
               return (
                 <div
                   key={msg.id}
@@ -185,7 +189,13 @@ export default function MessagesPage() {
                       isOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
                     }`}
                   >
-                    <p className="text-gray-300 text-sm leading-relaxed">{msg.body}</p>
+                    <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words space-y-3">
+                      {paragraphs.map((paragraph, index) => (
+                        <p key={`${msg.id}-paragraph-${index}`} className="whitespace-pre-wrap break-words">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
                   </div>
                 </div>
               );
