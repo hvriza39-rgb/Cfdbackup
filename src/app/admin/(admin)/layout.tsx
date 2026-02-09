@@ -8,6 +8,7 @@ import {
   Users, 
   ArrowRightLeft, 
   Settings, 
+  ShieldCheck,
   Mail,
   Menu, 
   X, 
@@ -18,6 +19,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+
+  const handleSessionExpired = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    document.cookie = 'token=; Max-Age=0; path=/';
+    window.location.href = '/admin/login';
+  };
+
+  const decodeToken = (token: string) => {
+    try {
+      const payload = token.split('.')[1];
+      if (!payload) return null;
+      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const json = JSON.parse(atob(normalized));
+      return json;
+    } catch {
+      return null;
+    }
+  };
 
   // 1. Safety Check: Kick user out if no token or non-admin
   useEffect(() => {
@@ -35,6 +55,38 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [router]);
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const payload = decodeToken(token);
+      if (payload?.exp) {
+        const expiresAt = payload.exp * 1000;
+        const remaining = expiresAt - Date.now();
+        if (remaining <= 0) {
+          handleSessionExpired();
+        } else {
+          const timeout = setTimeout(handleSessionExpired, remaining);
+          return () => clearTimeout(timeout);
+        }
+      }
+    }
+    return undefined;
+  }, []);
+
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const res = await originalFetch(...args);
+      if (res.status === 401) {
+        handleSessionExpired();
+      }
+      return res;
+    };
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
+
   // 2. THE FIX: Actual Logout Logic
   const handleLogout = () => {
     // Destroy the keys
@@ -49,6 +101,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Messages', href: '/admin/messages', icon: Mail },
     { name: 'Transactions', href: '/admin/transactions', icon: ArrowRightLeft },
+    { name: 'KYC', href: '/admin/kyc', icon: ShieldCheck },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];

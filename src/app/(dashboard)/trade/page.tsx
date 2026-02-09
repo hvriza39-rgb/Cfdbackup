@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ArrowUp, ArrowDown, Wallet, Loader2 } from 'lucide-react';
 import { Toaster, toast } from 'react-hot-toast';
 
 export default function TradePage() {
   const [asset, setAsset] = useState('BTCUSD'); 
-  const [price, setPrice] = useState(0); 
+  const [price, setPrice] = useState<number | null>(null); 
+  const [priceLoading, setPriceLoading] = useState(false);
+  const [priceError, setPriceError] = useState('');
   const [amount, setAmount] = useState('');
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -15,6 +17,12 @@ export default function TradePage() {
   // Order Book Data
   const [bids, setBids] = useState<any[]>([]);
   const [asks, setAsks] = useState<any[]>([]);
+
+  const baseSymbol = useMemo(() => asset.replace('USD', ''), [asset]);
+  const priceFormatter = useMemo(
+    () => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }),
+    [],
+  );
 
   // 1. Fetch User Balance
   const fetchBalance = async () => {
@@ -33,45 +41,53 @@ export default function TradePage() {
   useEffect(() => {
     const fetchPrice = async () => {
       try {
-        const symbol = asset === 'BTCUSD' ? 'BTCUSDT' : 
-                       asset === 'ETHUSD' ? 'ETHUSDT' : 
-                       asset === 'SOLUSD' ? 'SOLUSDT' : 'BTCUSDT';
-        
-        // FIX: Removed invalid options. Simple fetch to our own API.
-        const res = await fetch(`/api/price?symbol=${symbol}`);
-        const data = await res.json();
-        
-        if (data.price) {
-          const currentPrice = parseFloat(data.price);
-          setPrice(currentPrice);
+        setPriceLoading(true);
+        setPriceError('');
 
-          // Generate simulated order book
-          const spread = currentPrice * 0.0005; 
-          
-          setAsks(Array.from({ length: 5 }, (_, i) => ({ 
-            price: (currentPrice + (i + 1) * spread).toFixed(2), 
-            amount: (Math.random() * 1.5).toFixed(4) 
-          })).reverse());
-
-          setBids(Array.from({ length: 5 }, (_, i) => ({ 
-            price: (currentPrice - (i + 1) * spread).toFixed(2), 
-            amount: (Math.random() * 1.5).toFixed(4) 
-          })));
+        const res = await fetch(`/api/price?symbol=${baseSymbol}`);
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error || 'Price unavailable');
         }
+
+        const data = await res.json();
+        if (typeof data?.price !== 'number') throw new Error('Invalid price response');
+
+        const currentPrice = data.price;
+        setPrice(currentPrice);
+
+        // Generate simulated order book
+        const spread = currentPrice * 0.0005; 
+        
+        setAsks(Array.from({ length: 5 }, (_, i) => ({ 
+          price: (currentPrice + (i + 1) * spread).toFixed(2), 
+          amount: (Math.random() * 1.5).toFixed(4) 
+        })).reverse());
+
+        setBids(Array.from({ length: 5 }, (_, i) => ({ 
+          price: (currentPrice - (i + 1) * spread).toFixed(2), 
+          amount: (Math.random() * 1.5).toFixed(4) 
+        })));
       } catch (err) {
-        console.error("Failed to fetch price");
+        setPriceError(err instanceof Error ? err.message : 'Price unavailable');
       }
+      setPriceLoading(false);
     };
 
     fetchPrice(); 
-    const interval = setInterval(fetchPrice, 3000); 
+    const interval = setInterval(fetchPrice, 510000); 
     return () => clearInterval(interval);
-  }, [asset]);
+  }, [asset, baseSymbol]);
 
   // 3. Handle Trade Execution
   const handleTrade = async () => {
     if (!amount || Number(amount) <= 0) {
       toast.error('Enter a valid amount');
+      return;
+    }
+
+    if (price === null) {
+      toast.error('Price unavailable');
       return;
     }
 
@@ -144,7 +160,15 @@ export default function TradePage() {
             </div>
             <div className="h-8 w-px bg-white/10 mx-2 hidden md:block"></div>
             <div className="text-2xl font-mono font-bold text-white">
-              {price > 0 ? `$${price.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : 'Loading...'}
+              {priceLoading && !price ? (
+                'Loading...'
+              ) : priceError ? (
+                'Price unavailable'
+              ) : price !== null ? (
+                priceFormatter.format(price)
+              ) : (
+                '---'
+              )}
             </div>
           </div>
         </div>
@@ -217,14 +241,14 @@ export default function TradePage() {
 
           <button 
             onClick={handleTrade}
-            disabled={loading || price === 0}
+            disabled={loading || price === null}
             className={`w-full py-3.5 rounded-xl font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
               orderType === 'BUY' 
                 ? 'bg-green-600 hover:bg-green-500 shadow-green-900/20' 
                 : 'bg-red-600 hover:bg-red-500 shadow-red-900/20'
             }`}
           >
-            {loading ? <Loader2 className="animate-spin mx-auto"/> : `${orderType} BTC`}
+            {loading ? <Loader2 className="animate-spin mx-auto"/> : `${orderType} ${baseSymbol}`}
           </button>
         </div>
 
@@ -246,7 +270,7 @@ export default function TradePage() {
           </div>
 
           <div className="text-center py-2 text-lg font-mono font-bold border-y border-white/5 my-1 text-white">
-            {price > 0 ? price.toFixed(2) : '---'} <ArrowUp size={14} className="inline text-green-500"/>
+            {price !== null ? price.toFixed(2) : '---'} <ArrowUp size={14} className="inline text-green-500"/>
           </div>
 
           <div className="flex-1 flex flex-col justify-start gap-1 mt-2 overflow-hidden">

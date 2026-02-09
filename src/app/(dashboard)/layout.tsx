@@ -9,6 +9,7 @@ import {
   ArrowRightLeft, 
   LineChart, 
   User, 
+  ShieldCheck,
   Settings,
   Mail,
   LogOut, 
@@ -23,12 +24,63 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [userData, setUserData] = useState({
     name: 'User',
     balance: 0,
-    verified: false,
+    kycStatus: 'UNVERIFIED',
     initial: 'U'
   });
   const [unreadCount, setUnreadCount] = useState(0);
 
+  const handleSessionExpired = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    document.cookie = 'token=; Max-Age=0; path=/';
+    window.location.href = '/auth/login';
+  };
+
+  const decodeToken = (token: string) => {
+    try {
+      const payload = token.split('.')[1];
+      if (!payload) return null;
+      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const json = JSON.parse(atob(normalized));
+      return json;
+    } catch {
+      return null;
+    }
+  };
+
   // 1. Fetch User Data
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const payload = decodeToken(token);
+      if (payload?.exp) {
+        const expiresAt = payload.exp * 1000;
+        const remaining = expiresAt - Date.now();
+        if (remaining <= 0) {
+          handleSessionExpired();
+        } else {
+          const timeout = setTimeout(handleSessionExpired, remaining);
+          return () => clearTimeout(timeout);
+        }
+      }
+    }
+    return undefined;
+  }, []);
+
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const res = await originalFetch(...args);
+      if (res.status === 401) {
+        handleSessionExpired();
+      }
+      return res;
+    };
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -47,7 +99,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             setUserData({
               name: user.name || 'User',
               balance: Number(user.portfolioBalance) || 0,
-              verified: user.verified || false,
+              kycStatus: user.kycStatus || 'UNVERIFIED',
               initial: user.name ? user.name.charAt(0).toUpperCase() : 'U'
             });
           }
@@ -106,8 +158,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Withdraw', href: '/withdrawal', icon: ArrowRightLeft },
     { name: 'Trade', href: '/trade', icon: LineChart },
     { name: 'Profile', href: '/settings/profile', icon: User },
+    { name: 'KYC', href: '/settings/kyc', icon: ShieldCheck },
     { name: 'Settings', href: '/settings/account', icon: Settings },
   ];
+
+  const kycLabel = (() => {
+    switch (userData.kycStatus) {
+      case 'VERIFIED':
+        return { text: 'Verified', className: 'text-green-400' };
+      case 'PENDING':
+        return { text: 'Pending', className: 'text-yellow-400' };
+      case 'REJECTED':
+        return { text: 'Rejected', className: 'text-red-400' };
+      default:
+        return { text: 'Unverified', className: 'text-gray-400' };
+    }
+  })();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -220,8 +286,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="flex items-center gap-3 pl-6 border-l border-white/5">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-bold text-white leading-none mb-1">{userData.name}</p>
-                <p className={`text-xs font-medium ${userData.verified ? 'text-green-400' : 'text-yellow-400'}`}>
-                  {userData.verified ? 'Verified' : 'Unverified'}
+                <p className={`text-xs font-medium ${kycLabel.className}`}>
+                  {kycLabel.text}
                 </p>
               </div>
               <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-900/20">

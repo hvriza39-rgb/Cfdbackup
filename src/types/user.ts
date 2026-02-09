@@ -1,4 +1,4 @@
-export type KycStatus = 'pending' | 'verified' | 'rejected';
+export type KycStatus = 'UNVERIFIED' | 'PENDING' | 'VERIFIED' | 'REJECTED';
 export type AccountStatus = 'active' | 'suspended' | 'closed';
 
 export interface User {

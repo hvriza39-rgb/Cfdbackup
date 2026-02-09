@@ -16,6 +16,7 @@ model User {
   role           String  @default("user") // "admin" or "user"
   phone          String?
   country        String?
+  kycStatus      String  @default("UNVERIFIED") // UNVERIFIED | PENDING | VERIFIED | REJECTED
 
   // Balance Fields
   portfolioBalance Float @default(0.0)
@@ -29,6 +30,7 @@ model User {
   transactions  Transaction[]
   notifications Notification[]
   messages      Message[]
+  kycSubmissions KycSubmission[]
 }
 
 model Message {
@@ -78,4 +80,23 @@ model Settings {
   ethAddress  String?
   usdtAddress String?
   updatedAt   DateTime @updatedAt
+}
+
+model KycSubmission {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  userId   String @db.ObjectId
+  user     User   @relation(fields: [userId], references: [id])
+
+  status   String  @default("PENDING") // PENDING | APPROVED | REJECTED
+  docType  String?
+  fileUrl  String
+  fileMime String
+  fileName String
+  note     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
 }

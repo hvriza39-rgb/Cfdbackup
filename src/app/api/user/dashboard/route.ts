@@ -8,7 +8,7 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 export const dynamic = 'force-dynamic';
 
-const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key'; // Ensure this matches your login secret
+const SECRET_KEY = process.env.JWT_SECRET;
 
 export async function GET(req: Request) {
   try {
@@ -20,15 +20,31 @@ export async function GET(req: Request) {
     const token = authHeader.split(' ')[1]; // Remove "Bearer "
     let decoded: any;
 
+    if (!SECRET_KEY) {
+      return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
+    }
+
     try {
-        decoded = verify(token, SECRET_KEY);
+      decoded = verify(token, SECRET_KEY);
     } catch (err) {
-        return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     // Now we use the ID/Email from the token to find the REAL user
     const user = await prisma.user.findUnique({
-      where: { email: decoded.email } // Assumes your token stores 'email'
+      where: { email: decoded.email }, // Assumes your token stores 'email'
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        country: true,
+        portfolioBalance: true,
+        availableBalance: true,
+        pnl: true,
+        kycStatus: true,
+        createdAt: true,
+      },
     });
 
     if (!user) {

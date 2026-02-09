@@ -31,7 +31,7 @@ export async function POST(req: Request) {
         role: user.role 
       },
       process.env.JWT_SECRET!,
-      { expiresIn: '1d' }
+      { expiresIn: '1h' }
     );
 
     // ✅ FIXED: We MUST send the token in the body for the frontend to use
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === 'production',    
       sameSite: 'lax',                                        
       path: '/',                                             
-      maxAge: 86400,                                         
+      maxAge: 3600,                                         
     });
 
     return response;

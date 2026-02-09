@@ -43,7 +43,7 @@ function LoginForm() {
       }
       
       // 1. Save Token + User Info
-      document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `token=${data.token}; path=/; max-age=3600; SameSite=Lax`;
       localStorage.setItem('token', data.token); // Backup for client-side checks
       if (data.user) {
         localStorage.setItem('user', JSON.stringify(data.user));

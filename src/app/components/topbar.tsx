@@ -9,6 +9,7 @@ export default function Topbar() {
   const [username, setUsername] = useState('Loading...');
   const [initial, setInitial] = useState('');
   const [loading, setLoading] = useState(true);
+  const [kycStatus, setKycStatus] = useState('UNVERIFIED');
   
   // FIX: Start with empty string to prevent Server/Client mismatch
   const [formattedDate, setFormattedDate] = useState(''); 
@@ -41,6 +42,11 @@ export default function Topbar() {
           setUsername('User');
           setInitial('U');
         }
+        if (data.user?.kycStatus) {
+          setKycStatus(data.user.kycStatus);
+        } else {
+          setKycStatus('UNVERIFIED');
+        }
 
         if (data.balances?.available !== undefined) {
           setBalance(data.balances.available);
@@ -57,6 +63,19 @@ export default function Topbar() {
     const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  const kycLabel = (() => {
+    switch (kycStatus) {
+      case 'VERIFIED':
+        return { text: 'Verified', className: 'text-green-400', dot: 'bg-green-500' };
+      case 'PENDING':
+        return { text: 'Pending', className: 'text-yellow-400', dot: 'bg-yellow-500' };
+      case 'REJECTED':
+        return { text: 'Rejected', className: 'text-red-400', dot: 'bg-red-500' };
+      default:
+        return { text: 'Unverified', className: 'text-gray-400', dot: 'bg-gray-500' };
+    }
+  })();
 
   return (
     <header className="h-20 bg-[#0b1220]/80 backdrop-blur-md border-b border-white/10 flex items-center justify-between px-6 md:px-8 sticky top-0 z-30">
@@ -93,8 +112,8 @@ export default function Topbar() {
             <div className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">
               {loading ? '...' : username}
             </div>
-            <div className="text-xs text-green-400 font-medium flex items-center justify-end gap-1">
-              Verified Account
+            <div className={`text-xs font-medium flex items-center justify-end gap-1 ${kycLabel.className}`}>
+              {kycLabel.text}
             </div>
           </div>
           
@@ -107,7 +126,7 @@ export default function Topbar() {
               )}
             </div>
             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#0b1220] rounded-full flex items-center justify-center">
-              <div className="w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#0b1220]"></div>
+              <div className={`w-2.5 h-2.5 ${kycLabel.dot} rounded-full border-2 border-[#0b1220]`}></div>
             </div>
           </div>
           
