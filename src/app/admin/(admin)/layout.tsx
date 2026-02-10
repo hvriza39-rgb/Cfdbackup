@@ -9,6 +9,7 @@ import {
   ArrowRightLeft, 
   Settings, 
   ShieldCheck,
+  LifeBuoy,
   Mail,
   Menu, 
   X, 
@@ -100,6 +101,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Messages', href: '/admin/messages', icon: Mail },
+    { name: 'Support', href: '/admin/support', icon: LifeBuoy },
     { name: 'Transactions', href: '/admin/transactions', icon: ArrowRightLeft },
     { name: 'KYC', href: '/admin/kyc', icon: ShieldCheck },
     { name: 'Users', href: '/admin/users', icon: Users },

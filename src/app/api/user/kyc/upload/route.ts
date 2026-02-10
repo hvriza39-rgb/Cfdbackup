@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     const dataUri = `data:${file.type};base64,${buffer.toString('base64')}`;
 
     const uploadResult = await cloudinary.uploader.upload(dataUri, {
-      folder: 'kyc',
+      folder: 'kyc-documents',
       resource_type: 'auto',
     });
 
@@ -68,6 +68,7 @@ export async function POST(req: Request) {
         status: 'PENDING',
         docType: typeof docType === 'string' ? docType : null,
         fileUrl: uploadResult.secure_url,
+        fileId: uploadResult.public_id,
         fileMime: file.type,
         fileName: file.name,
       },

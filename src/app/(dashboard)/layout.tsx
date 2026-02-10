@@ -10,6 +10,7 @@ import {
   LineChart, 
   User, 
   ShieldCheck,
+  LifeBuoy,
   Settings,
   Mail,
   LogOut, 
@@ -154,6 +155,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
     { name: 'Messages', href: '/messages', icon: Mail },
+    { name: 'Support', href: '/support', icon: LifeBuoy },
     { name: 'Deposit', href: '/deposit', icon: Wallet },
     { name: 'Withdraw', href: '/withdrawal', icon: ArrowRightLeft },
     { name: 'Trade', href: '/trade', icon: LineChart },

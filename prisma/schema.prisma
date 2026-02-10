@@ -27,10 +27,11 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  transactions  Transaction[]
-  notifications Notification[]
-  messages      Message[]
+  transactions   Transaction[]
+  notifications  Notification[]
+  messages       Message[]
   kycSubmissions KycSubmission[]
+  supportTickets SupportTicket[]
 }
 
 model Message {
@@ -83,13 +84,14 @@ model Settings {
 }
 
 model KycSubmission {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  userId   String @db.ObjectId
-  user     User   @relation(fields: [userId], references: [id])
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
 
   status   String  @default("PENDING") // PENDING | APPROVED | REJECTED
   docType  String?
   fileUrl  String
+  fileId   String
   fileMime String
   fileName String
   note     String?
@@ -99,4 +101,30 @@ model KycSubmission {
 
   @@index([userId])
   @@index([status])
+}
+
+model SupportTicket {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String           @db.ObjectId
+  user      User             @relation(fields: [userId], references: [id])
+  subject   String
+  status    String           @default("OPEN") // OPEN | CLOSED
+  priority  String? // Optional (e.g. LOW | NORMAL | HIGH)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  messages  SupportMessage[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model SupportMessage {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  ticketId  String        @db.ObjectId
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id])
+  sender    String // USER | ADMIN
+  body      String
+  createdAt DateTime      @default(now())
+
+  @@index([ticketId])
 }

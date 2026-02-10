@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { verify } from 'jsonwebtoken';
-import { prisma } from '../../../../lib/prisma';
+import { prisma } from '../../../../../../../lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
@@ -16,46 +16,34 @@ export async function GET(req: Request) {
 
     try {
       decoded = verify(token, process.env.JWT_SECRET!);
-    } catch {
+    } catch (err) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
       where: { email: decoded.email },
-      select: {
-        id: true,
-        kycStatus: true,
-      },
     });
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const latestSubmission = await prisma.kycSubmission.findFirst({
-      where: { userId: user.id },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        status: true,
-        docType: true,
-        fileUrl: true,
-        fileId: true,
-        fileMime: true,
-        fileName: true,
-        note: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+    const ticket = await prisma.supportTicket.findFirst({
+      where: { id: params.id, userId: user.id },
     });
 
-    return NextResponse.json({
-      success: true,
-      kycStatus: user.kycStatus,
-      submission: latestSubmission,
+    if (!ticket) {
+      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
+    }
+
+    const updated = await prisma.supportTicket.update({
+      where: { id: ticket.id },
+      data: { status: 'CLOSED' },
     });
+
+    return NextResponse.json({ success: true, ticket: updated });
   } catch (error) {
-    console.error('KYC Fetch Error:', error);
+    console.error('Support Ticket Close Error:', error);
     return NextResponse.json({ error: 'Server Error' }, { status: 500 });
   }
 }
