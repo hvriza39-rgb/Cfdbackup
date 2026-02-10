@@ -91,7 +91,7 @@ model KycSubmission {
   status   String  @default("PENDING") // PENDING | APPROVED | REJECTED
   docType  String?
   fileUrl  String
-  fileId   String
+  fileId   String?
   fileMime String
   fileName String
   note     String?
