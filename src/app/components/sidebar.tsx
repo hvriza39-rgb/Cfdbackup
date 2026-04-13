@@ -89,6 +89,7 @@ export default function Sidebar() {
   </>
 )}
         </div>
+        </div>
 
         <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
           {items.map((item) => {
