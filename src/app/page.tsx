@@ -51,7 +51,7 @@ export default function LandingPage() {
                 CT
             </div>
             <span className="text-2xl font-bold text-white tracking-tight">
-                CMX<span className="text-blue-500">TRADE</span>
+                CFD<span className="text-blue-500">TRADE</span>
             </span>
         </div>
 
