@@ -82,10 +82,10 @@ export default function Sidebar() {
         >
           <div className="text-xl font-bold text-white tracking-wide">
             {desktopCollapsed ? (
-              <span className="text-blue-500">CFD</span>
+              <span className="text-blue-500">TRADE</span>
             ) : (
               <>
-                TRADE<span className="text-blue-500">X</span>
+                CFD <span className="text-blue-500">X</span>
               </>
             )}
           </div>
