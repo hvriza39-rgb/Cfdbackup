@@ -78,7 +78,7 @@ export default function LandingPage() {
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.15]">
               Trade crypto with <br className="hidden lg:block" />
-              <span className="text-blue-500">confidence</span> on CMXTRADE
+              <span className="text-blue-500">confidence</span> on CFDTRADE
             </h1>
             
             <p className="text-lg text-gray-400 max-w-lg leading-relaxed">
