@@ -59,9 +59,9 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-[#1a1f2e] p-8 rounded-2xl border border-white/10 shadow-xl">
         
         <div className="text-center mb-8">
-  <Link href="/" className="inline-block mb-4">
-    <Logo />
-  </Link>
+  <Link href="/" className="flex justify-center mb-4">
+  <Logo />
+</Link> 
   <h1 className="text-2xl font-bold mb-2">Welcome Back</h1>
   <p className="text-gray-400 text-sm">Sign in to access your portfolio</p>
 </div>
