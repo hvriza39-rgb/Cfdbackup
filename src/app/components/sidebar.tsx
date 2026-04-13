@@ -82,13 +82,12 @@ export default function Sidebar() {
         >
           <div className="text-xl font-bold text-white tracking-wide">
             {desktopCollapsed ? (
-              <span className="text-blue-500">TRADE</span>
-            ) : (
-              <>
-                CFD <span className="text-blue-500">X</span>
-              </>
-            )}
-          </div>
+  <span className="text-blue-500">C</span>
+) : (
+  <>
+    CFD<span className="text-blue-500">TRADE</span>
+  </>
+)}
         </div>
 
         <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
