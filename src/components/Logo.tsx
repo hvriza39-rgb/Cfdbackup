@@ -26,7 +26,7 @@ export default function Logo({ className = "w-8 h-8" }: { className?: string }) 
       {/* The Text Name */}
       <div className="flex flex-col leading-none">
         <span className="text-xl font-extrabold text-white tracking-wide">
-          CMX<span className="text-blue-500">TRADE</span>
+          CFD<span className="text-blue-500">TRADE</span>
         </span>
       </div>
     </div>
