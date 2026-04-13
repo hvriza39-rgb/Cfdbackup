@@ -60,8 +60,8 @@ export default function LoginPage() {
         
         <div className="text-center mb-8">
   <Link href="/" className="flex justify-center mb-4">
-  <Logo />
-</Link> 
+  <Logo className="justify-center" />
+</Link 
   <h1 className="text-2xl font-bold mb-2">Welcome Back</h1>
   <p className="text-gray-400 text-sm">Sign in to access your portfolio</p>
 </div>
