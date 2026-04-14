@@ -186,7 +186,7 @@ export default function WithdrawalPage() {
             >
               <option value="BTC">Bitcoin (BTC)</option>
               <option value="ETH">Ethereum (ERC20)</option>
-              <option value="USDT">Tether (TRC20)</option>
+              <option value="USDT">Tether (ERC20)</option>
             </select>
           </div>
 
