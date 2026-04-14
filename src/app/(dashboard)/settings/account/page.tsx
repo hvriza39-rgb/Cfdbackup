@@ -29,7 +29,7 @@ export default function AccountSettingsPage() {
           <Select label="Currency" value={currency} onChange={handleCurrency}>
             <option>USD</option>
             <option>EUR</option>
-            <option>NGN</option>
+            <option>GBP</option>
           </Select>
           
           <Select label="Language" value={language} onChange={handleLanguage}>
