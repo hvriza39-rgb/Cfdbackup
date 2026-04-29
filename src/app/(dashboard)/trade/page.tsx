@@ -23,25 +23,14 @@ export default function TradePage() {
     [],
   );
 
-  // 1. Fetch User Balance
-  const fetchBalance = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    try {
-      const res = await fetch('/api/user/dashboard', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await res.json();
-      console.log('Dashboard data:', data); // 👈 debug log
-      if (data.balances) {
-        const available = Number(data.balances.available); // ✅ FIXED: force number
-        console.log('Balance set to:', available, typeof available); // 👈 debug log
-        setBalance(isNaN(available) ? 0 : available);
-      }
-    } catch (e) {
-      console.error('Balance fetch error:', e);
-    }
-  };
+  const res = await fetch('/api/user/dashboard', {
+  headers: { 'Authorization': `Bearer ${token}` }
+});
+const data = await res.json();
+if (data.user) {
+  const available = Number(data.user.availableBalance);
+  setBalance(isNaN(available) ? 0 : available);
+}
 
   useEffect(() => { fetchBalance(); }, []);
 
