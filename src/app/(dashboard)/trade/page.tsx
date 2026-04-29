@@ -22,23 +22,23 @@ export default function TradePage() {
     () => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }),
     [],
   );
-
-   const fetchBalance = async () => {
+useEffect(() => {
   const token = localStorage.getItem('token');
   if (!token) return;
-  try {
-    const res = await fetch('/api/user/dashboard', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const data = await res.json();
-    if (data.user) {
-      const available = Number(data.user.availableBalance);
-      setBalance(isNaN(available) ? 0 : available);
-    }
-  } catch (e) {
-    console.error('Balance fetch error:', e);
-  }
-};
+
+  fetch('/api/user/dashboard', {
+    headers: { 'Authorization': `Bearer ${token}` },
+    cache: 'no-store'
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.user) {
+        setBalance(Number(data.user.availableBalance) || 0);
+      }
+    })
+    .catch(e => console.error('Balance fetch error:', e));
+}, []);
+   
   useEffect(() => { fetchBalance(); }, []);
 
   // 2. Fetch Price
