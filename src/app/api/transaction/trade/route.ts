@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../../../../lib/prisma';
+import { prisma } from '../../../../../lib/prisma';
 
 export async function POST(req: Request) {
   try {
@@ -12,17 +12,15 @@ export async function POST(req: Request) {
 
     const totalCost = parseFloat(amount) * parseFloat(price);
 
-    // Fetch user and check balance
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    if (action === 'BUY' && user.balance < totalCost) {
+    if (action === 'BUY' && user.availableBalance < totalCost) {
       return NextResponse.json({ error: 'Insufficient balance' }, { status: 400 });
     }
 
-    // Record trade and update balance atomically
     const [trade] = await prisma.$transaction([
       prisma.transaction.create({
         data: {
@@ -36,7 +34,7 @@ export async function POST(req: Request) {
       prisma.user.update({
         where: { id: userId },
         data: {
-          balance: {
+          availableBalance: {
             [action === 'BUY' ? 'decrement' : 'increment']: totalCost,
           },
         },
