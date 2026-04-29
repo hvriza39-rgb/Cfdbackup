@@ -35,7 +35,7 @@ export default function TradePage() {
       .then(res => res.json())
       .then(data => {
         if (data.user) {
-          setBalance(Number(data.user.availableBalance) || 0);
+          setBalance(Number(data.user.portfolioBalance) || 0); 
         }
       })
       .catch(e => console.error('Balance fetch error:', e));
