@@ -23,15 +23,22 @@ export default function TradePage() {
     [],
   );
 
-  const res = await fetch('/api/user/dashboard', {
-  headers: { 'Authorization': `Bearer ${token}` }
-});
-const data = await res.json();
-if (data.user) {
-  const available = Number(data.user.availableBalance);
-  setBalance(isNaN(available) ? 0 : available);
-}
-
+   const fetchBalance = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  try {
+    const res = await fetch('/api/user/dashboard', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.user) {
+      const available = Number(data.user.availableBalance);
+      setBalance(isNaN(available) ? 0 : available);
+    }
+  } catch (e) {
+    console.error('Balance fetch error:', e);
+  }
+};
   useEffect(() => { fetchBalance(); }, []);
 
   // 2. Fetch Price
