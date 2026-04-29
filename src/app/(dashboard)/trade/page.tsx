@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { ArrowUp, ArrowDown, Wallet, Loader2 } from 'lucide-react';
+import { ArrowUp, Wallet, Loader2 } from 'lucide-react';
 import { Toaster, toast } from 'react-hot-toast';
 
 export default function TradePage() {
@@ -22,23 +22,25 @@ export default function TradePage() {
     () => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }),
     [],
   );
-useEffect(() => {
-  const token = localStorage.getItem('token');
-  if (!token) return;
 
-  fetch('/api/user/dashboard', {
-    headers: { 'Authorization': `Bearer ${token}` },
-    cache: 'no-store'
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.user) {
-        setBalance(Number(data.user.availableBalance) || 0);
-      }
+  // 1. Fetch Balance
+  const fetchBalance = () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    fetch('/api/user/dashboard', {
+      headers: { 'Authorization': `Bearer ${token}` },
+      cache: 'no-store'
     })
-    .catch(e => console.error('Balance fetch error:', e));
-}, []);
-   
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+          setBalance(Number(data.user.availableBalance) || 0);
+        }
+      })
+      .catch(e => console.error('Balance fetch error:', e));
+  };
+
   useEffect(() => { fetchBalance(); }, []);
 
   // 2. Fetch Price
@@ -95,9 +97,6 @@ useEffect(() => {
       toast.error('Price unavailable');
       return;
     }
-
-    // ✅ FIXED: compare numbers properly, with debug info
-    console.log('Trade check — amount:', numAmount, 'balance:', balance, 'type:', typeof balance);
 
     if (orderType === 'BUY' && numAmount > balance) {
       toast.error(`Insufficient balance. You have $${balance.toLocaleString()} available.`);
@@ -301,4 +300,4 @@ useEffect(() => {
       </div>
     </div>
   );
-}
+              } 
