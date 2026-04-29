@@ -14,7 +14,6 @@ export default function TradePage() {
   const [loading, setLoading] = useState(false);
   const [orderType, setOrderType] = useState<'BUY' | 'SELL'>('BUY');
   
-  // Order Book Data
   const [bids, setBids] = useState<any[]>([]);
   const [asks, setAsks] = useState<any[]>([]);
 
@@ -29,15 +28,24 @@ export default function TradePage() {
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-      const res = await fetch('/api/user/dashboard', { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch('/api/user/dashboard', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
-      if (data.balances) setBalance(data.balances.available);
-    } catch (e) { console.error(e); }
+      console.log('Dashboard data:', data); // 👈 debug log
+      if (data.balances) {
+        const available = Number(data.balances.available); // ✅ FIXED: force number
+        console.log('Balance set to:', available, typeof available); // 👈 debug log
+        setBalance(isNaN(available) ? 0 : available);
+      }
+    } catch (e) {
+      console.error('Balance fetch error:', e);
+    }
   };
 
   useEffect(() => { fetchBalance(); }, []);
 
-  // 2. Fetch REAL Price via Internal Proxy
+  // 2. Fetch Price
   useEffect(() => {
     const fetchPrice = async () => {
       try {
@@ -56,7 +64,6 @@ export default function TradePage() {
         const currentPrice = data.price;
         setPrice(currentPrice);
 
-        // Generate simulated order book
         const spread = currentPrice * 0.0005; 
         
         setAsks(Array.from({ length: 5 }, (_, i) => ({ 
@@ -81,7 +88,9 @@ export default function TradePage() {
 
   // 3. Handle Trade Execution
   const handleTrade = async () => {
-    if (!amount || Number(amount) <= 0) {
+    const numAmount = Number(amount);
+
+    if (!amount || numAmount <= 0) {
       toast.error('Enter a valid amount');
       return;
     }
@@ -91,8 +100,11 @@ export default function TradePage() {
       return;
     }
 
-    if (orderType === 'BUY' && Number(amount) > balance) {
-      toast.error('Insufficient USD Balance');
+    // ✅ FIXED: compare numbers properly, with debug info
+    console.log('Trade check — amount:', numAmount, 'balance:', balance, 'type:', typeof balance);
+
+    if (orderType === 'BUY' && numAmount > balance) {
+      toast.error(`Insufficient balance. You have $${balance.toLocaleString()} available.`);
       return;
     }
 
@@ -109,7 +121,7 @@ export default function TradePage() {
         body: JSON.stringify({
           action: orderType,
           asset: asset.replace('USD', ''), 
-          amount: Number(amount),
+          amount: numAmount,
           price
         })
       });
@@ -120,7 +132,11 @@ export default function TradePage() {
 
       toast.success(`${orderType} Order Filled!`, {
         icon: orderType === 'BUY' ? '🚀' : '💰',
-        style: { background: '#1a1f2e', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }
+        style: {
+          background: '#1a1f2e',
+          color: '#fff',
+          border: '1px solid rgba(255,255,255,0.1)'
+        }
       });
       
       setAmount('');
@@ -138,7 +154,7 @@ export default function TradePage() {
     if (orderType === 'BUY') {
       setAmount((balance * pct).toFixed(2));
     } else {
-      toast('For SELL, amount logic would go here');
+      toast('For SELL, enter the crypto amount manually');
     }
   };
 
@@ -146,7 +162,7 @@ export default function TradePage() {
     <div className="h-[calc(100vh-80px)] p-4 flex flex-col lg:flex-row gap-4 text-white overflow-hidden">
       <Toaster position="bottom-right" />
 
-      {/* --- LEFT COLUMN: CHART & INFO --- */}
+      {/* LEFT COLUMN: CHART & INFO */}
       <div className="flex-1 flex flex-col gap-4 min-w-0">
         
         {/* Header Ticker */}
@@ -173,9 +189,9 @@ export default function TradePage() {
           </div>
         </div>
 
-        {/* Chart Container */}
+        {/* Chart */}
         <div className="flex-1 bg-[#1a1f2e] border border-white/10 rounded-xl overflow-hidden relative shadow-2xl">
-           <iframe
+          <iframe
             src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_76d87&symbol=${asset}&interval=15&hidesidetoolbar=1&hidetoptoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=${asset}`}
             className="w-full h-full border-0 absolute inset-0"
             allowTransparency={true}
@@ -184,13 +200,13 @@ export default function TradePage() {
         </div>
       </div>
 
-      {/* --- RIGHT COLUMN: ORDER FORM & ORDER BOOK --- */}
+      {/* RIGHT COLUMN: ORDER FORM & ORDER BOOK */}
       <div className="w-full lg:w-[320px] flex flex-col gap-4">
         
-        {/* 1. ORDER FORM */}
+        {/* ORDER FORM */}
         <div className="bg-[#1a1f2e] border border-white/10 rounded-xl p-5 shadow-xl">
           
-          {/* Buy/Sell Toggles */}
+          {/* Buy/Sell Toggle */}
           <div className="flex bg-[#0b1220] p-1 rounded-lg mb-6">
             <button 
               onClick={() => setOrderType('BUY')}
@@ -211,7 +227,9 @@ export default function TradePage() {
           </div>
 
           <div className="flex justify-between text-xs mb-2">
-            <span className="text-gray-500 flex items-center gap-1"><Wallet size={12}/> Avail. Balance</span>
+            <span className="text-gray-500 flex items-center gap-1">
+              <Wallet size={12}/> Avail. Balance
+            </span>
             <span className="text-white font-mono">${balance.toLocaleString()}</span>
           </div>
 
@@ -252,7 +270,7 @@ export default function TradePage() {
           </button>
         </div>
 
-        {/* 2. ORDER BOOK */}
+        {/* ORDER BOOK */}
         <div className="bg-[#1a1f2e] border border-white/10 rounded-xl p-4 flex-1 shadow-xl overflow-hidden flex flex-col">
           <h3 className="text-xs font-bold text-gray-400 mb-3 flex justify-between">
             <span>Price (USD)</span>
@@ -274,7 +292,7 @@ export default function TradePage() {
           </div>
 
           <div className="flex-1 flex flex-col justify-start gap-1 mt-2 overflow-hidden">
-             {bids.map((bid, i) => (
+            {bids.map((bid, i) => (
               <div key={i} className="flex justify-between text-xs font-mono relative">
                 <span className="text-green-400 relative z-10">{bid.price}</span>
                 <span className="text-gray-300 relative z-10">{bid.amount}</span>
