@@ -107,7 +107,7 @@ export default function DashboardPage() {
             <span className="text-gray-400 text-xs font-bold">Active</span>
           </div>
           <p className="text-gray-400 text-sm">Open Positions</p>
-          <h3 className="text-2xl font-bold text-white mt-1">3 Trades</h3>
+          <h3 className="text-2xl font-bold text-white mt-1">{transactions.length} Trades</h3>
         </div>
       </div>
 
