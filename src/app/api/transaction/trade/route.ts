@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const totalCost = parseFloat(amount) * parseFloat(price);
+    const totalCost = parseFloat(amount); // amount is already in USD
 
     if (action === 'BUY' && user.portfolioBalance < totalCost) {
       return NextResponse.json({ error: 'Insufficient balance' }, { status: 400 });
