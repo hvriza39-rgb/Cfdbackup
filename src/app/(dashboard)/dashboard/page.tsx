@@ -156,9 +156,9 @@ export default function DashboardPage() {
                     </td>
                     <td className="py-4 text-right">
                       <span className={`text-xs font-bold px-2 py-1 rounded-lg uppercase ${
-                        tx.status === 'Success' ? 'bg-green-500/10 text-green-400' : 
-                        tx.status === 'Pending' ? 'bg-yellow-500/10 text-yellow-400' : 
-                        'bg-red-500/10 text-red-400'
+                        tx.status === 'Success' || tx.status === 'Completed' ? 'bg-green-500/10 text-green-400' : 
+tx.status === 'Pending' ? 'bg-yellow-500/10 text-yellow-400' : 
+'bg-red-500/10 text-red-400'
                       }`}>
                         {tx.status}
                       </span>
