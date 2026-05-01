@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useState, Suspense } from 'react';
 import Button from '../../../../components/ui/Button';
 import Card from '../../../../components/ui/Card';
@@ -8,9 +8,7 @@ import Input from '../../../../components/ui/Input';
 import InlineAlert from '../../../../components/ui/InlineAlert';
 
 function LoginForm() {
-  const router = useRouter();
   const sp = useSearchParams();
-  const redirect = sp.get('redirect') || '/admin/users';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,18 +36,12 @@ function LoginForm() {
         throw new Error(data?.error || 'Login failed');
       }
 
-      if (!data.token) {
-        throw new Error('Server error: No token received.');
+      if (!data.success) {
+        throw new Error('Login failed');
       }
 
-      document.cookie = `token=${data.token}; path=/; max-age=3600; SameSite=Lax`;
-      localStorage.setItem('token', data.token);
-      if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
-      }
-
-      const target = data.user?.role === 'admin' ? '/admin/users' : '/dashboard';
-      window.location.href = target;
+      localStorage.setItem('adminEmail', email);
+      window.location.href = '/admin/users';
 
     } catch (err: any) {
       setError(err?.message || 'Login failed');
@@ -74,7 +66,7 @@ function LoginForm() {
         throw new Error(data?.error || 'Reset failed');
       }
 
-      setResetStatus('Password reset successfully. You can now log in with your default credentials.');
+      setResetStatus('Password reset successfully. Login with your default credentials.');
     } catch (err: any) {
       setError(err?.message || 'Reset failed');
     } finally {
