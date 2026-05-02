@@ -10,25 +10,29 @@ export async function POST(req: Request) {
     const token = authHeader.split(' ')[1];
     const decoded: any = verify(token, process.env.JWT_SECRET!);
     
-    const user = await prisma.user.findUnique({ where: { id: decoded.userId } }); // Preferred to use ID if available in token
+    // Using userId from token for better security/performance
+    const user = await prisma.user.findUnique({ where: { id: decoded.userId } }); 
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
     const body = await req.json();
     const { 
-      action,     // "BUY" or "SELL"
-      asset,      // "BTC", "AAPL", "CL1!", "EURUSD"
-      amount,     // Margin amount
+      action,     
+      asset,      // Now handles "USOIL", "UKOIL", "EURUSD", etc.
+      amount,     
       price,      
       leverage,   
       marginType, 
-      marketType  // "CRYPTO", "STOCKS", "FOREX", "COMMODITIES"
+      marketType  
     } = body;
 
+    // Clean the asset name (e.g., remove "USD" suffix or TradingView "!" for DB consistency)
+    const cleanAsset = asset.replace('USD', '').replace('!', '');
+    
     const marginAmount = parseFloat(amount);
     const tradeLeverage = parseInt(leverage) || 1;
     const totalExposure = marginAmount * tradeLeverage;
 
-    // VALIDATION: User must have enough balance to cover the MARGIN for both BUY and SELL (Shorting)
+    // VALIDATION: Ensure user can afford the margin
     if (user.portfolioBalance < marginAmount) {
       return NextResponse.json({ error: 'Insufficient balance to cover margin' }, { status: 400 });
     }
@@ -41,7 +45,7 @@ export async function POST(req: Request) {
           userId: user.id,
           type: action.toLowerCase(), 
           amount: marginAmount,
-          asset: asset,
+          asset: cleanAsset, // Stores "USOIL" instead of "CL1!"
           status: 'Completed',
           leverage: tradeLeverage,
           entryPrice: parseFloat(price),
@@ -52,7 +56,7 @@ export async function POST(req: Request) {
       });
 
       // 2. Update User Balance
-      // IMPORTANT: In margin trading, opening a position (BUY or SELL) always DEDUCTS the margin from the available balance.
+      // Both BUY and SELL (Long/Short) deduct margin from available balance
       await tx.user.update({
         where: { id: user.id },
         data: {
