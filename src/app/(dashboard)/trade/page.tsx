@@ -107,6 +107,15 @@ export default function TradePage() {
     return () => clearInterval(interval);
   }, [asset, baseSymbol]);
 
+  // FIX: Added the missing setPercentage function
+  const setPercentage = (pct: number) => {
+    if (orderType === 'BUY') {
+      setAmount((balance * pct).toFixed(2));
+    } else {
+      toast('For SELL, please enter the amount manually');
+    }
+  };
+
   const handleTrade = async () => {
     const numAmount = Number(amount);
     if (!amount || numAmount <= 0) return toast.error('Enter a valid amount');
@@ -117,8 +126,19 @@ export default function TradePage() {
     try {
       const res = await fetch('/api/transaction/trade', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-        body: JSON.stringify({ action: orderType, asset: baseSymbol, amount: numAmount, price, leverage, marginType, marketType: activeAsset?.type })
+        headers: { 
+            'Content-Type': 'application/json', 
+            'Authorization': `Bearer ${localStorage.getItem('token')}` 
+        },
+        body: JSON.stringify({ 
+            action: orderType, 
+            asset: baseSymbol, 
+            amount: numAmount, 
+            price, 
+            leverage, 
+            marginType, 
+            marketType: activeAsset?.type 
+        })
       });
       if (!res.ok) throw new Error('Trade Failed');
       toast.success(`${orderType} Order Filled!`, {
@@ -136,9 +156,7 @@ export default function TradePage() {
     <div className="min-h-screen lg:h-[calc(100vh-80px)] p-2 md:p-4 flex flex-col lg:flex-row gap-4 text-white bg-[#0b1220] overflow-y-auto lg:overflow-hidden">
       <Toaster position="top-center" reverseOrder={false} />
 
-      {/* LEFT COLUMN: CHART & INFO */}
       <div className="flex-1 flex flex-col gap-4 min-w-0">
-        
         {/* Header with Searchable Dropdown */}
         <div className="bg-[#1a1f2e] border border-white/10 p-4 rounded-xl flex items-center justify-between relative z-50">
           <div className="flex items-center gap-4" ref={dropdownRef}>
@@ -189,7 +207,7 @@ export default function TradePage() {
           </div>
         </div>
 
-        {/* Chart: Increased height on mobile */}
+        {/* Chart Container */}
         <div className="h-[450px] lg:flex-1 bg-[#1a1f2e] border border-white/10 rounded-xl overflow-hidden relative shadow-2xl">
           <iframe
             src={`https://s.tradingview.com/widgetembed/?symbol=${asset}&interval=15&theme=dark&style=1&locale=en`}
@@ -199,10 +217,8 @@ export default function TradePage() {
         </div>
       </div>
 
-      {/* RIGHT COLUMN: ORDER FORM & ORDER BOOK */}
+      {/* Right Column */}
       <div className="w-full lg:w-[350px] flex flex-col gap-4 pb-10 lg:pb-0">
-        
-        {/* ORDER FORM */}
         <div className="bg-[#1a1f2e] border border-white/10 rounded-xl p-5 shadow-xl">
           <div className="flex bg-[#0b1220] p-1 rounded-lg mb-4">
             <button onClick={() => setOrderType('BUY')} className={`flex-1 py-2 rounded-md text-sm font-bold transition-all ${orderType === 'BUY' ? 'bg-green-600 text-white shadow-lg' : 'text-gray-400'}`}>BUY</button>
@@ -240,7 +256,7 @@ export default function TradePage() {
 
           <div className="grid grid-cols-4 gap-2 mb-4">
             {[0.25, 0.50, 0.75, 1].map((pct) => (
-              <button key={pct} onClick={() => setPercentage(pct)} className="bg-[#0b1220] hover:bg-white/10 text-gray-400 text-[10px] py-1 rounded border border-white/5">{pct * 100}%</button>
+              <button key={pct} onClick={() => setPercentage(pct)} className="bg-[#0b1220] hover:bg-white/10 text-gray-400 text-[10px] py-1 rounded border border-white/5 font-mono">{pct * 100}%</button>
             ))}
           </div>
 
@@ -256,9 +272,9 @@ export default function TradePage() {
           </button>
         </div>
 
-        {/* ORDER BOOK */}
+        {/* Order Book */}
         <div className="bg-[#1a1f2e] border border-white/10 rounded-xl p-4 flex-1 shadow-xl flex flex-col min-h-[300px]">
-          <h3 className="text-[10px] font-bold text-gray-500 mb-3 flex justify-between uppercase"><span>Price (USD)</span><span>Amount ({baseSymbol})</span></h3>
+          <h3 className="text-[10px] font-bold text-gray-500 mb-3 flex justify-between uppercase tracking-widest"><span>Price (USD)</span><span>Amount ({baseSymbol})</span></h3>
           <div className="flex-1 flex flex-col justify-end gap-1 mb-2">
             {asks.slice(0, 5).map((ask, i) => (
               <div key={i} className="flex justify-between text-[11px] font-mono relative">
