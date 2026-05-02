@@ -5,22 +5,20 @@ import { ArrowUp, Wallet, Loader2, ChevronDown, Search } from 'lucide-react';
 import { Toaster, toast } from 'react-hot-toast';
 
 const ALL_ASSETS = [
-  // ... existing assets ...
-  { symbol: 'CL1!', name: 'Crude Oil', type: 'COMMODITIES' },
-  { symbol: 'XAUUSD', name: 'Gold', type: 'COMMODITIES' },
-  { symbol: 'EURUSD', name: 'Euro / US Dollar', type: 'FOREX' },
-  { symbol: 'GBPUSD', name: 'British Pound / USD', type: 'FOREX' },
-  { symbol: 'USDJPY', name: 'US Dollar / Yen', type: 'FOREX' },
- 
   { symbol: 'BTCUSD', name: 'Bitcoin', type: 'CRYPTO' },
   { symbol: 'ETHUSD', name: 'Ethereum', type: 'CRYPTO' },
   { symbol: 'SOLUSD', name: 'Solana', type: 'CRYPTO' },
   { symbol: 'AAPL', name: 'Apple Inc.', type: 'STOCKS' },
   { symbol: 'TSLA', name: 'Tesla, Inc.', type: 'STOCKS' },
   { symbol: 'NVDA', name: 'NVIDIA Corp.', type: 'STOCKS' },
-  { symbol: 'AMZN', name: 'Amazon.com', type: 'STOCKS' },
-  { symbol: 'MSFT', name: 'Microsoft Corp.', type: 'STOCKS' },
+  { symbol: 'USOIL', name: 'WTI Crude Oil', type: 'COMMODITIES' },
+  { symbol: 'UKOIL', name: 'Brent Crude Oil', type: 'COMMODITIES' },
+  { symbol: 'XAUUSD', name: 'Gold', type: 'COMMODITIES' },
+  { symbol: 'EURUSD', name: 'Euro / US Dollar', type: 'FOREX' },
+  { symbol: 'GBPUSD', name: 'British Pound / USD', type: 'FOREX' },
+  { symbol: 'USDJPY', name: 'US Dollar / Yen', type: 'FOREX' },
 ];
+
 
 export default function TradePage() {
   const [asset, setAsset] = useState('BTCUSD'); 
