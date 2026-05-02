@@ -10,14 +10,21 @@ export async function POST(req: Request) {
     const token = authHeader.split(' ')[1];
     const decoded: any = verify(token, process.env.JWT_SECRET!);
     
-    // Using userId from token for better security/performance
-    const user = await prisma.user.findUnique({ where: { id: decoded.userId } }); 
-    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    // FIX 1: Find by email if userId isn't in token. 
+    // Also, MongoDB IDs in Prisma are usually referenced via the 'id' field in the query.
+    const user = await prisma.user.findUnique({ 
+      where: { email: decoded.email } 
+    });
+
+    if (!user) {
+      console.error("Trade Fail: User not found for email", decoded.email);
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
 
     const body = await req.json();
     const { 
       action,     
-      asset,      // Now handles "USOIL", "UKOIL", "EURUSD", etc.
+      asset,      
       amount,     
       price,      
       leverage,   
@@ -25,44 +32,37 @@ export async function POST(req: Request) {
       marketType  
     } = body;
 
-    // Clean the asset name (e.g., remove "USD" suffix or TradingView "!" for DB consistency)
-    const cleanAsset = asset.replace('USD', '').replace('!', '');
-    
     const marginAmount = parseFloat(amount);
     const tradeLeverage = parseInt(leverage) || 1;
     const totalExposure = marginAmount * tradeLeverage;
 
-    // VALIDATION: Ensure user can afford the margin
+    // Validation
     if (user.portfolioBalance < marginAmount) {
-      return NextResponse.json({ error: 'Insufficient balance to cover margin' }, { status: 400 });
+      return NextResponse.json({ error: 'Insufficient balance' }, { status: 400 });
     }
 
-    // Database Transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Create the Trade Record
+      // 1. Create Trade Record
       const trade = await tx.transaction.create({
         data: {
           userId: user.id,
           type: action.toLowerCase(), 
           amount: marginAmount,
-          asset: cleanAsset, // Stores "USOIL" instead of "CL1!"
+          asset: asset.replace('USD', ''), // Clean up asset name
           status: 'Completed',
           leverage: tradeLeverage,
           entryPrice: parseFloat(price),
           exposure: totalExposure,
-          marginType: marginType,
-          marketType: marketType,
+          marginType: marginType || "ISOLATED",
+          marketType: marketType || "CRYPTO", // Fallback to avoid null
         },
       });
 
-      // 2. Update User Balance
-      // Both BUY and SELL (Long/Short) deduct margin from available balance
+      // 2. Deduct Margin
       await tx.user.update({
         where: { id: user.id },
         data: {
-          portfolioBalance: {
-            decrement: marginAmount,
-          },
+          portfolioBalance: { decrement: marginAmount },
         },
       });
 
@@ -71,8 +71,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, trade: result });
 
-  } catch (error) {
-    console.error('Trade Error:', error);
-    return NextResponse.json({ error: 'Trade execution failed' }, { status: 500 });
+  } catch (error: any) {
+    // FIX 2: Detailed logging to see exactly what Prisma doesn't like
+    console.error('DATABASE TRADE ERROR:', error);
+    return NextResponse.json({ 
+      error: 'Trade failed', 
+      message: error.message 
+    }, { status: 500 });
   }
 }
