@@ -10,27 +10,27 @@ export async function POST(req: Request) {
     const token = authHeader.split(' ')[1];
     const decoded: any = verify(token, process.env.JWT_SECRET!);
     
-    const user = await prisma.user.findUnique({ where: { email: decoded.email } });
+    const user = await prisma.user.findUnique({ where: { id: decoded.userId } }); // Preferred to use ID if available in token
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
     const body = await req.json();
     const { 
       action,     // "BUY" or "SELL"
-      asset,      // "BTC", "AAPL"
-      amount,     // This is the MARGIN input from user
-      price,      // Current market price
-      leverage,   // e.g., 10
-      marginType, // "ISOLATED"
-      marketType  // "CRYPTO" or "STOCKS"
+      asset,      // "BTC", "AAPL", "CL1!", "EURUSD"
+      amount,     // Margin amount
+      price,      
+      leverage,   
+      marginType, 
+      marketType  // "CRYPTO", "STOCKS", "FOREX", "COMMODITIES"
     } = body;
 
     const marginAmount = parseFloat(amount);
     const tradeLeverage = parseInt(leverage) || 1;
     const totalExposure = marginAmount * tradeLeverage;
 
-    // Validate balance (User only needs the Margin amount to open the position)
-    if (action === 'BUY' && user.portfolioBalance < marginAmount) {
-      return NextResponse.json({ error: 'Insufficient balance for margin' }, { status: 400 });
+    // VALIDATION: User must have enough balance to cover the MARGIN for both BUY and SELL (Shorting)
+    if (user.portfolioBalance < marginAmount) {
+      return NextResponse.json({ error: 'Insufficient balance to cover margin' }, { status: 400 });
     }
 
     // Database Transaction
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
       const trade = await tx.transaction.create({
         data: {
           userId: user.id,
-          type: action.toLowerCase(), // "buy" or "sell"
+          type: action.toLowerCase(), 
           amount: marginAmount,
           asset: asset,
           status: 'Completed',
@@ -51,12 +51,13 @@ export async function POST(req: Request) {
         },
       });
 
-      // 2. Update User Balance (Deduct the Margin)
+      // 2. Update User Balance
+      // IMPORTANT: In margin trading, opening a position (BUY or SELL) always DEDUCTS the margin from the available balance.
       await tx.user.update({
         where: { id: user.id },
         data: {
           portfolioBalance: {
-            [action === 'BUY' ? 'decrement' : 'increment']: marginAmount,
+            decrement: marginAmount,
           },
         },
       });
