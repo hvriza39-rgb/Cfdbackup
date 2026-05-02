@@ -34,12 +34,11 @@ model User {
   supportTickets SupportTicket[]
 }
 
+// ✅ 2. Message Model
 model Message {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  userId String @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
-
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
   title     String?
   body      String
   read      Boolean  @default(false)
@@ -57,21 +56,38 @@ model Notification {
   message   String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
-// ✅ 4. Transaction Model
+// ✅ 4. Updated Transaction Model (Supports Deposits, Withdrawals, & Advanced Trading)
 model Transaction {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
-  type      String // "deposit" or "withdrawal"
-  amount    Float
-  status    String // "Pending", "Completed", "Failed"
-  asset     String // "USD", "BTC", "ETH"
-  network   String? // New field for "BTC", "ERC20", etc.
-  address   String? // New field for the wallet address
+  user      User     @relation(fields: [userId], references: [id])
+  
+  // Core Fields
+  type      String   // "deposit", "withdrawal", "buy", "sell"
+  amount    Float    // For trades, this is the Margin (Collateral)
+  asset     String   // "USD", "BTC", "ETH", "AAPL", "TSLA", etc.
+  status    String   // "Pending", "Completed", "Failed"
+  
+  // Wallet/Transfer specific
+  network   String? 
+  address   String? 
+
+  // Trading specific (New for Leverage & Stocks)
+  leverage    Int?     @default(1)
+  entryPrice  Float?   
+  exposure    Float?   // margin * leverage (total position size)
+  marginType  String?  @default("ISOLATED") // "ISOLATED" or "CROSS"
+  marketType  String?  @default("CRYPTO")   // "CRYPTO" or "STOCKS"
+  
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  @@index([userId])
+  @@index([asset])
+  @@index([marketType])
 }
 
 // ✅ 5. Settings Model
@@ -83,6 +99,7 @@ model Settings {
   updatedAt   DateTime @updatedAt
 }
 
+// ✅ 6. KYC Submission Model
 model KycSubmission {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
   userId String @db.ObjectId
@@ -103,13 +120,14 @@ model KycSubmission {
   @@index([status])
 }
 
+// ✅ 7. Support Ticket Model
 model SupportTicket {
   id        String           @id @default(auto()) @map("_id") @db.ObjectId
   userId    String           @db.ObjectId
   user      User             @relation(fields: [userId], references: [id])
   subject   String
   status    String           @default("OPEN") // OPEN | CLOSED
-  priority  String? // Optional (e.g. LOW | NORMAL | HIGH)
+  priority  String?          // Optional (e.g. LOW | NORMAL | HIGH)
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
   messages  SupportMessage[]
@@ -118,13 +136,15 @@ model SupportTicket {
   @@index([status])
 }
 
+// ✅ 8. Support Message Model
 model SupportMessage {
   id        String        @id @default(auto()) @map("_id") @db.ObjectId
   ticketId  String        @db.ObjectId
   ticket    SupportTicket @relation(fields: [ticketId], references: [id])
-  sender    String // USER | ADMIN
+  sender    String        // USER | ADMIN
   body      String
   createdAt DateTime      @default(now())
 
   @@index([ticketId])
 }
+ 
