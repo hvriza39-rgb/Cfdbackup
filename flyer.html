@@ -17,7 +17,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #f5e6ec;
+            background: #f0dbe3;
             font-family: 'Georgia', 'Times New Roman', serif;
             padding: 20px;
         }
@@ -28,13 +28,14 @@
             width: 100%;
             max-width: 520px;
             aspect-ratio: 0.8 / 1;
-            background: linear-gradient(145deg, #fce4ec, #f8d7e0);
+            /* VIBRANT PINK GRADIENT — pops more */
+            background: linear-gradient(145deg, #ff6b8a, #e8436e, #d6336a);
             border-radius: 40px;
             overflow: hidden;
             box-shadow:
-                0 30px 60px rgba(180, 80, 120, 0.25),
-                0 10px 30px rgba(180, 80, 120, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+                0 40px 80px rgba(200, 40, 80, 0.40),
+                0 10px 30px rgba(200, 40, 80, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
             padding: 40px 32px;
             display: flex;
             flex-direction: column;
@@ -43,10 +44,10 @@
         }
 
         .flyer:hover {
-            transform: scale(1.01);
+            transform: scale(1.02);
         }
 
-        /* ── decorative SVG layers ── */
+        /* ── decorative SVG layers (pink accents) ── */
         .flyer-svg {
             position: absolute;
             top: 0;
@@ -78,24 +79,25 @@
             font-size: 11px;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: #a05a7a;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(4px);
-            padding: 6px 16px;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(6px);
+            padding: 6px 18px;
             border-radius: 100px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             font-weight: 400;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .year {
             font-size: 12px;
-            color: #a05a7a;
+            color: #fff;
             letter-spacing: 2px;
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(4px);
             padding: 4px 14px;
             border-radius: 100px;
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         /* ── main heading ── */
@@ -104,91 +106,144 @@
         }
 
         .brand {
-            font-size: 52px;
+            font-size: 54px;
             font-weight: 700;
-            color: #4a1e30;
+            color: #fff;
             letter-spacing: -1px;
             line-height: 0.9;
             font-family: 'Georgia', 'Times New Roman', serif;
-            text-shadow: 0 2px 8px rgba(180, 80, 120, 0.15);
+            text-shadow: 0 4px 20px rgba(160, 20, 60, 0.5);
         }
 
         .brand span {
-            color: #b05a7a;
+            color: #ffe3e9;
             font-style: italic;
             font-weight: 300;
+            text-shadow: 0 2px 12px rgba(255, 200, 220, 0.4);
         }
 
         .tagline {
             font-size: 14px;
-            color: #7a4a62;
-            letter-spacing: 4px;
+            color: #ffe3e9;
+            letter-spacing: 5px;
             text-transform: uppercase;
-            margin-top: 8px;
+            margin-top: 10px;
             font-weight: 300;
-            border-top: 1px solid rgba(160, 90, 122, 0.25);
-            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            padding-top: 12px;
             max-width: 70%;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
         }
 
-        /* ── middle description ── */
+        /* ── description ── */
         .description {
-            margin: 20px 0 10px;
+            margin: 18px 0 10px;
         }
 
         .description p {
             font-size: 15px;
             line-height: 1.7;
-            color: #4a2a3a;
+            color: #fff;
             font-weight: 300;
             letter-spacing: 0.3px;
             max-width: 85%;
             font-family: 'Georgia', 'Times New Roman', serif;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
         }
 
         .description p:last-child {
             font-style: italic;
-            color: #a05a7a;
+            color: #ffe3e9;
             font-size: 16px;
-            margin-top: 6px;
+            margin-top: 4px;
             letter-spacing: 0.5px;
         }
 
-        /* ── product icons row ── */
+        /* ── product pills (white glass) ── */
         .products {
             display: flex;
-            gap: 14px;
+            gap: 12px;
             flex-wrap: wrap;
-            margin: 12px 0 6px;
+            margin: 12px 0 8px;
         }
 
         .product-pill {
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(6px);
-            border: 1px solid rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.5);
             padding: 6px 18px;
             border-radius: 100px;
             font-size: 11px;
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            color: #5a2a42;
+            color: #fff;
             font-weight: 400;
             transition: all 0.2s;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
         }
 
         .product-pill:hover {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.5);
             transform: translateY(-2px);
+            border-color: #fff;
         }
 
-        /* ── bottom section ── */
+        /* ── bottom section with contacts ── */
         .bottom {
             display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            padding-top: 20px;
+        }
+
+        .contacts {
+            display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
-            align-items: flex-end;
-            margin-top: 10px;
-            border-top: 1px solid rgba(160, 90, 122, 0.2);
-            padding-top: 18px;
+            gap: 10px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(4px);
+            padding: 6px 16px 6px 12px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        .contact-item:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .contact-item svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: #fff;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .cta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .cta {
@@ -200,22 +255,23 @@
             font-size: 10px;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: #a05a7a;
+            color: rgba(255, 255, 255, 0.7);
             font-weight: 300;
         }
 
         .cta .number {
             font-size: 22px;
             font-weight: 600;
-            color: #3a1a2a;
+            color: #fff;
             letter-spacing: 1px;
             font-family: 'Georgia', 'Times New Roman', serif;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .cta .number small {
             font-size: 13px;
             font-weight: 300;
-            color: #a05a7a;
+            color: #ffe3e9;
             margin-left: 6px;
         }
 
@@ -229,7 +285,7 @@
             font-size: 10px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: #a05a7a;
+            color: rgba(255, 255, 255, 0.7);
             font-weight: 300;
         }
 
@@ -237,7 +293,7 @@
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: #b05a7a;
+            background: #fff;
             opacity: 0.5;
         }
 
@@ -249,7 +305,7 @@
             }
 
             .brand {
-                font-size: 38px;
+                font-size: 40px;
             }
 
             .tagline {
@@ -278,15 +334,27 @@
                 padding: 4px 12px;
             }
 
-            .bottom {
-                flex-wrap: wrap;
-                gap: 12px;
+            .contacts {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .contact-item {
+                justify-content: center;
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+
+            .cta-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
             }
         }
 
         @media (max-width: 380px) {
             .brand {
-                font-size: 30px;
+                font-size: 32px;
             }
             .products {
                 gap: 8px;
@@ -295,6 +363,9 @@
                 font-size: 8px;
                 padding: 3px 10px;
             }
+            .contact-item {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -302,33 +373,34 @@
 
     <div class="flyer">
 
-        <!-- ─── SVG DECORATIVE LAYER ─── -->
+        <!-- ─── SVG DECORATIVE LAYER (glows & accents) ─── -->
         <svg class="flyer-svg" viewBox="0 0 520 650" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-            <!-- large soft circles -->
-            <circle cx="420" cy="80" r="180" fill="rgba(200,130,160,0.12)" />
-            <circle cx="80" cy="500" r="200" fill="rgba(200,130,160,0.08)" />
-            <circle cx="460" cy="580" r="120" fill="rgba(180,110,150,0.07)" />
+            <!-- large glowing circles (pink & white) -->
+            <circle cx="420" cy="80" r="200" fill="rgba(255,255,255,0.08)" />
+            <circle cx="80" cy="520" r="220" fill="rgba(255,255,255,0.06)" />
+            <circle cx="460" cy="580" r="140" fill="rgba(255,200,220,0.10)" />
+            <circle cx="50" cy="100" r="120" fill="rgba(255,200,220,0.07)" />
 
-            <!-- elegant swoosh / ribbon -->
-            <path d="M -20 200 Q 120 120 260 200 Q 400 280 540 200" stroke="rgba(160,90,122,0.15)" stroke-width="1.5" fill="none" />
-            <path d="M -20 220 Q 120 140 260 220 Q 400 300 540 220" stroke="rgba(160,90,122,0.08)" stroke-width="1" fill="none" />
+            <!-- glowing swoosh -->
+            <path d="M -20 200 Q 120 120 260 200 Q 400 280 540 200" stroke="rgba(255,255,255,0.20)" stroke-width="2" fill="none" />
+            <path d="M -20 220 Q 120 140 260 220 Q 400 300 540 220" stroke="rgba(255,255,255,0.10)" stroke-width="1.5" fill="none" />
 
-            <!-- small diamond accents -->
-            <polygon points="460,40 470,55 460,70 450,55" fill="rgba(180,110,150,0.15)" />
-            <polygon points="60,610 68,622 60,634 52,622" fill="rgba(180,110,150,0.12)" />
+            <!-- diamond sparkles -->
+            <polygon points="460,40 470,55 460,70 450,55" fill="rgba(255,255,255,0.25)" />
+            <polygon points="60,610 68,622 60,634 52,622" fill="rgba(255,255,255,0.20)" />
 
-            <!-- subtle dots -->
-            <circle cx="480" cy="160" r="3" fill="rgba(180,110,150,0.10)" />
-            <circle cx="500" cy="140" r="2" fill="rgba(180,110,150,0.08)" />
-            <circle cx="30" cy="380" r="4" fill="rgba(180,110,150,0.07)" />
-            <circle cx="490" cy="410" r="2.5" fill="rgba(180,110,150,0.06)" />
+            <!-- floating dots -->
+            <circle cx="480" cy="160" r="4" fill="rgba(255,255,255,0.25)" />
+            <circle cx="500" cy="140" r="2.5" fill="rgba(255,255,255,0.15)" />
+            <circle cx="30" cy="380" r="5" fill="rgba(255,255,255,0.12)" />
+            <circle cx="490" cy="410" r="3" fill="rgba(255,255,255,0.10)" />
 
             <!-- hair-like abstract strokes -->
-            <path d="M 380 320 Q 420 300 440 340 Q 460 380 430 400" stroke="rgba(160,90,122,0.06)" stroke-width="2" fill="none" />
-            <path d="M 400 300 Q 440 280 460 320 Q 480 360 450 380" stroke="rgba(160,90,122,0.04)" stroke-width="2" fill="none" />
+            <path d="M 380 320 Q 420 300 440 340 Q 460 380 430 400" stroke="rgba(255,255,255,0.10)" stroke-width="2.5" fill="none" />
+            <path d="M 400 300 Q 440 280 460 320 Q 480 360 450 380" stroke="rgba(255,255,255,0.06)" stroke-width="2" fill="none" />
 
             <!-- border glow -->
-            <rect x="12" y="12" width="496" height="626" rx="30" stroke="rgba(255,255,255,0.15)" stroke-width="1" fill="none" />
+            <rect x="12" y="12" width="496" height="626" rx="30" stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none" />
         </svg>
 
         <!-- ─── CONTENT ─── -->
@@ -366,23 +438,46 @@
                 <span class="product-pill">Maintenance Kits</span>
             </div>
 
-            <!-- bottom -->
+            <!-- bottom: contacts + cta -->
             <div class="bottom">
-                <div class="cta">
-                    <span class="label">connect</span>
-                    <span class="number">
-                        @d.hairs
-                        <small>✦</small>
-                    </span>
+
+                <!-- Contacts -->
+                <div class="contacts">
+                    <div class="contact-item">
+                        <!-- Phone icon -->
+                        <svg viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                        </svg>
+                        +2348062854873
+                    </div>
+                    <div class="contact-item">
+                        <svg viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                        </svg>
+                        +2349021570977
+                    </div>
                 </div>
-                <div class="social">
-                    <span>shop</span>
-                    <span class="dot"></span>
-                    <span>book</span>
-                    <span class="dot"></span>
-                    <span>care</span>
+
+                <!-- CTA & social -->
+                <div class="cta-row">
+                    <div class="cta">
+                        <span class="label">connect</span>
+                        <span class="number">
+                            @d.hairs
+                            <small>✦</small>
+                        </span>
+                    </div>
+                    <div class="social">
+                        <span>shop</span>
+                        <span class="dot"></span>
+                        <span>book</span>
+                        <span class="dot"></span>
+                        <span>care</span>
+                    </div>
                 </div>
+
             </div>
+            <!-- /bottom -->
 
         </div>
         <!-- /content -->
