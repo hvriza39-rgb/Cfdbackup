@@ -11,14 +11,13 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-        --ivory: #f8f1e6;
-        --wine: #3c0f1f;
-        --wine-soft: #55192c;
-        --gold: #c19a4f;
-        --gold-soft: #d9bd82;
-        --plum-text: #3a1c26;
-        --rose-dim: #8a5462;
-        --hair-strand: #c19a4f;
+        --blush-light: #fdecf3;
+        --blush-mid: #f6d3e3;
+        --pink-deep: #93195c;
+        --pink-darkest: #560f3c;
+        --pink-accent: #d94f8c;
+        --pink-accent-soft: #f3b6d1;
+        --plum-text: #6e1f49;
     }
 
     body {
@@ -26,7 +25,7 @@
         justify-content: center;
         align-items: center;
         min-height: 100vh;
-        background: #e9dfd2;
+        background: linear-gradient(160deg, #fdecf3, #f3cfe1);
         font-family: 'Jost', sans-serif;
         padding: 24px;
     }
@@ -36,12 +35,12 @@
         width: 100%;
         max-width: 480px;
         aspect-ratio: 0.72 / 1;
-        background: var(--ivory);
+        background: linear-gradient(165deg, var(--blush-light), var(--blush-mid));
         border-radius: 28px;
         overflow: hidden;
         box-shadow:
-            0 30px 60px rgba(60, 15, 31, 0.25),
-            0 8px 20px rgba(60, 15, 31, 0.15);
+            0 30px 60px rgba(147, 25, 92, 0.28),
+            0 8px 20px rgba(147, 25, 92, 0.16);
         display: flex;
         flex-direction: column;
     }
@@ -53,7 +52,7 @@
         height: 34%;
         flex-shrink: 0;
         overflow: hidden;
-        background: var(--wine);
+        background: var(--pink-deep);
     }
 
     .photo-panel img {
@@ -70,8 +69,8 @@
         position: absolute;
         inset: 0;
         background:
-            linear-gradient(180deg, rgba(60,15,31,0.05) 45%, rgba(60,15,31,0.95) 100%),
-            linear-gradient(0deg, rgba(60,15,31,0.28), rgba(60,15,31,0.28));
+            linear-gradient(180deg, rgba(147,25,92,0.08) 45%, rgba(86,15,60,0.95) 100%),
+            linear-gradient(0deg, rgba(147,25,92,0.25), rgba(147,25,92,0.25));
     }
 
     .monogram {
@@ -82,14 +81,14 @@
         width: 46px;
         height: 46px;
         border-radius: 50%;
-        background: var(--ivory);
+        background: var(--blush-light);
         display: flex;
         align-items: center;
         justify-content: center;
         font-family: 'Playfair Display', serif;
         font-weight: 700;
         font-size: 20px;
-        color: var(--wine);
+        color: var(--pink-darkest);
         box-shadow: 0 6px 16px rgba(0,0,0,0.25);
     }
 
@@ -101,7 +100,7 @@
         font-size: 10px;
         letter-spacing: 3px;
         text-transform: uppercase;
-        color: var(--gold-soft);
+        color: var(--pink-accent-soft);
         font-weight: 500;
     }
 
@@ -118,7 +117,7 @@
         font-family: 'Playfair Display', serif;
         font-size: 42px;
         font-weight: 700;
-        color: var(--wine);
+        color: var(--pink-darkest);
         line-height: 1;
         letter-spacing: -0.5px;
     }
@@ -126,7 +125,7 @@
     .brand em {
         font-style: italic;
         font-weight: 500;
-        color: var(--rose-dim);
+        color: var(--pink-deep);
     }
 
     .tagline {
@@ -134,14 +133,14 @@
         font-size: 11px;
         letter-spacing: 4px;
         text-transform: uppercase;
-        color: var(--gold);
-        font-weight: 500;
+        color: var(--pink-accent);
+        font-weight: 600;
     }
 
     .rule {
         width: 42px;
         height: 2px;
-        background: var(--gold);
+        background: var(--pink-accent);
         margin: 14px 0;
         border: none;
     }
@@ -159,7 +158,7 @@
         font-family: 'Playfair Display', serif;
         font-style: italic;
         font-size: 15px;
-        color: var(--wine-soft);
+        color: var(--pink-deep);
         font-weight: 500;
     }
 
@@ -190,14 +189,14 @@
         color: var(--plum-text);
         font-weight: 500;
         padding-bottom: 6px;
-        border-bottom: 1px solid rgba(60, 15, 31, 0.12);
+        border-bottom: 1px solid rgba(147, 25, 92, 0.14);
     }
 
     .products li::before {
         content: '';
         width: 5px;
         height: 5px;
-        background: var(--gold);
+        background: var(--pink-accent);
         border-radius: 50%;
         flex-shrink: 0;
     }
@@ -207,7 +206,7 @@
     /* ── footer CTA ── */
     .footer {
         margin-top: auto;
-        background: var(--wine);
+        background: linear-gradient(135deg, var(--pink-deep), var(--pink-darkest));
         padding: 18px 26px 20px;
         display: flex;
         flex-direction: column;
@@ -224,7 +223,7 @@
         font-size: 9.5px;
         letter-spacing: 3px;
         text-transform: uppercase;
-        color: var(--gold-soft);
+        color: var(--pink-accent-soft);
         font-weight: 500;
     }
 
@@ -232,7 +231,7 @@
         font-family: 'Playfair Display', serif;
         font-size: 25px;
         font-weight: 700;
-        color: var(--ivory);
+        color: var(--blush-light);
         letter-spacing: 0.5px;
     }
 
@@ -241,7 +240,7 @@
         justify-content: space-between;
         align-items: center;
         padding-top: 10px;
-        border-top: 1px solid rgba(217, 189, 130, 0.25);
+        border-top: 1px solid rgba(243, 182, 209, 0.3);
     }
 
     .alt-contact {
@@ -249,14 +248,14 @@
         align-items: center;
         gap: 6px;
         font-size: 12px;
-        color: var(--gold-soft);
+        color: var(--pink-accent-soft);
         font-weight: 300;
     }
 
     .alt-contact svg {
         width: 13px;
         height: 13px;
-        stroke: var(--gold-soft);
+        stroke: var(--pink-accent-soft);
         fill: none;
         stroke-width: 2;
         stroke-linecap: round;
@@ -265,7 +264,7 @@
 
     .handle {
         font-size: 12px;
-        color: var(--ivory);
+        color: var(--blush-light);
         font-weight: 500;
         letter-spacing: 0.5px;
     }
@@ -307,7 +306,7 @@
             <div class="strand-divider">
                 <svg viewBox="0 0 300 14" preserveAspectRatio="none">
                     <path d="M0,7 C30,0 60,14 90,7 C120,0 150,14 180,7 C210,0 240,14 270,7 C285,3.5 295,3.5 300,7"
-                          fill="none" stroke="#c19a4f" stroke-width="1.4" stroke-linecap="round"/>
+                          fill="none" stroke="#d94f8c" stroke-width="1.4" stroke-linecap="round"/>
                 </svg>
             </div>
 
