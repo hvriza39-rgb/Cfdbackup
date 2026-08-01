@@ -6,18 +6,21 @@
 <title>D~hairs | Luxury Hair Collective</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Jost:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet">
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-        --blush-light: #fdecf3;
-        --blush-mid: #f6d3e3;
-        --pink-deep: #F04DB4;
-        --pink-darkest: #560f3c;
-        --pink-accent: #d94f8c;
-        --pink-accent-soft: #f3b6d1;
-        --plum-text: #6e1f49;
+        --pink-50: #fff0f5;
+        --pink-100: #ffd6e5;
+        --pink-200: #ff8fab;
+        --pink-300: #fb6f92;
+        --pink-400: #ff006e;
+        --pink-500: #e83e8c;
+        --pink-600: #c9184a;
+        --pink-700: #a4133c;
+        --pink-800: #800f2f;
+        --pink-900: #590d22;
     }
 
     body {
@@ -25,7 +28,7 @@
         justify-content: center;
         align-items: center;
         min-height: 100vh;
-        background: linear-gradient(160deg, #fdecf3, #f3cfe1);
+        background: linear-gradient(160deg, var(--pink-50), var(--pink-100));
         font-family: 'Jost', sans-serif;
         padding: 24px;
     }
@@ -38,13 +41,12 @@
         border-radius: 28px;
         overflow: hidden;
         box-shadow:
-            0 30px 60px rgba(147, 25, 92, 0.28),
-            0 8px 20px rgba(147, 25, 92, 0.16);
+            0 30px 60px rgba(192, 24, 74, 0.22),
+            0 8px 20px rgba(192, 24, 74, 0.12);
         display: flex;
         flex-direction: column;
     }
 
-    /* Full-bleed background image */
     .flyer > img.bg {
         position: absolute;
         inset: 0;
@@ -52,149 +54,150 @@
         height: 100%;
         object-fit: cover;
         object-position: center 20%;
-        filter: grayscale(10%) contrast(1.05) saturate(0.9);
+        filter: grayscale(15%) contrast(1.08) saturate(0.88);
         z-index: 0;
     }
 
-    /* Continuous pink gradient overlay — one seamless wash */
+    /* Seamless pink wash — no magenta, no purple */
     .flyer::before {
         content: '';
         position: absolute;
         inset: 0;
         z-index: 1;
         background: linear-gradient(180deg,
-            rgba(253, 236, 243, 0.25) 0%,
-            rgba(246, 211, 227, 0.55) 18%,
-            rgba(240, 140, 190, 0.72) 38%,
-            rgba(217, 79, 140, 0.82) 58%,
-            rgba(110, 31, 73, 0.92) 78%,
-            rgba(86, 15, 60, 0.97) 100%
+            rgba(255, 240, 245, 0.20) 0%,
+            rgba(255, 214, 229, 0.50) 15%,
+            rgba(255, 143, 171, 0.70) 32%,
+            rgba(251, 111, 146, 0.82) 50%,
+            rgba(232, 62, 140, 0.90) 68%,
+            rgba(201, 24, 74, 0.95) 85%,
+            rgba(163, 19, 60, 0.98) 100%
         );
     }
 
-    /* Extra depth vignette for cohesion */
+    /* Soft vignette for depth */
     .flyer::after {
         content: '';
         position: absolute;
         inset: 0;
         z-index: 1;
-        background: radial-gradient(ellipse at 50% 0%, transparent 40%, rgba(86, 15, 60, 0.35) 100%);
+        background: radial-gradient(ellipse at 50% 0%, transparent 45%, rgba(89, 13, 34, 0.25) 100%);
         pointer-events: none;
     }
 
-    /* ── top badge ── */
     .monogram {
         position: absolute;
         top: 18px;
         left: 20px;
         z-index: 3;
-        width: 46px;
-        height: 46px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
-        background: rgba(253, 236, 243, 0.92);
-        backdrop-filter: blur(4px);
+        background: rgba(255, 240, 245, 0.95);
+        backdrop-filter: blur(6px);
         display: flex;
         align-items: center;
         justify-content: center;
         font-family: 'Playfair Display', serif;
-        font-weight: 700;
-        font-size: 20px;
-        color: var(--pink-darkest);
-        box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+        font-weight: 900;
+        font-size: 22px;
+        color: var(--pink-700);
+        box-shadow: 0 6px 20px rgba(89, 13, 34, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.4);
     }
 
     .photo-caption {
         position: absolute;
-        top: 74px;
+        top: 78px;
         left: 20px;
         z-index: 3;
         font-size: 10px;
-        letter-spacing: 3px;
+        letter-spacing: 4px;
         text-transform: uppercase;
-        color: rgba(253, 236, 243, 0.95);
-        font-weight: 500;
-        text-shadow: 0 1px 6px rgba(86, 15, 60, 0.5);
+        color: rgba(255, 255, 255, 0.95);
+        font-weight: 600;
+        text-shadow: 0 2px 10px rgba(89, 13, 34, 0.5);
     }
 
-    /* ── content ── */
     .content {
         position: relative;
         z-index: 2;
         flex: 1;
         display: flex;
         flex-direction: column;
-        padding: 120px 26px 0;
+        padding: 110px 28px 0;
         min-height: 0;
     }
 
     .brand {
         font-family: 'Playfair Display', serif;
-        font-size: 46px;
+        font-size: 52px;
         font-weight: 700;
-        color: var(--pink-darkest);
-        line-height: 1;
-        letter-spacing: -0.5px;
-        text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+        color: #fff;
+        line-height: 0.95;
+        letter-spacing: -1px;
+        text-shadow: 0 3px 12px rgba(89, 13, 34, 0.35), 0 1px 2px rgba(89, 13, 34, 0.2);
     }
 
     .brand em {
         font-style: italic;
         font-weight: 500;
-        color: #9e1b5c;
+        color: var(--pink-50);
     }
 
     .tagline {
-        margin-top: 8px;
+        margin-top: 10px;
         font-size: 11px;
-        letter-spacing: 4px;
+        letter-spacing: 5px;
         text-transform: uppercase;
-        color: var(--pink-darkest);
+        color: rgba(255, 255, 255, 0.92);
         font-weight: 600;
-        opacity: 0.85;
+        text-shadow: 0 2px 8px rgba(89, 13, 34, 0.3);
     }
 
     .rule {
-        width: 42px;
-        height: 2px;
-        background: var(--pink-accent);
-        margin: 14px 0;
+        width: 50px;
+        height: 2.5px;
+        background: linear-gradient(90deg, #fff, rgba(255,255,255,0.3));
+        margin: 16px 0;
         border: none;
-        opacity: 0.8;
+        border-radius: 2px;
     }
 
     .description {
-        font-size: 13.5px;
-        line-height: 1.65;
-        color: var(--pink-darkest);
+        font-family: 'Jost', sans-serif;
+        font-size: 14px;
+        line-height: 1.7;
+        color: rgba(255, 255, 255, 0.95);
         font-weight: 400;
-        max-width: 94%;
-        opacity: 0.92;
+        max-width: 96%;
+        text-shadow: 0 2px 8px rgba(89, 13, 34, 0.35);
     }
 
     .motto {
-        margin-top: 8px;
-        font-family: 'Playfair Display', serif;
+        margin-top: 10px;
+        font-family: 'Cormorant Garamond', serif;
         font-style: italic;
-        font-size: 16px;
-        color: #7a164d;
-        font-weight: 500;
+        font-size: 18px;
+        color: #fff;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-shadow: 0 2px 8px rgba(89, 13, 34, 0.3);
     }
 
-    /* ── strand divider ── */
     .strand-divider {
-        margin: 18px 0 14px;
+        margin: 20px 0 14px;
         width: 100%;
         height: 14px;
-        opacity: 0.7;
+        opacity: 0.8;
     }
 
     .strand-divider svg { width: 100%; height: 100%; }
 
-    /* ── product list ── */
     .products {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 8px 18px;
+        gap: 10px 20px;
     }
 
     .products li {
@@ -203,111 +206,111 @@
         align-items: baseline;
         gap: 8px;
         font-size: 11.5px;
-        letter-spacing: 1px;
+        letter-spacing: 2px;
         text-transform: uppercase;
-        color: var(--pink-darkest);
+        color: #fff;
         font-weight: 600;
-        padding-bottom: 6px;
-        border-bottom: 1px solid rgba(147, 25, 92, 0.18);
-        opacity: 0.95;
+        padding-bottom: 7px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+        text-shadow: 0 2px 6px rgba(89, 13, 34, 0.3);
     }
 
     .products li::before {
         content: '';
         width: 5px;
         height: 5px;
-        background: var(--pink-accent);
+        background: #fff;
         border-radius: 50%;
         flex-shrink: 0;
+        box-shadow: 0 0 6px rgba(255,255,255,0.5);
     }
 
     .products li.wide { grid-column: 1 / -1; }
 
-    /* ── footer CTA ── */
     .footer {
         position: relative;
         z-index: 2;
         margin-top: auto;
-        padding: 22px 26px 24px;
+        padding: 24px 28px 26px;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 14px;
     }
 
     .cta-primary {
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: 3px;
     }
 
     .cta-primary .label {
-        font-size: 9.5px;
-        letter-spacing: 3px;
+        font-size: 10px;
+        letter-spacing: 4px;
         text-transform: uppercase;
-        color: var(--pink-accent-soft);
-        font-weight: 500;
-        opacity: 0.95;
+        color: rgba(255, 240, 245, 0.9);
+        font-weight: 600;
     }
 
     .cta-primary .number {
         font-family: 'Playfair Display', serif;
-        font-size: 27px;
+        font-size: 30px;
         font-weight: 700;
-        color: var(--blush-light);
+        color: #fff;
         letter-spacing: 0.5px;
-        text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        text-shadow: 0 3px 12px rgba(89, 13, 34, 0.45);
     }
 
     .footer-lower {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-top: 10px;
-        border-top: 1px solid rgba(243, 182, 209, 0.35);
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .alt-contact {
         display: flex;
         align-items: center;
-        gap: 6px;
-        font-size: 12px;
-        color: var(--pink-accent-soft);
-        font-weight: 400;
+        gap: 7px;
+        font-size: 12.5px;
+        color: rgba(255, 240, 245, 0.95);
+        font-weight: 500;
+        text-shadow: 0 1px 4px rgba(89, 13, 34, 0.3);
     }
 
     .alt-contact svg {
-        width: 13px;
-        height: 13px;
-        stroke: var(--pink-accent-soft);
+        width: 14px;
+        height: 14px;
+        stroke: rgba(255, 240, 245, 0.95);
         fill: none;
         stroke-width: 2;
         stroke-linecap: round;
         stroke-linejoin: round;
+        filter: drop-shadow(0 1px 2px rgba(89,13,34,0.3));
     }
 
     .handle {
-        font-size: 12px;
-        color: var(--blush-light);
-        font-weight: 500;
+        font-size: 13px;
+        color: #fff;
+        font-weight: 600;
         letter-spacing: 0.5px;
+        text-shadow: 0 2px 6px rgba(89, 13, 34, 0.35);
     }
 
-    /* ── responsive ── */
     @media (max-width: 420px) {
-        .brand { font-size: 38px; }
-        .description { font-size: 12.5px; }
-        .cta-primary .number { font-size: 23px; }
-        .content { padding: 110px 20px 0; }
-        .footer { padding: 18px 20px 20px; }
+        .brand { font-size: 42px; }
+        .description { font-size: 13px; }
+        .cta-primary .number { font-size: 25px; }
+        .content { padding: 100px 22px 0; }
+        .footer { padding: 20px 22px 22px; }
         .products li { font-size: 10.5px; }
+        .motto { font-size: 16px; }
     }
 </style>
 </head>
 <body>
 
     <div class="flyer">
-
-        <!-- full-bleed background -->
         <img class="bg" src="https://i.ibb.co/V0zgXdTN/file-00000000663881f489481909553c4457.png" alt="D~hairs model" />
 
         <div class="monogram">D~</div>
@@ -327,7 +330,7 @@
             <div class="strand-divider">
                 <svg viewBox="0 0 300 14" preserveAspectRatio="none">
                     <path d="M0,7 C30,0 60,14 90,7 C120,0 150,14 180,7 C210,0 240,14 270,7 C285,3.5 295,3.5 300,7"
-                          fill="none" stroke="#d94f8c" stroke-width="1.4" stroke-linecap="round"/>
+                          fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.4" stroke-linecap="round"/>
                 </svg>
             </div>
 
@@ -353,7 +356,6 @@
                 <span class="handle">@d.hairs</span>
             </div>
         </div>
-
     </div>
 
 </body>
