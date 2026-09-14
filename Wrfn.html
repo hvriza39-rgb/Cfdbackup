@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WRFN — Join the Network | Wealth Rise &amp; Freedom Network</title>
+<meta name="description" content="Wealth Rise & Freedom Network — a free community for financial education, investing and wealth-building. Learn, connect and grow with 5,000+ members on WhatsApp and Telegram.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&family=Archivo:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS & RESET ============ */
+:root{
+  --ink:#071F1A;
+  --pine:#0B2B24;
+  --moss:#103329;
+  --paper:#F2EDE0;
+  --paper-dim:#E9E1CF;
+  --gold:#C9A15A;
+  --gold-bright:#E0BC74;
+  --gold-deep:#8A6A24;
+  --signal:#3FD08A;
+  --wa:#25C15E;
+  --tg:#2AABEE;
+  --line:rgba(201,161,90,.22);
+  --line-d:rgba(11,43,36,.16);
+  --mut:#9CB2A7;
+  --mut-d:#5B6F66;
+  --display:"Fraunces",Georgia,serif;
+  --body:"Archivo",Helvetica,Arial,sans-serif;
+  --mono:"Spline Sans Mono","Courier New",monospace;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);color:var(--paper);
+  font-family:var(--body);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+/* grain */
+body::after{
+  content:"";position:fixed;inset:0;z-index:120;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+::selection{background:var(--gold);color:var(--ink)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;background:none;border:0;color:inherit;cursor:pointer}
+img,svg{display:block}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.wrap{width:min(1180px,92vw);margin-inline:auto}
+.mono{font-family:var(--mono)}
+.skip{position:absolute;left:-9999px;top:0;background:var(--gold);color:var(--ink);padding:.6rem 1rem;z-index:300}
+.skip:focus{left:12px;top:12px}
+
+/* kickers */
+.kicker{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--gold);display:inline-flex;align-items:center;gap:.9rem;
+}
+.kicker::before{content:"";width:28px;height:1px;background:var(--gold)}
+.on-paper .kicker{color:var(--gold-deep)}
+.on-paper .kicker::before{background:var(--gold-deep)}
+
+/* scroll progress */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--gold);z-index:210}
+
+/* ============ HEADER ============ */
+header{
+  position:fixed;inset:0 0 auto 0;z-index:200;
+  border-bottom:1px solid transparent;transition:background .4s,border-color .4s;
+}
+header.scrolled{background:rgba(7,31,26,.96);border-color:var(--line)}
+.nav-bar{display:flex;align-items:center;justify-content:space-between;padding:1.05rem 0}
+.brand{display:flex;align-items:center;gap:.7rem}
+.brand svg{width:34px;height:34px}
+.brand b{font-family:var(--display);font-weight:600;font-size:1.25rem;letter-spacing:.04em}
+.brand small{display:block;font-family:var(--mono);font-size:.55rem;letter-spacing:.3em;color:var(--mut);text-transform:uppercase}
+nav.main{display:flex;align-items:center;gap:2.2rem}
+nav.main a{
+  font-family:var(--mono);font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);
+  position:relative;padding:.3rem 0;transition:color .3s;
+}
+nav.main a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:0;background:var(--gold);transition:width .35s}
+nav.main a:hover{color:var(--paper)}
+nav.main a:hover::after{width:100%}
+.nav-join{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;
+  border:1px solid var(--gold);color:var(--gold-bright);padding:.55rem 1.2rem;border-radius:2px;
+  transition:background .3s,color .3s;
+}
+.nav-join:hover{background:var(--gold);color:var(--ink)}
+#menuBtn{display:none;flex-direction:column;gap:6px;padding:6px}
+#menuBtn span{width:26px;height:2px;background:var(--paper);transition:transform .35s,opacity .3s}
+body.nav-open #menuBtn span:first-child{transform:translateY(8px) rotate(45deg)}
+body.nav-open #menuBtn span:last-child{transform:translateY(-8px) rotate(-45deg)}
+body.nav-open #menuBtn span:nth-child(2){opacity:0}
+.m-nav{
+  position:fixed;inset:0;background:var(--ink);z-index:190;display:flex;flex-direction:column;
+  justify-content:center;padding:0 8vw;gap:.4rem;
+  clip-path:inset(0 0 100% 0);transition:clip-path .55s cubic-bezier(.7,0,.3,1);
+}
+body.nav-open .m-nav{clip-path:inset(0 0 0 0)}
+.m-nav a{font-family:var(--display);font-size:clamp(2rem,8vw,3.4rem);padding:.35rem 0;border-bottom:1px solid var(--line)}
+.m-nav a em{font-style:italic;color:var(--gold)}
+.m-nav .m-cta{display:flex;gap:1rem;margin-top:2rem;font-family:var(--mono);font-size:.75rem;letter-spacing:.15em;text-transform:uppercase}
+.m-nav .m-cta a{border:1px solid var(--line);padding:.8rem 1.4rem;font-size:.75rem}
+
+/* ============ HERO ============ */
+.hero{position:relative;padding:11.5rem 0 7rem;overflow:hidden}
+.hero::before{ /* ledger grid, masked */
+  content:"";position:absolute;inset:0;
+  background-image:linear-gradient(rgba(201,161,90,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(201,161,90,.06) 1px,transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(ellipse at 28% 18%,#000 0%,transparent 72%);
+          mask-image:radial-gradient(ellipse at 28% 18%,#000 0%,transparent 72%);
+}
+.hero::after{
+  content:"";position:absolute;top:-220px;left:-160px;width:640px;height:640px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,161,90,.14),transparent 65%);pointer-events:none;
+}
+.hero .wrap{position:relative;z-index:2;display:grid;grid-template-columns:1.25fr .9fr;gap:4.5rem;align-items:start}
+.hero-copy .kicker{min-height:1.2em;display:inline-flex}
+.hero h1{
+  font-family:var(--display);font-weight:500;
+  font-size:clamp(2.7rem,5.6vw,4.5rem);line-height:1.05;letter-spacing:-.01em;
+  margin:1.4rem 0 1.6rem;
+}
+.hero h1 em{font-style:italic;color:var(--gold-bright)}
+.lm{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em;margin-bottom:-.08em}
+.lm > span{display:inline-block;transform:translateY(115%)}
+body.loaded .lm > span{transform:translateY(0);transition:transform .9s cubic-bezier(.2,.7,.2,1) calc(var(--i)*70ms + .2s)}
+.hfade{opacity:0;transform:translateY(18px)}
+body.loaded .hfade{opacity:1;transform:none;transition:opacity .8s ease var(--d,.6s),transform .8s cubic-bezier(.2,.7,.2,1) var(--d,.6s)}
+.hero-sub{max-width:34rem;color:var(--mut);font-size:1.06rem}
+.hero-meta{display:flex;flex-wrap:wrap;margin-top:2.6rem;border-top:1px solid var(--line)}
+.hero-meta div{padding:1.1rem 2rem 0 0;margin-right:2rem;border-right:1px solid var(--line)}
+.hero-meta div:last-child{border-right:0;margin-right:0}
+.hero-meta b{font-family:var(--display);font-size:1.5rem;font-weight:500;color:var(--gold-bright);display:block}
+.hero-meta span{font-family:var(--mono);font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mut)}
+
+/* rising chart behind console */
+.hero-chart{position:absolute;right:-2%;bottom:4%;width:min(560px,44vw);opacity:.3;pointer-events:none;z-index:1}
+.hero-chart polyline{
+  fill:none;stroke:var(--gold);stroke-width:2;
+  stroke-dasharray:1400;stroke-dashoffset:1400;
+}
+body.loaded .hero-chart polyline{animation:draw 2.4s ease .5s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* join console */
+.join-card{
+  position:relative;background:linear-gradient(160deg,#0E332B,#082019);
+  border:1px solid rgba(201,161,90,.4);padding:1.9rem 1.7rem 1.5rem;border-radius:4px;
+  box-shadow:0 30px 70px rgba(0,0,0,.45);
+  will-change:transform;transition:transform .25s ease;
+}
+.tick{position:absolute;width:12px;height:12px;border-color:var(--gold);border-style:solid;border-width:0}
+.tick.tl{top:7px;left:7px;border-top-width:1px;border-left-width:1px}
+.tick.tr{top:7px;right:7px;border-top-width:1px;border-right-width:1px}
+.tick.bl{bottom:7px;left:7px;border-bottom-width:1px;border-left-width:1px}
+.tick.br{bottom:7px;right:7px;border-bottom-width:1px;border-right-width:1px}
+.jc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.4rem}
+.jc-head h2{font-family:var(--mono);font-weight:500;font-size:.78rem;letter-spacing:.24em;color:var(--gold-bright)}
+.live{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 0 rgba(63,208,138,.5);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 9px rgba(63,208,138,0)}100%{box-shadow:0 0 0 0 rgba(63,208,138,0)}}
+.plat{
+  display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:1rem;
+  padding:1.1rem .8rem;border-top:1px solid var(--line);position:relative;
+  transition:background .3s,padding-left .3s;
+}
+.plat:hover{background:rgba(201,161,90,.07);padding-left:1.2rem}
+.plat-ico{width:46px;height:46px;border-radius:50%;display:grid;place-items:center}
+.plat-ico svg{width:22px;height:22px}
+.plat.wa .plat-ico{background:rgba(37,193,94,.14);color:var(--wa)}
+.plat.tg .plat-ico{background:rgba(42,171,238,.14);color:var(--tg)}
+.plat b{display:block;font-weight:600;font-size:.98rem}
+.plat small{display:block;color:var(--mut);font-size:.78rem;margin-top:.15rem}
+.plat-ct{font-family:var(--mono);font-size:.66rem;color:var(--gold);letter-spacing:.1em;text-align:right}
+.plat-arrow{color:var(--gold);transition:transform .3s}
+.plat:hover .plat-arrow{transform:translateX(5px)}
+.plat-right{display:flex;flex-direction:column;align-items:flex-end;gap:.4rem}
+.jc-foot{margin-top:1.3rem;padding-top:1.1rem;border-top:1px solid var(--line)}
+.spark{width:100%;height:30px}
+.spark path{fill:none;stroke:var(--signal);stroke-width:1.8;stroke-dasharray:420;stroke-dashoffset:420}
+body.loaded .spark path{animation:draw 2s ease 1.2s forwards}
+.jc-foot p{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-top:.4rem}
+.jc-note{margin-top:1rem;font-size:.75rem;color:var(--mut);text-align:center}
+.jc-note a{color:var(--gold-bright);border-bottom:1px solid transparent;transition:border-color .3s}
+.jc-note a:hover{border-color:var(--gold-bright)}
+
+/* ============ TICKER ============ */
+.ticker{border-block:1px solid var(--line);background:var(--pine);overflow:hidden}
+.ticker-track{display:flex;width:max-content;animation:mq 32s linear infinite}
+.ticker:hover .ticker-track{animation-play-state:paused}
+@keyframes mq{to{transform:translateX(-50%)}}
+.ticker-group{display:flex;align-items:center;padding:.85rem 0}
+.ticker-group span{font-family:var(--mono);font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:var(--mut);padding:0 1.6rem;white-space:nowrap}
+.ticker-group i{color:var(--gold);font-style:normal;font-size:.6rem}
+
+/* ============ SECTION SCAFFOLD ============ */
+section{position:relative}
+.sec-pad{padding:7.5rem 0}
+h2.sec-title{font-family:var(--display);font-weight:500;font-size:clamp(2rem,4vw,3.1rem);line-height:1.1;letter-spacing:-.01em;margin:1.1rem 0 1rem}
+h2.sec-title em{font-style:italic;color:var(--gold-deep)}
+.on-dark h2.sec-title em{color:var(--gold-bright)}
+.on-paper{background:var(--paper);color:var(--pine)}
+.on-paper .muted{color:var(--mut-d)}
+.on-dark .muted{color:var(--mut)}
+.muted{color:var(--mut)}
+/* scroll reveal */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s ease var(--d,0s),transform .8s cubic-bezier(.2,.7,.2,1) var(--d,0s)}
+.reveal.in{opacity:1;transform:none}
+
+/* ============ PILLARS ============ */
+.pillars .wrap{display:grid;grid-template-columns:.85fr 1.35fr;gap:5rem;align-items:start}
+.pillars-left{position:sticky;top:110px}
+.pillars-left .big-idx{
+  font-family:var(--display);font-style:italic;font-size:5rem;color:transparent;
+  -webkit-text-stroke:1px rgba(138,106,36,.55);line-height:1;margin-top:2.2rem;
+}
+.pillars-left p{max-width:24rem;margin-top:1rem;color:var(--mut-d)}
+.pillar{
+  display:grid;grid-template-columns:92px 1fr;gap:1.6rem;
+  padding:2.6rem 0 2.6rem 1.2rem;border-top:1px solid var(--line-d);position:relative;
+  transition:padding-left .35s;
+}
+.pillar::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold-deep);transform:scaleY(0);transform-origin:top;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.pillar:hover{padding-left:1.8rem}
+.pillar:hover::before{transform:scaleY(1)}
+.pillar:last-child{border-bottom:1px solid var(--line-d)}
+.pillar .idx{font-family:var(--display);font-style:italic;font-size:2.4rem;color:var(--gold-deep);line-height:1;padding-top:.2rem}
+.pillar h3{font-family:var(--display);font-weight:500;font-size:1.7rem;margin-bottom:.6rem}
+.pillar p{color:var(--mut-d);max-width:36rem}
+.tags{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:1.1rem}
+.tags span{
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;
+  border:1px solid rgba(11,43,36,.28);border-radius:999px;padding:.35rem .8rem;color:var(--mut-d);
+  transition:border-color .3s,color .3s;
+}
+.pillar:hover .tags span{border-color:var(--gold-deep);color:var(--pine)}
+
+/* ============ RHYTHM ============ */
+.rhythm{background:var(--pine)}
+.rhythm::before{
+  content:"";position:absolute;inset:0;
+  background-image:linear-gradient(rgba(201,161,90,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(201,161,90,.045) 1px,transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(ellipse at 80% 0%,#000,transparent 70%);
+          mask-image:radial-gradient(ellipse at 80% 0%,#000,transparent 70%);
+}
+.rhythm .wrap{position:relative}
+.rhythm-head{max-width:38rem;margin-bottom:3.5rem}
+.cadence{position:relative;max-width:56rem}
+.cadence::before{content:"";position:absolute;left:44px;top:12px;bottom:12px;width:1px;background:var(--line)}
+.day{
+  display:grid;grid-template-columns:90px 1fr;gap:2.2rem;align-items:baseline;
+  padding:1.7rem 0;border-top:1px solid rgba(201,161,90,.12);position:relative;
+}
+.day:last-child{border-bottom:1px solid rgba(201,161,90,.12)}
+.day-chip{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;color:var(--gold-bright);
+  border:1px solid var(--line);padding:.5rem 0;text-align:center;border-radius:2px;position:relative;
+  transition:background .3s,color .3s;z-index:1;background:var(--pine);
+}
+.day:hover .day-chip{background:var(--gold);color:var(--ink)}
+.day h3{font-family:var(--display);font-weight:500;font-size:1.45rem}
+.day h3 small{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;color:var(--mut);text-transform:uppercase;margin-left:.9rem;vertical-align:middle}
+.day p{color:var(--mut);margin-top:.35rem;max-width:38rem}
+
+/* ============ STATS (gold band) ============ */
+.stats{background:var(--gold);color:var(--ink)}
+.stats .wrap{display:grid;grid-template-columns:repeat(4,1fr)}
+.stat{padding:3.2rem 2rem;border-left:1px solid rgba(7,31,26,.28)}
+.stat:first-child{border-left:0}
+.stat b{font-family:var(--display);font-weight:500;font-size:clamp(2.4rem,4.4vw,3.6rem);display:block;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-family:var(--mono);font-size:.64rem;letter-spacing:.22em;text-transform:uppercase;opacity:.75;display:block;margin-top:.7rem}
+
+/* ============ RULES ============ */
+.rules-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 3rem;margin-top:3.2rem}
+.rule{border-top:1px solid var(--line-d);padding:2rem 0 2.4rem}
+.rule .rn{
+  font-family:var(--display);font-style:italic;font-size:2.6rem;line-height:1;
+  color:transparent;-webkit-text-stroke:1px var(--gold-deep);transition:color .35s;
+}
+.rule:hover .rn{color:var(--gold-deep)}
+.rule h3{font-weight:600;font-size:1.08rem;margin:.9rem 0 .5rem}
+.rule p{color:var(--mut-d);font-size:.92rem}
+
+/* ============ FAQ ============ */
+.faq{background:var(--paper-dim);color:var(--pine)}
+.faq-list{max-width:52rem;margin-top:2.8rem}
+.faq-item{border-top:1px solid var(--line-d)}
+.faq-item:last-child{border-bottom:1px solid var(--line-d)}
+.faq-q{
+  width:100%;display:grid;grid-template-columns:1fr 30px;align-items:center;gap:1rem;
+  padding:1.6rem 0;text-align:left;
+}
+.faq-q h3{font-family:var(--display);font-weight:500;font-size:clamp(1.1rem,2vw,1.4rem);transition:color .3s}
+.faq-q:hover h3{color:var(--gold-deep)}
+.plus{position:relative;width:16px;height:16px;justify-self:end}
+.plus::before,.plus::after{content:"";position:absolute;background:var(--pine);transition:transform .4s}
+.plus::before{left:0;top:7px;width:16px;height:2px}
+.plus::after{left:7px;top:0;width:2px;height:16px}
+.faq-item.open .plus::after{transform:rotate(90deg) scaleY(0)}
+.faq-item.open .plus::before{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.2,.7,.2,1)}
+.faq-a p{padding:0 3rem 1.7rem 0;color:var(--mut-d)}
+
+/* ============ CONTACT ============ */
+.contact{background:var(--ink)}
+.contact .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:5rem;align-items:start}
+.channel{display:grid;grid-template-columns:120px 1fr;gap:1.5rem;padding:1.7rem 0;border-top:1px solid var(--line);align-items:baseline}
+.channel:last-of-type{border-bottom:1px solid var(--line)}
+.channel .cl{font-family:var(--mono);font-size:.64rem;letter-spacing:.22em;text-transform:uppercase;color:var(--mut)}
+.channel a.big{
+  font-family:var(--display);font-style:italic;font-size:clamp(1.25rem,2.4vw,1.7rem);color:var(--gold-bright);
+  background-image:linear-gradient(currentColor,currentColor);background-size:0% 1px;background-repeat:no-repeat;background-position:0 100%;
+  transition:background-size .5s;
+}
+.channel a.big:hover{background-size:100% 1px}
+.channel p{color:var(--mut);font-size:.88rem;margin-top:.35rem}
+.desk-card{border:1px solid var(--line);padding:2rem;border-radius:4px;background:rgba(16,51,41,.4)}
+.desk-card h3{font-family:var(--mono);font-weight:500;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:1.4rem}
+.desk-row{display:flex;justify-content:space-between;gap:1rem;padding:.85rem 0;border-top:1px solid rgba(201,161,90,.14);font-size:.86rem}
+.desk-row span:first-child{color:var(--mut)}
+.desk-row span:last-child{font-family:var(--mono);font-size:.72rem;color:var(--paper)}
+.crew{display:flex;align-items:center;gap:1rem;margin-top:1.6rem}
+.crew .faces{display:flex}
+.crew .faces i{
+  width:38px;height:38px;border-radius:50%;background:var(--moss);border:1px solid var(--gold);
+  display:grid;place-items:center;font-family:var(--mono);font-style:normal;font-size:.62rem;color:var(--gold-bright);
+  margin-left:-10px;
+}
+.crew .faces i:first-child{margin-left:0}
+.crew p{font-size:.8rem;color:var(--mut)}
+
+/* ============ FOOTER ============ */
+footer{background:#051510;border-top:1px solid var(--line);padding:5.5rem 0 2.2rem}
+.foot-word{
+  font-family:var(--display);font-weight:500;font-size:clamp(2.4rem,7vw,5.2rem);line-height:1.02;letter-spacing:-.01em;
+  max-width:18ch;
+}
+.foot-word em{font-style:italic;color:var(--gold-bright)}
+.foot-tag{font-family:var(--mono);font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-top:1.6rem}
+.foot-grid{display:flex;justify-content:space-between;gap:3rem;flex-wrap:wrap;margin-top:4rem;padding-top:2rem;border-top:1px solid rgba(201,161,90,.14)}
+.foot-col b{font-family:var(--mono);font-weight:500;font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;color:var(--mut);display:block;margin-bottom:1rem}
+.foot-col a{display:block;font-size:.9rem;color:var(--paper);opacity:.8;padding:.22rem 0;transition:opacity .3s,color .3s}
+.foot-col a:hover{opacity:1;color:var(--gold-bright)}
+.foot-legal{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;margin-top:3.5rem;padding-top:1.4rem;border-top:1px solid rgba(201,161,90,.1);font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;color:var(--mut);text-transform:uppercase}
+.foot-legal a:hover{color:var(--gold-bright)}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:1020px){
+  .hero .wrap{grid-template-columns:1fr;gap:3.5rem}
+  .hero{padding-top:9.5rem}
+  .pillars .wrap{grid-template-columns:1fr;gap:2.5rem}
+  .pillars-left{position:static}
+  .rules-grid{grid-template-columns:repeat(2,1fr)}
+  .contact .wrap{grid-template-columns:1fr;gap:3.5rem}
+  .hero-chart{display:none}
+}
+@media (max-width:760px){
+  nav.main{display:none}
+  #menuBtn{display:flex}
+  .stats .wrap{grid-template-columns:1fr 1fr}
+  .stat{padding:2rem 1.2rem}
+  .stat:nth-child(odd){border-left:0}
+  .stat:nth-child(n+3){border-top:1px solid rgba(7,31,26,.28)}
+  .rules-grid{grid-template-columns:1fr}
+  .day{grid-template-columns:1fr;gap:.7rem}
+  .cadence::before{display:none}
+  .day-chip{justify-self:start;padding:.5rem 1.1rem}
+  .channel{grid-template-columns:1fr;gap:.4rem}
+  .hero-meta div{border-right:0;padding-right:0;margin-right:1.6rem}
+  .pillar{grid-template-columns:1fr;gap:.6rem;padding-left:.6rem}
+  .pillar:hover{padding-left:.9rem}
+}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .lm > span{transform:none}
+  .hfade,.reveal{opacity:1;transform:none}
+  .hero-chart polyline,.spark path{stroke-dashoffset:0}
+  .ticker-track{animation:none;flex-wrap:wrap;width:auto}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- ================= HEADER ================= -->
+<header id="header">
+  <div class="wrap nav-bar">
+    <a class="brand" href="#home" aria-label="WRFN home">
+      <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="16" cy="16" r="14.5" stroke="#C9A15A" stroke-width="1.4"/>
+        <rect x="8.5" y="17" width="3.4" height="6.5" fill="#C9A15A"/>
+        <rect x="14.3" y="12.5" width="3.4" height="11" fill="#C9A15A"/>
+        <rect x="20.1" y="8" width="3.4" height="15.5" fill="#C9A15A"/>
+      </svg>
+      <span><b>WRFN</b><small>Wealth Rise &amp; Freedom</small></span>
+    </a>
+    <nav class="main" aria-label="Primary">
+      <a href="#home">Home</a>
+      <a href="#pillars">About</a>
+      <a href="#contact">Contact</a>
+      <a class="nav-join" href="#join">Join free</a>
+    </nav>
+    <button id="menuBtn" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<div class="m-nav" id="mNav" aria-hidden="true">
+  <a href="#home">Home</a>
+  <a href="#pillars"><em>About</em> the network</a>
+  <a href="#rhythm">Weekly <em>cadence</em></a>
+  <a href="#faq">Questions</a>
+  <a href="#contact">Contact</a>
+  <div class="m-cta">
+    <a href="#join">WhatsApp ↗</a>
+    <a href="#join">Telegram ↗</a>
+  </div>
+</div>
+
+<main id="main">
+
+<!-- ================= HERO / MEMBER DESK ================= -->
+<section class="hero" id="home">
+  <svg class="hero-chart" viewBox="0 0 560 210" aria-hidden="true">
+    <polyline points="0,190 90,190 90,152 185,152 185,120 280,120 280,82 375,82 375,48 470,48 470,18 545,18"/>
+    <path d="M545 18 l-14 -7 v14 z" fill="#C9A15A"/>
+  </svg>
+  <div class="wrap">
+    <div class="hero-copy">
+      <span class="kicker" data-scramble>Member desk — intake open</span>
+      <h1>
+        <span class="lm"><span style="--i:0">Wealth</span></span>
+        <span class="lm"><span style="--i:1">rises</span></span>
+        <span class="lm"><span style="--i:2">faster</span></span><br>
+        <span class="lm"><span style="--i:3">in</span></span>
+        <span class="lm"><span style="--i:4"><em>good&nbsp;company.</em></span></span>
+      </h1>
+      <p class="hero-sub hfade" style="--d:.75s">
+        Wealth Rise &amp; Freedom Network is a free community for people serious about financial
+        education, investing and long-term wealth — built on three habits:
+        <strong>learn, connect, grow.</strong>
+      </p>
+      <div class="hero-meta hfade" style="--d:.9s">
+        <div><b>5,400+</b><span>Members</span></div>
+        <div><b>23</b><span>Countries</span></div>
+        <div><b>Est. 2023</b><span>&amp; growing weekly</span></div>
+        <div><b>£0 / $0</b><span>To join or stay</span></div>
+      </div>
+    </div>
+
+    <!-- Join console -->
+    <div class="join-card hfade" id="joinCard" style="--d:.55s" id="join">
+      <span class="tick tl" aria-hidden="true"></span><span class="tick tr" aria-hidden="true"></span>
+      <span class="tick bl" aria-hidden="true"></span><span class="tick br" aria-hidden="true"></span>
+      <div class="jc-head">
+        <h2 id="join">Join the network</h2>
+        <span class="live"><i></i>Intake open</span>
+      </div>
+
+      <a class="plat wa" href="#" aria-label="Join the WRFN WhatsApp channel">
+        <span class="plat-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9.1 8.4c.2-.5.5-.5.8-.5h.6c.2 0 .5-.1.7.5.2.6.7 1.6.8 1.7.1.2.1.4 0 .6-.3.6-.7.9-.4 1.4.7 1.1 1.6 1.9 2.8 2.4.4.2.6.1.8-.1l.7-.8c.2-.2.4-.2.7-.1l1.6.8c.3.1.5.2.5.4 0 .6-.3 1.6-.9 2-.5.4-1.3.6-2.4.3-2.6-.8-4.9-2.6-6.3-5.1-.5-.9-.6-1.7-.4-2.3.1-.4.3-.8.5-1.2Z" fill="currentColor"/></svg>
+        </span>
+        <span><b>WhatsApp Channel</b><small>Daily money notes · voice briefs · member chat</small></span>
+        <span class="plat-right">
+          <span class="plat-ct">3,800+ inside</span>
+          <svg class="plat-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 12h16m-6-6 6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="plat tg" href="#" aria-label="Join the WRFN Telegram channel">
+        <span class="plat-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M21.5 4.1 3.9 10.9c-.9.35-.85 1.6.07 1.9l4.5 1.4 1.7 4.6c.32.87 1.45 1 1.95.24l2.1-3.2 4.6 3.4c.75.55 1.8.14 2-.77l2.4-12.9c.2-1-.76-1.8-1.72-1.47Z" fill="currentColor"/></svg>
+        </span>
+        <span><b>Telegram Channel</b><small>Market threads · AMAs · searchable archive</small></span>
+        <span class="plat-right">
+          <span class="plat-ct">1,600+ inside</span>
+          <svg class="plat-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 12h16m-6-6 6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <div class="jc-foot">
+        <svg class="spark" viewBox="0 0 160 30" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M2,27 C20,26 32,23 48,21 C64,19 74,14 90,12 C106,10 116,7 130,5.5 C142,4.3 150,3.4 158,2.6"/>
+        </svg>
+        <p>Member growth · 2023 → today</p>
+      </div>
+      <div class="jc-note">No spam, ever. Leave anytime · Prefer email? <a href="mailto:hello@wrfn.network">hello@wrfn.network</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TICKER ================= -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <div class="ticker-group">
+      <span>Learn</span><i>✦</i><span>Connect</span><i>✦</i><span>Grow</span><i>✦</i>
+      <span>Compound &gt; Hustle</span><i>✦</i><span>Assets over status</span><i>✦</i>
+      <span>Pay yourself first</span><i>✦</i><span>Time in the market</span><i>✦</i>
+      <span>Freedom is the dividend</span><i>✦</i>
+    </div>
+    <div class="ticker-group">
+      <span>Learn</span><i>✦</i><span>Connect</span><i>✦</i><span>Grow</span><i>✦</i>
+      <span>Compound &gt; Hustle</span><i>✦</i><span>Assets over status</span><i>✦</i>
+      <span>Pay yourself first</span><i>✦</i><span>Time in the market</span><i>✦</i>
+      <span>Freedom is the dividend</span><i>✦</i>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PILLARS ================= -->
+<section class="pillars on-paper sec-pad" id="pillars">
+  <div class="wrap">
+    <div class="pillars-left reveal">
+      <span class="kicker">The method</span>
+      <h2 class="sec-title">Three habits.<br>One direction: <em>up.</em></h2>
+      <p>Everything in WRFN feeds one loop — learn the fundamentals, connect with people who hold you to them, and grow into habits that compound.</p>
+      <div class="big-idx" aria-hidden="true">01–03</div>
+    </div>
+    <div class="pillars-right">
+      <article class="pillar reveal">
+        <div class="idx" aria-hidden="true">01</div>
+        <div>
+          <h3>Learn — sharpen your money literacy</h3>
+          <p>Weekly notes on personal finance, investing basics and the psychology behind both. Plain language, no hype, no jargon walls — the Monday brief takes five minutes.</p>
+          <div class="tags"><span>Personal finance</span><span>Investing 101</span><span>Money psychology</span></div>
+        </div>
+      </article>
+      <article class="pillar reveal" style="--d:.1s">
+        <div class="idx" aria-hidden="true">02</div>
+        <div>
+          <h3>Connect — find your room</h3>
+          <p>Introduce yourself, ask questions, trade ideas. Members span 23 countries — from first paychecks to first portfolios to planning early retirement.</p>
+          <div class="tags"><span>Member Q&amp;A</span><span>City circles</span><span>Idea exchange</span></div>
+        </div>
+      </article>
+      <article class="pillar reveal" style="--d:.2s">
+        <div class="idx" aria-hidden="true">03</div>
+        <div>
+          <h3>Grow — turn knowledge into position</h3>
+          <p>Goal sprints, accountability pairs and monthly reviews that convert what you learned into savings rate, investments and habits that actually stick.</p>
+          <div class="tags"><span>Goal sprints</span><span>Accountability</span><span>Habit reviews</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RHYTHM ================= -->
+<section class="rhythm on-dark sec-pad" id="rhythm">
+  <div class="wrap">
+    <div class="rhythm-head reveal">
+      <span class="kicker">The cadence</span>
+      <h2 class="sec-title">Your week <em>in the network.</em></h2>
+      <p class="muted">A steady rhythm beats a burst of motivation. This is what lands in your pocket each week — about fifteen minutes in total.</p>
+    </div>
+    <div class="cadence">
+      <div class="day reveal">
+        <span class="day-chip">MON</span>
+        <div><h3>Market-Open Brief <small>5-min read</small></h3>
+        <p>The three ideas worth thinking about this week — one concept, one question, one action.</p></div>
+      </div>
+      <div class="day reveal" style="--d:.08s">
+        <span class="day-chip">WED</span>
+        <div><h3>Ask the Room <small>Open thread</small></h3>
+        <p>Open Q&amp;A. No question too basic, no strategy too serious — the room answers, not an algorithm.</p></div>
+      </div>
+      <div class="day reveal" style="--d:.16s">
+        <span class="day-chip">FRI</span>
+        <div><h3>Wins &amp; Lessons <small>Show your receipts</small></h3>
+        <p>Celebrate a win, share a loss, log the lesson. Screenshots and numbers encouraged.</p></div>
+      </div>
+      <div class="day reveal" style="--d:.24s">
+        <span class="day-chip">SUN</span>
+        <div><h3>The Digest <small>Weekly recap</small></h3>
+        <p>Everything you missed, summarised in one post — so Monday starts with zero FOMO.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STATS ================= -->
+<section class="stats" aria-label="Network numbers">
+  <div class="wrap">
+    <div class="stat reveal"><b><span data-count="5400" data-suffix="+">0</span></b><span>Members &amp; counting</span></div>
+    <div class="stat reveal" style="--d:.08s"><b><span data-count="23">0</span></b><span>Countries represented</span></div>
+    <div class="stat reveal" style="--d:.16s"><b><span data-count="120" data-suffix="+">0</span></b><span>Briefs &amp; threads published</span></div>
+    <div class="stat reveal" style="--d:.24s"><b><span data-count="0">0</span></b><span>Fees — free to join &amp; stay</span></div>
+  </div>
+</section>
+
+<!-- ================= HOUSE RULES ================= -->
+<section class="on-paper sec-pad" id="rules">
+  <div class="wrap">
+    <div class="reveal" style="max-width:38rem">
+      <span class="kicker">House rules</span>
+      <h2 class="sec-title">How we keep <em>the room sharp.</em></h2>
+      <p class="muted">A community is only as good as its standards. These six are enforced by the desk, kindly but firmly.</p>
+    </div>
+    <div class="rules-grid">
+      <div class="rule reveal"><div class="rn">01</div><h3>No get-rich-quick</h3><p>Promotions, pumps and “guaranteed returns” get you removed. Compounding is the only magic allowed here.</p></div>
+      <div class="rule reveal" style="--d:.07s"><div class="rn">02</div><h3>Give before you ask</h3><p>Answer a question today, ask one tomorrow. The network pays back those who pay in.</p></div>
+      <div class="rule reveal" style="--d:.14s"><div class="rn">03</div><h3>Sources over vibes</h3><p>Share the data or the article behind your take. Strong opinions, held loosely.</p></div>
+      <div class="rule reveal" style="--d:.21s"><div class="rn">04</div><h3>Privacy stays inside</h3><p>What members share about their numbers stays in the room. Full stop.</p></div>
+      <div class="rule reveal" style="--d:.28s"><div class="rn">05</div><h3>Beginners welcome</h3><p>No jargon-gatekeeping. Explain it so a smart sixteen-year-old could follow.</p></div>
+      <div class="rule reveal" style="--d:.35s"><div class="rn">06</div><h3>Disagree well</h3><p>Attack the argument, never the person. The best idea usually comes from the other side.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="faq sec-pad" id="faq">
+  <div class="wrap">
+    <div class="reveal" style="max-width:38rem">
+      <span class="kicker">Before you join</span>
+      <h2 class="sec-title">Fair <em>questions.</em></h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <button class="faq-q" aria-expanded="false"><h3>Is it really free?</h3><span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>Yes — free to join, free to stay. We occasionally highlight partner tools that members ask about, and they never influence what we teach.</p></div>
+      </div>
+      <div class="faq-item reveal" style="--d:.06s">
+        <button class="faq-q" aria-expanded="false"><h3>WhatsApp or Telegram — which should I pick?</h3><span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>Both carry the same core briefs. WhatsApp is leaner for daily notes and voice briefs; Telegram adds searchable threads, files and the archive. Many members keep both and mute one.</p></div>
+      </div>
+      <div class="faq-item reveal" style="--d:.12s">
+        <button class="faq-q" aria-expanded="false"><h3>I’m a complete beginner. Will I be lost?</h3><span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>No. The Monday brief and the Learn notes assume zero background, and house rule #05 means nobody gets mocked for a basic question. Around a third of new members start with no investing experience at all.</p></div>
+      </div>
+      <div class="faq-item reveal" style="--d:.18s">
+        <button class="faq-q" aria-expanded="false"><h3>Is this financial advice?</h3><span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>No. Everything shared is education and discussion, not personal financial advice. For decisions involving real money, consult a licensed professional in your country.</p></div>
+      </div>
+      <div class="faq-item reveal" style="--d:.24s">
+        <button class="faq-q" aria-expanded="false"><h3>How much time does it take?</h3><span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>About fifteen minutes a week if you only read the briefs. The threads, sprints and circles are there whenever you want to go deeper.</p></div>
+      </div>
+      <div class="faq-item reveal" style="--d:.3s">
+        <button class="faq-q" aria-expanded="false"><h3>How do I reach the team directly?</h3><span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>Email <strong>hello@wrfn.network</strong> for anything formal, or DM a community manager on either platform — desk hours are Mon–Fri, 09:00–17:00 GMT.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTACT ================= -->
+<section class="contact on-dark sec-pad" id="contact">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="kicker">Direct line</span>
+      <h2 class="sec-title">Talk to <em>a human.</em></h2>
+      <p class="muted" style="max-width:30rem;margin-bottom:2.6rem">For partnerships, press, or anything that doesn’t fit a chat thread — the desk is open and replies personally.</p>
+
+      <div class="channel">
+        <span class="cl">Email</span>
+        <div>
+          <a class="big" href="mailto:hello@wrfn.network">hello@wrfn.network</a>
+          <p>Best for partnerships, press and formal requests. Replies within 48 hours.</p>
+        </div>
+      </div>
+      <div class="channel">
+        <span class="cl">WhatsApp desk</span>
+        <div>
+          <a class="big" href="#">Message the desk ↗</a>
+          <p>Chat with a community manager. Mon–Fri, 09:00–17:00 GMT.</p>
+        </div>
+      </div>
+      <div class="channel">
+        <span class="cl">Telegram desk</span>
+        <div>
+          <a class="big" href="#">@wrfn_desk ↗</a>
+          <p>Fastest route for member questions and channel support.</p>
+        </div>
+      </div>
+    </div>
+
+    <aside class="desk-card reveal" style="--d:.15s">
+      <h3>The community desk</h3>
+      <div class="desk-row"><span>Desk hours</span><span>Mon–Fri · 09–17 GMT</span></div>
+      <div class="desk-row"><span>Email response</span><span>&lt; 48 hours</span></div>
+      <div class="desk-row"><span>Chat response</span><span>Same day</span></div>
+      <div class="desk-row"><span>Languages</span><span>EN · FR · PT</span></div>
+      <div class="crew">
+        <div class="faces" aria-hidden="true"><i>AD</i><i>KO</i><i>TM</i></div>
+        <p>Three community managers keep the room tidy, the briefs on time and the spammers out.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="wrap">
+    <p class="foot-word">Wealth Rise &amp; <em>Freedom</em> Network</p>
+    <p class="foot-tag">Learn · Connect · Grow</p>
+    <div class="foot-grid">
+      <div class="foot-col">
+        <b>Navigate</b>
+        <a href="#home">Home</a><a href="#pillars">About</a><a href="#rhythm">Cadence</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
+      </div>
+      <div class="foot-col">
+        <b>Join</b>
+        <a href="#">WhatsApp channel</a><a href="#">Telegram channel</a><a href="mailto:hello@wrfn.network">Email list</a>
+      </div>
+      <div class="foot-col">
+        <b>Legal</b>
+        <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Community guidelines</a>
+      </div>
+    </div>
+    <div class="foot-legal">
+      <span>© 2026 WRFN · All rights reserved</span>
+      <span>Content is educational — not financial advice</span>
+      <a href="#home">Back to top ↑</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* loaded state (hero reveals + chart draw) */
+  function setLoaded(){ document.body.classList.add("loaded"); }
+  if (document.readyState === "complete") setLoaded();
+  else { window.addEventListener("load", setLoaded); setTimeout(setLoaded, 700); }
+
+  /* header + progress */
+  var header = document.getElementById("header"),
+      progress = document.getElementById("progress");
+  function onScroll(){
+    header.classList.toggle("scrolled", window.scrollY > 24);
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + "%";
+  }
+  window.addEventListener("scroll", onScroll, {passive:true}); onScroll();
+
+  /* mobile nav */
+  var btn = document.getElementById("menuBtn"), mnav = document.getElementById("mNav");
+  btn.addEventListener("click", function(){
+    var open = document.body.classList.toggle("nav-open");
+    btn.setAttribute("aria-expanded", open);
+    mnav.setAttribute("aria-hidden", !open);
+  });
+  mnav.querySelectorAll("a").forEach(function(a){
+    a.addEventListener("click", function(){
+      document.body.classList.remove("nav-open");
+      btn.setAttribute("aria-expanded","false");
+      mnav.setAttribute("aria-hidden","true");
+    });
+  });
+
+  /* scroll reveal */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
+    });
+  }, {threshold:.14});
+  document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+
+  /* scramble-decode kicker */
+  function scramble(el){
+    var chars = "◆✦ABDEHKMNPRSTUWX0123456789",
+        final = el.textContent,
+        start = performance.now(), dur = 950;
+    (function tick(now){
+      var p = Math.min(1, (now - start) / dur),
+          solved = Math.floor(p * final.length), out = "";
+      for (var i = 0; i < final.length; i++){
+        var c = final[i];
+        out += (c === " " || i < solved) ? c : chars[Math.floor(Math.random()*chars.length)];
+      }
+      el.textContent = out;
+      if (p < 1) requestAnimationFrame(tick); else el.textContent = final;
+    })(start);
+  }
+  if (!reduced){
+    var sio = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){ scramble(e.target); sio.unobserve(e.target); }
+      });
+    }, {threshold:.6});
+    document.querySelectorAll("[data-scramble]").forEach(function(el){ sio.observe(el); });
+  }
+
+  /* count-up */
+  function countUp(el){
+    var target = parseInt(el.dataset.count, 10),
+        suffix = el.dataset.suffix || "",
+        start = performance.now(), dur = 1500;
+    (function tick(now){
+      var p = Math.min(1, (now - start) / dur),
+          ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * ease).toLocaleString("en-US") + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+  var cio = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        reduced ? e.target.textContent = (+e.target.dataset.count).toLocaleString("en-US") + (e.target.dataset.suffix||"")
+                : countUp(e.target);
+        cio.unobserve(e.target);
+      }
+    });
+  }, {threshold:.5});
+  document.querySelectorAll("[data-count]").forEach(function(el){ cio.observe(el); });
+
+  /* FAQ accordion (one open at a time) */
+  document.querySelectorAll(".faq-item").forEach(function(item){
+    var q = item.querySelector(".faq-q"), a = item.querySelector(".faq-a");
+    q.addEventListener("click", function(){
+      var isOpen = item.classList.contains("open");
+      document.querySelectorAll(".faq-item.open").forEach(function(o){
+        o.classList.remove("open");
+        o.querySelector(".faq-a").style.maxHeight = null;
+        o.querySelector(".faq-q").setAttribute("aria-expanded","false");
+      });
+      if(!isOpen){
+        item.classList.add("open");
+        a.style.maxHeight = a.scrollHeight + "px";
+        q.setAttribute("aria-expanded","true");
+      }
+    });
+  });
+
+  /* gentle tilt on join card */
+  var card = document.getElementById("joinCard");
+  if (card && !reduced && window.matchMedia("(pointer:fine)").matches){
+    card.addEventListener("mousemove", function(e){
+      var r = card.getBoundingClientRect(),
+          x = (e.clientX - r.left) / r.width - .5,
+          y = (e.clientY - r.top) / r.height - .5;
+      card.style.transform = "perspective(900px) rotateY(" + (x*4).toFixed(2) + "deg) rotateX(" + (-y*4).toFixed(2) + "deg)";
+    });
+    card.addEventListener("mouseleave", function(){ card.style.transform = ""; });
+  }
+})();
+</script>
+</body>
+</html>
