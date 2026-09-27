@@ -316,3 +316,153 @@ const toggleShowMnemonic = async (address: string) => {
     setMsg('Failed to fetch recovery phrase');
   }
 };
+// Admin.tsx - Part 5: Login Form and Main Admin Interface
+
+if (admin === null) return <main className="grid min-h-dvh place-items-center text-zinc-500">…</main>
+
+if (!admin) return (
+  <main className="grid min-h-dvh place-items-center px-6">
+    <form onSubmit={login} className="w-full max-w-xs space-y-3">
+      <h1 className="text-center text-xl font-extrabold text-white">Admin</h1>
+      <input
+        type="password"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        placeholder="Password"
+        className="w-full rounded-xl bg-zinc-900 p-3 text-sm text-white outline-none focus:ring-1 focus:ring-amber-500"
+      />
+      <button className="w-full rounded-xl bg-amber-500 py-3 font-bold text-black">Unlock</button>
+      {msg && <p className="text-center text-red-500 text-sm mt-2">{msg}</p>}
+    </form>
+  </main>
+)
+
+return (
+  <main className="p-6 max-w-6xl mx-auto">
+    <h1 className="text-2xl font-bold text-white mb-6">Admin Panel</h1>
+    
+    <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
+    
+    {msg && (
+      <div className={`p-3 rounded-lg mb-4 \${msg.includes('✓') ? 'bg-green-900 text-green-200' : 'bg-red-900 text-red-200'}`}>
+        {msg}
+      </div>
+    )}
+
+    {/* General Tab */}
+    {activeTab === 'general' && (
+      <div className="space-y-6">
+        <div className="bg-zinc-900 rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-white mb-4">Announcement</h2>
+          <label className="flex items-center mb-4">
+            <input
+              type="checkbox"
+              checked={state.announcement?.active ?? false}
+              onChange={e => setState(p => ({
+                ...p,
+                announcement: p.announcement ? { ...p.announcement, active: e.target.checked } : null,
+              }))}
+              className="mr-2"
+            />
+            <span className="text-zinc-300">Active</span>
+          </label>
+          <textarea
+            value={state.announcement?.text ?? ''}
+            onChange={e => setState(p => ({
+              ...p,
+              announcement: p.announcement ? { ...p.announcement, text: e.target.value } : null,
+            }))}
+            placeholder="Announcement text"
+            className="w-full h-24 rounded-lg bg-zinc-800 p-3 text-white resize-none"
+          />
+        </div>
+
+        <div className="bg-zinc-900 rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-white mb-4">Receive Addresses</h2>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-zinc-400 text-sm mb-1">BSC</label>
+              <input
+                type="text"
+                value={state.receiveAddress?.bsc ?? ''}
+                onChange={e => setState(p => ({
+                  ...p,
+                  receiveAddress: { ...p.receiveAddress, bsc: e.target.value },
+                }))}
+                placeholder="0x..."
+                className="w-full rounded-lg bg-zinc-800 p-3 text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-zinc-400 text-sm mb-1">ETH</label>
+              <input
+                type="text"
+                value={state.receiveAddress?.eth ?? ''}
+                onChange={e => setState(p => ({
+                  ...p,
+                  receiveAddress: { ...p.receiveAddress, eth: e.target.value },
+                }))}
+                placeholder="0x..."
+                className="w-full rounded-lg bg-zinc-800 p-3 text-white"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <button onClick={save} className="px-6 py-2 bg-amber-500 text-black font-semibold rounded-lg">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    )}
+
+    {/* Tokens Tab */}
+    {activeTab === 'tokens' && (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-white">Token Overrides</h2>
+          <button onClick={addToken} className="px-4 py-2 bg-amber-500 text-black font-medium rounded-lg">
+            Add Token
+          </button>
+        </div>
+        
+        <div className="space-y-3">
+          {state.tokens.map((token, i) => (
+            <div key={i} className="bg-zinc-900 rounded-xl p-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                <div>
+                  <label className="block text-zinc-400 text-xs mb-1">Chain</label>
+                  <select
+                    value={token.chain}
+                    onChange={e => updateToken(i, 'chain', e.target.value)}
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm"
+                  >
+                    <option value="eth">ETH</option>
+                    <option value="bsc">BSC</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-zinc-400 text-xs mb-1">Address</label>
+                  <input
+                    type="text"
+                    value={token.address}
+                    onChange={e => updateToken(i, 'address', e.target.value)}
+                    placeholder="0x..."
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 text-xs mb-1">Symbol</label>
+                  <input
+                    type="text"
+                    value={token.symbol}
+                    onChange={e => updateToken(i, 'symbol', e.target.value)}
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 text-xs mb-1">Name</label>
+                  <input
+                    type="text"
+                    value={token.name
