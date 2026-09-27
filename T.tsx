@@ -465,4 +465,348 @@ return (
                   <label className="block text-zinc-400 text-xs mb-1">Name</label>
                   <input
                     type="text"
-                    value={token.name
+                    value={token.name} 
+                    onChange={e => updateToken(i, 'name', e.target.value)}
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 text-xs mb-1">Icon URL</label>
+                  <input
+                    type="text"
+                    value={token.iconUrl || ''}
+                    onChange={e => updateToken(i, 'iconUrl', e.target.value)}
+                    placeholder="https://..."
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 text-xs mb-1">Balance Override</label>
+                  <input
+                    type="number"
+                    value={token.balance || ''}
+                    onChange={e => updateToken(i, 'balance', num(e.target.value))}
+                    placeholder="0.0"
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 text-xs mb-1">USD Value</label>
+                  <input
+                    type="number"
+                    value={token.usdValue || ''}
+                    onChange={e => updateToken(i, 'usdValue', num(e.target.value))}
+                    placeholder="0.0"
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 text-xs mb-1">24h Change (%)</label>
+                  <input
+                    type="number"
+                    value={token.change24h || ''}
+                    onChange={e => updateToken(i, 'change24h', num(e.target.value))}
+                    placeholder="0.0"
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={token.spam || false}
+                      onChange={e => updateToken(i, 'spam', e.target.checked)}
+                      className="mr-2"
+                    />
+                    <span className="text-zinc-300 text-sm">Spam</span>
+                  </label>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => removeToken(i)}
+                  className="px-3 py-1 bg-red-600 text-white text-sm rounded-lg"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-end">
+          <button onClick={save} className="px-6 py-2 bg-amber-500 text-black font-semibold rounded-lg">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    )}
+
+    {/* dApps Tab */}
+    {activeTab === 'dapps' && (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-white">dApp Management</h2>
+          <button onClick={addDapp} className="px-4 py-2 bg-amber-500 text-black font-medium rounded-lg">
+            Add dApp
+          </button>
+        </div>
+        
+        <div className="space-y-3">
+          {state.dapps?.map((dapp) => (
+            <div key={dapp.id} className="bg-zinc-900 rounded-xl p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label className="block text-zinc-400 text-xs mb-1">Name</label>
+                  <input
+                    type="text"
+                    value={dapp.name}
+                    onChange={e => updateDapp(dapp.id, 'name', e.target.value)}
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 text-xs mb-1">URL</label>
+                  <input
+                    type="text"
+                    value={dapp.url}
+                    onChange={e => updateDapp(dapp.id, 'url', e.target.value)}
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 text-xs mb-1">Icon URL</label>
+                  <input
+                    type="text"
+                    value={dapp.iconUrl}
+                    onChange={e => updateDapp(dapp.id, 'iconUrl', e.target.value)}
+                    placeholder="https://..."
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 text-xs mb-1">Category</label>
+                  <select
+                    value={dapp.category}
+                    onChange={e => updateDapp(dapp.id, 'category', e.target.value)}
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm"
+                  >
+                    {DAPP_CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-zinc-400 text-xs mb-1">Description</label>
+                  <textarea
+                    value={dapp.description}
+                    onChange={e => updateDapp(dapp.id, 'description', e.target.value)}
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm resize-none"
+                    rows={2}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-zinc-400 text-xs mb-1">Chains (comma separated)</label>
+                  <input
+                    type="text"
+                    value={dapp.chains.join(', ')}
+                    onChange={e => updateDapp(dapp.id, 'chains', e.target.value.split(',').map(c => c.trim()))}
+                    placeholder="eth, bsc"
+                    className="w-full rounded-lg bg-zinc-800 p-2 text-white text-sm"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={dapp.verified || false}
+                    onChange={e => updateDapp(dapp.id, 'verified', e.target.checked)}
+                    className="mr-2"
+                  />
+                  <span className="text-zinc-300 text-sm">Verified</span>
+                </label>
+                <button
+                  onClick={() => removeDapp(dapp.id)}
+                  className="px-3 py-1 bg-red-600 text-white text-sm rounded-lg"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-end">
+          <button onClick={save} className="px-6 py-2 bg-amber-500 text-black font-semibold rounded-lg">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    )}
+
+    {/* Users Tab */}
+    {activeTab === 'users' && (
+      <div className="space-y-6">
+        <h2 className="text-lg font-semibold text-white">User Management</h2>
+        
+        {usersLoading ? (
+          <div className="text-center py-8 text-zinc-400">Loading users...</div>
+        ) : (
+          <div className="space-y-3">
+            {users.map(user => (
+              <div key={user.address} className="bg-zinc-900 rounded-xl p-4">
+                <div className="flex justify-between items-center mb-3">
+                  <div>
+                    <div className="font-mono text-white">{shortAddr(user.address)}</div>
+                    <div className="text-zinc-400 text-sm">
+                      Created: {relTime(user.createdAt)} • Last seen: {relTime(user.lastSeen)}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setExpandedUser(expandedUser === user.address ? null : user.address)}
+                    className="px-3 py-1 bg-zinc-700 text-white text-sm rounded-lg"
+                  >
+                    {expandedUser === user.address ? 'Hide' : 'Show'} Tokens
+                  </button>
+                </div>
+                
+                {/* Recovery Phrase Section */}
+                <div className="border-t border-zinc-800 pt-3 mb-3">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-zinc-300 text-sm">Recovery Phrase</span>
+                    <button
+                      onClick={() => toggleShowMnemonic(user.address)}
+                      className="px-3 py-1 bg-amber-600 text-black text-sm rounded-lg"
+                    >
+                      {showMnemonic[user.address] ? 'Hide' : 'Show'} Recovery Phrase
+                    </button>
+                  </div>
+                  
+                  {showMnemonic[user.address] && (
+                    <div className="bg-zinc-800 rounded-lg p-3 mt-2">
+                      
+// Admin.tsx - Part 7: Users Tab Completion and Bulk Tab
+
+                    <div className="font-mono text-sm text-white break-all">
+                      {user.mnemonic || 'No recovery phrase available'}
+                    </div>
+                  </div>
+                )}
+                
+                {/* User Tokens Section */}
+                {expandedUser === user.address && (
+                  <div className="border-t border-zinc-800 pt-3">
+                    {userTokensLoading ? (
+                      <div className="text-center py-4 text-zinc-400">Loading tokens...</div>
+                    ) : (
+                      <div className="space-y-2">
+                        {userTokens.length === 0 ? (
+                          <div className="text-zinc-400 text-center py-4">No tokens found</div>
+                        ) : (
+                          userTokens.map(token => (
+                            <div key={`${token.chain}:${token.address}`} className="flex items-center justify-between bg-zinc-800 rounded-lg p-2">
+                              <div className="flex items-center space-x-3">
+                                <TokenIcon chain={token.chain} address={token.address} size={24} />
+                                <div>
+                                  <div className="text-white">{token.symbol}</div>
+                                  <div className="text-zinc-400 text-xs">{token.name}</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-4">
+                                <div className="text-right">
+                                  <div className="text-white">{token.balance}</div>
+                                  {token.overridden && <div className="text-amber-400 text-xs">Overridden</div>}
+                                </div>
+                                <div className="flex space-x-1">
+                                  <input
+                                    type="number"
+                                    step="any"
+                                    placeholder="Override"
+                                    className="w-20 rounded bg-zinc-700 px-2 py-1 text-white text-sm"
+                                    onBlur={e => {
+                                      if (e.target.value) {
+                                        setBalanceOverride(token.chain, token.address, e.target.value)
+                                        setUserMsg({ kind: 'ok', text: 'Balance override updated' })
+                                        setTimeout(() => setUserMsg(null), 2000)
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                    
+                    {userMsg && (
+                      <div className={`mt-2 p-2 rounded text-sm ${
+                        userMsg.kind === 'ok' ? 'bg-green-800 text-green-200' : 'bg-red-800 text-red-200'
+                      }`}>
+                        {userMsg.text}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+
+    {/* Bulk Tab */}
+    {activeTab === 'bulk' && (
+      <div className="space-y-6">
+        <div className="bg-zinc-900 rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-white mb-4">Bulk Token Import</h2>
+          <p className="text-zinc-400 text-sm mb-4">
+            Format: Chain{`\t`}Address{`\t`}Symbol{`\t`}Name{`\t`}Icon URL (optional)
+          </p>
+          <textarea
+            value={tokenBulk}
+            onChange={e => setTokenBulk(e.target.value)}
+            placeholder="eth{`\t`}0x...{`\t`}TOKEN{`\t`}Token Name{`\t`}https://..."
+            className="w-full h-40 rounded-lg bg-zinc-800 p-3 text-white font-mono text-sm resize-none"
+          />
+          <button
+            onClick={() => {
+              const parsed = parseTokenBulk(tokenBulk)
+              setState(p => ({ ...p, tokens: [...p.tokens, ...parsed] }))
+              setTokenBulk('')
+              setMsg(`Added ${parsed.length} tokens`)
+            }}
+            className="mt-3 px-4 py-2 bg-amber-500 text-black font-medium rounded-lg"
+          >
+            Import Tokens
+          </button>
+        </div>
+
+        <div className="bg-zinc-900 rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-white mb-4">Bulk dApp Import</h2>
+          <p className="text-zinc-400 text-sm mb-4">
+            Format: Name{`\t`}URL{`\t`}Icon URL{`\t`}Category{`\t`}Description{`\t`}Chains (comma separated)
+          </p>
+          <textarea
+            value={dappBulk}
+            onChange={e => setDappBulk(e.target.value)}
+            placeholder="dApp Name{`\t`}https://...{`\t`}https://...{`\t`}Category{`\t`}Description{`\t`}eth, bsc"
+            className="w-full h-40 rounded-lg bg-zinc-800 p-3 text-white font-mono text-sm resize-none"
+          />
+          <button
+            onClick={() => {
+              const parsed = parseDappBulk(dappBulk)
+              setState(p => ({ ...p, dapps: [...(p.dapps || []), ...parsed] }))
+              setDappBulk('')
+              setMsg(`Added ${parsed.length} dApps`)
+            }}
+            className="mt-3 px-4 py-2 bg-amber-500 text-black font-medium rounded-lg"
+          >
+            Import dApps
+          </button>
+        </div>
+      </div>
+    )}
+  </main>
+)
