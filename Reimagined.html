@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Renaissance Investors Club — Wisdom · Wealth · Legacy</title>
+<meta name="description" content="An invitation-only investment club. Community-driven market insights, curated education, and expert guidance to grow your wealth, generate passive income, and build a lasting legacy." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet" />
+
+<style>
+  :root{
+    --paper:      #FBFAF5;
+    --paper-deep: #F5F1E6;
+    --paper-warm: #FAF6EA;
+    --ink:        #1C1710;
+    --ink-soft:   rgba(28,23,16,0.80);
+    --ink-mute:   rgba(28,23,16,0.58);
+    --ink-faint:  rgba(28,23,16,0.40);
+    --gold:       #C9A227;
+    --gold-deep:  #8F6F14;
+    --gold-bright:#DDB94C;
+    --gold-light: #F3E3A6;
+    --rule:       rgba(143,111,20,0.28);
+    --rule-soft:  rgba(143,111,20,0.14);
+    --whatsapp:   #25D366;
+    --telegram:   #229ED9;
+    --ease:       cubic-bezier(.2,.8,.2,1);
+    --display:    'Playfair Display', Georgia, 'Times New Roman', serif;
+    --body:       'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --maxw:       1180px;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+  html, body{ margin:0; padding:0; overflow-x:hidden; }
+
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--body);
+    font-size:16px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    position:relative;
+    min-height:100svh;
+  }
+
+  /* ── Paper texture + golden dot grid ── */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    background-image:
+      radial-gradient(ellipse 90% 55% at 50% 8%, rgba(201,162,39,0.09) 0%, rgba(201,162,39,0.025) 45%, transparent 72%),
+      radial-gradient(rgba(201,162,39,0.14) 1px, transparent 1.4px);
+    background-size: 100% 100%, 34px 34px;
+    background-position: center top, 0 0;
+  }
+
+  /* ── Fine grain ── */
+  body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    opacity:.14;
+    mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.72 0 0 0 0 0.35 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ── Three.js particle canvas (whisper-quiet gold dust) ── */
+  #scene{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    width:100%;
+    height:100%;
+    display:block;
+    pointer-events:none;
+    opacity:.55;
+  }
+
+  a{ color:inherit; text-decoration:none; }
+  button{ font-family:inherit; }
+  :focus-visible{ outline:2px solid var(--gold); outline-offset:3px; }
+
+  .wrap{
+    position:relative;
+    z-index:2;
+    width:min(var(--maxw), 100%);
+    margin:0 auto;
+    padding:0 clamp(20px, 4vw, 48px);
+  }
+
+  /* ══════════════════════════════════════════════
+     TICKER
+  ══════════════════════════════════════════════ */
+  .ticker{
+    position:relative;
+    z-index:5;
+    overflow:hidden;
+    background:linear-gradient(90deg, #B18A22 0%, #D4AF37 50%, #B18A22 100%);
+    padding:10px 0;
+  }
+  .ticker__track{
+    display:flex;
+    width:max-content;
+    animation:tickerScroll 55s linear infinite;
+  }
+  .ticker__group{ display:flex; align-items:center; white-space:nowrap; }
+  .ticker__item{
+    display:inline-flex;
+    align-items:center;
+    gap:24px;
+    padding-right:24px;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:2.8px;
+    text-transform:uppercase;
+    color:#241B06;
+  }
+  .ticker__item::after{ content:"✦"; font-size:8px; opacity:.55; }
+  @keyframes tickerScroll{ from{ transform:translateX(-50%); } to{ transform:translateX(0); } }
+  @media (prefers-reduced-motion:reduce){ .ticker__track{ animation:none; } }
+
+  /* ══════════════════════════════════════════════
+     MASTHEAD NAV
+  ══════════════════════════════════════════════ */
+  .masthead{
+    position:sticky;
+    top:0;
+    z-index:30;
+    background:rgba(251,250,245,.86);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--rule-soft);
+  }
+  .masthead__inner{
+    width:min(var(--maxw), 100%);
+    margin:0 auto;
+    padding:16px clamp(20px, 4vw, 48px);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+  }
+
+  .brand{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    text-decoration:none;
+    color:var(--ink);
+  }
+  .brand__mark{
+    width:22px; height:22px;
+    flex:0 0 auto;
+    transform:translateY(3px);
+    color:var(--gold-deep);
+  }
+  .brand__name{
+    font-family:var(--display);
+    font-size:19px;
+    font-weight:700;
+    letter-spacing:.01em;
+    line-height:1;
+  }
+  .brand__tag{
+    font-size:9.5px;
+    font-weight:700;
+    letter-spacing:2.4px;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    transform:translateY(-1px);
+  }
+
+  .mastnav{
+    display:flex;
+    align-items:center;
+    gap:30px;
+  }
+  .mastnav a{
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:1.6px;
+    text-transform:uppercase;
+    color:var(--ink-mute);
+    transition:color .25s var(--ease);
+    position:relative;
+  }
+  .mastnav a::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:-6px;
+    height:1px;
+    background:var(--gold-deep);
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform .35s var(--ease);
+  }
+  .mastnav a:hover{ color:var(--ink); }
+  .mastnav a:hover::after{ transform:scaleX(1); }
+
+  .masthead__cta{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1.8px;
+    text-transform:uppercase;
+    color:var(--ink);
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    padding:11px 20px;
+    border:1.5px solid var(--ink);
+    border-radius:999px;
+    background:transparent;
+    transition:background .3s var(--ease), color .3s var(--ease), transform .3s var(--ease);
+  }
+  .masthead__cta::after{
+    content:"→";
+    font-size:13px;
+    transition:transform .3s var(--ease);
+  }
+  .masthead__cta:hover{
+    background:var(--ink);
+    color:var(--paper);
+    transform:translateY(-1px);
+  }
+  .masthead__cta:hover::after{ transform:translateX(3px); }
+
+  @media (max-width:820px){
+    .mastnav{ display:none; }
+  }
+
+  /* ══════════════════════════════════════════════
+     HERO — editorial masthead
+  ══════════════════════════════════════════════ */
+  .hero{
+    position:relative;
+    z-index:2;
+    min-height:calc(100svh - 120px);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:clamp(64px, 10vh, 120px) 0 clamp(48px, 8vh, 96px);
+    overflow:hidden;
+  }
+
+  /* ── Golden globe watermark ── */
+  .hero__globe{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -52%);
+    width:min(140vmin, 1150px);
+    height:min(140vmin, 1150px);
+    z-index:0;
+    pointer-events:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='900' viewBox='0 0 900 900'><g fill='none' stroke='%238F6F14'><circle cx='450' cy='450' r='430' stroke-opacity='0.30' stroke-width='1.2'/><ellipse cx='450' cy='450' rx='145' ry='430' stroke-opacity='0.18' stroke-width='1'/><ellipse cx='450' cy='450' rx='288' ry='430' stroke-opacity='0.15' stroke-width='1'/><ellipse cx='450' cy='450' rx='398' ry='430' stroke-opacity='0.12' stroke-width='1'/><ellipse cx='450' cy='450' rx='430' ry='130' stroke-opacity='0.20' stroke-width='1'/><ellipse cx='450' cy='312' rx='366' ry='80' stroke-opacity='0.13' stroke-width='.9'/><ellipse cx='450' cy='566' rx='400' ry='96' stroke-opacity='0.13' stroke-width='.9'/><ellipse cx='450' cy='198' rx='238' ry='42' stroke-opacity='0.09' stroke-width='.9'/><ellipse cx='450' cy='656' rx='288' ry='50' stroke-opacity='0.09' stroke-width='.9'/></g><path d='M360 310q50 -40 110 -22q64 18 72 66q8 44 -36 66q-60 30 -114 6q-48 -22 -40 -64q6 -34 8 -52z' fill='%23C9A227' fill-opacity='0.06'/><path d='M520 520q44 -20 90 0q42 18 38 60q-4 42 -46 56q-48 16 -86 -6q-34 -20 -26 -56q6 -34 30 -54z' fill='%23C9A227' fill-opacity='0.05'/><path d='M96 640C240 470 660 470 804 640' fill='none' stroke='%23C9A227' stroke-opacity='0.14' stroke-width='1'/><g fill='%238F6F14'><circle cx='450' cy='450' r='3.5' fill-opacity='0.4'/><circle cx='216' cy='322' r='3' fill-opacity='0.35'/><circle cx='668' cy='536' r='3' fill-opacity='0.35'/><circle cx='552' cy='236' r='2.5' fill-opacity='0.3'/><circle cx='300' cy='636' r='2.5' fill-opacity='0.3'/><circle cx='752' cy='330' r='2' fill-opacity='0.28'/><circle cx='170' cy='510' r='2' fill-opacity='0.28'/></g></svg>");
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:contain;
+    opacity:.9;
+    -webkit-mask-image:radial-gradient(circle at center, #000 30%, rgba(0,0,0,.6) 60%, transparent 90%);
+            mask-image:radial-gradient(circle at center, #000 30%, rgba(0,0,0,.6) 60%, transparent 90%);
+  }
+
+  .hero__inner{
+    position:relative;
+    z-index:2;
+    width:min(var(--maxw), 100%);
+    padding:0 clamp(20px, 4vw, 48px);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .hero__eyebrow{
+    margin:0 0 clamp(24px, 4vh, 40px);
+    display:inline-flex;
+    align-items:center;
+    gap:14px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:3.6px;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    opacity:0;
+    animation:heroIn .9s var(--ease) .15s forwards;
+  }
+  .hero__eyebrow::before,
+  .hero__eyebrow::after{
+    content:"";
+    width:34px;
+    height:1px;
+    background:var(--gold-deep);
+    opacity:.6;
+  }
+
+  .hero__title{
+    margin:0;
+    font-family:var(--display);
+    font-weight:800;
+    font-size:clamp(58px, 10.5vw, 152px);
+    line-height:.94;
+    letter-spacing:-.035em;
+    opacity:0;
+    animation:heroIn 1.05s var(--ease) .3s forwards;
+  }
+  .hero__title-gold{
+    display:block;
+    background:linear-gradient(96deg, #8F6F14 0%, #C9A227 22%, #F0DA8A 48%, #C9A227 74%, #8F6F14 100%);
+    -webkit-background-clip:text;
+            background-clip:text;
+    -webkit-text-fill-color:transparent;
+    padding-right:.02em;
+  }
+  .hero__title-ink{
+    display:block;
+    color:var(--ink);
+    font-style:italic;
+    font-weight:600;
+    letter-spacing:-.045em;
+    padding-right:.06em;
+  }
+
+  .hero__ornament{
+    margin:clamp(28px, 4.5vh, 48px) 0;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    opacity:0;
+    animation:heroIn .9s var(--ease) .55s forwards;
+  }
+  .hero__ornament-line{
+    width:clamp(50px, 8vw, 96px);
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--gold-deep), transparent);
+    opacity:.55;
+  }
+  .hero__ornament-star{
+    color:var(--gold);
+    font-size:12px;
+    line-height:1;
+    letter-spacing:0;
+  }
+
+  .hero__tagline{
+    margin:0;
+    font-family:var(--display);
+    font-style:italic;
+    font-weight:500;
+    font-size:clamp(15px, 1.4vw, 18px);
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    opacity:0;
+    animation:heroIn .9s var(--ease) .65s forwards;
+  }
+
+  .hero__lede{
+    margin:clamp(28px, 4vh, 40px) 0 0;
+    max-width:64ch;
+    font-size:clamp(15px, 1.2vw, 17px);
+    font-weight:400;
+    line-height:1.78;
+    color:var(--ink-soft);
+    opacity:0;
+    animation:heroIn 1s var(--ease) .8s forwards;
+  }
+  .hero__lede b{ font-weight:700; color:var(--ink); }
+
+  /* ── Hero channel buttons ── */
+  .hero__channels{
+    margin-top:clamp(36px, 5vh, 56px);
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:14px;
+    opacity:0;
+    animation:heroIn 1s var(--ease) .95s forwards;
+  }
+
+  .channel{
+    display:inline-flex;
+    align-items:center;
+    gap:12px;
+    padding:15px 26px;
+    border-radius:999px;
+    font-size:13.5px;
+    font-weight:700;
+    letter-spacing:.3px;
+    color:#fff;
+    box-shadow:0 6px 20px -6px rgba(28,23,16,.28);
+    transition:transform .3s var(--ease), box-shadow .3s var(--ease), filter .3s var(--ease);
+    white-space:nowrap;
+  }
+  .channel svg{ width:18px; height:18px; flex:0 0 auto; }
+  .channel:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.05);
+    box-shadow:0 12px 28px -8px rgba(28,23,16,.35);
+  }
+  .channel--telegram{ background:var(--telegram); }
+  .channel--whatsapp{ background:var(--whatsapp); }
+  .channel--email{
+    background:var(--ink);
+    color:var(--paper);
+  }
+
+  /* ── Scroll cue ── */
+  .hero__scroll{
+    margin-top:clamp(48px, 8vh, 88px);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    font-size:9.5px;
+    font-weight:700;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    opacity:0;
+    animation:heroIn 1s var(--ease) 1.15s forwards;
+  }
+  .hero__scroll-arrow{
+    width:1px;
+    height:36px;
+    background:linear-gradient(180deg, var(--gold-deep), transparent);
+    position:relative;
+  }
+  .hero__scroll-arrow::after{
+    content:"";
+    position:absolute;
+    bottom:0; left:50%;
+    width:5px; height:5px;
+    border-right:1px solid var(--gold-deep);
+    border-bottom:1px solid var(--gold-deep);
+    transform:translateX(-50%) rotate(45deg);
+  }
+
+  @keyframes heroIn{
+    from{ opacity:0; transform:translateY(14px); }
+    to  { opacity:1; transform:translateY(0); }
+  }
+
+  @media (max-width:640px){
+    .hero__eyebrow{ letter-spacing:2.8px; font-size:10px; }
+    .hero__eyebrow::before,
+    .hero__eyebrow::after{ width:20px; }
+    .channel{ padding:13px 20px; font-size:13px; }
+  }
+
+  /* ══════════════════════════════════════════════
+     SHARED — chapters, headings, hairlines
+  ══════════════════════════════════════════════ */
+  .chapter{
+    position:relative;
+    z-index:2;
+    padding:clamp(80px, 12vh, 140px) 0;
+  }
+  .chapter + .chapter{ border-top:1px solid var(--rule-soft); }
+
+  .chapter__head{
+    max-width:820px;
+    margin:0 auto clamp(48px, 7vh, 80px);
+    text-align:center;
+  }
+  .chapter__no{
+    display:inline-flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:22px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:3.6px;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+  }
+  .chapter__no::before,
+  .chapter__no::after{
+    content:"";
+    width:26px;
+    height:1px;
+    background:var(--gold-deep);
+    opacity:.5;
+  }
+
+  .chapter__title{
+    margin:0;
+    font-family:var(--display);
+    font-size:clamp(34px, 5vw, 58px);
+    font-weight:700;
+    line-height:1.08;
+    letter-spacing:-.02em;
+    color:var(--ink);
+  }
+  .chapter__title em{
+    font-style:italic;
+    font-weight:500;
+    background:linear-gradient(96deg, #8F6F14 0%, #C9A227 50%, #DDB94C 100%);
+    -webkit-background-clip:text;
+            background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+
+  .chapter__lede{
+    margin:26px auto 0;
+    max-width:62ch;
+    font-size:clamp(15px, 1.15vw, 16.5px);
+    font-weight:400;
+    line-height:1.8;
+    color:var(--ink-mute);
+  }
+
+  /* ══════════════════════════════════════════════
+     SECTION 01 — SERVICES (editorial numbered list)
+  ══════════════════════════════════════════════ */
+  .services{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:0;
+    border-top:1px solid var(--rule-soft);
+  }
+  .svc{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:28px;
+    padding:42px 40px 42px 0;
+    border-bottom:1px solid var(--rule-soft);
+    align-items:start;
+  }
+  .svc:nth-child(odd){
+    padding-right:40px;
+    border-right:1px solid var(--rule-soft);
+  }
+  .svc:nth-child(even){
+    padding-left:40px;
+  }
+  .svc__num{
+    font-family:var(--display);
+    font-style:italic;
+    font-weight:500;
+    font-size:26px;
+    line-height:1;
+    letter-spacing:.02em;
+    color:var(--gold-deep);
+    padding-top:4px;
+    min-width:44px;
+  }
+  .svc__body{ display:flex; flex-direction:column; gap:14px; }
+  .svc h3{
+    margin:0;
+    font-family:var(--display);
+    font-size:clamp(22px, 2vw, 27px);
+    font-weight:700;
+    letter-spacing:-.015em;
+    color:var(--ink);
+    line-height:1.15;
+  }
+  .svc p{
+    margin:0;
+    font-size:14.5px;
+    line-height:1.75;
+    color:var(--ink-mute);
+    font-weight:400;
+  }
+  .svc__tags{
+    list-style:none;
+    margin:4px 0 0;
+    padding:0;
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .svc__tags li{
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:1.3px;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    padding:5px 11px;
+    border:1px solid var(--rule);
+    border-radius:999px;
+    background:var(--paper-warm);
+  }
+
+  @media (max-width:760px){
+    .services{ grid-template-columns:1fr; }
+    .svc, .svc:nth-child(odd), .svc:nth-child(even){
+      padding:36px 0;
+      border-right:none;
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     SECTION 02 — STATS (typographic banner)
+  ══════════════════════════════════════════════ */
+  .stats{
+    list-style:none;
+    margin:0;
+    padding:clamp(36px, 5vh, 56px) 0;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    border-top:1px solid var(--rule);
+    border-bottom:1px solid var(--rule);
+  }
+  .stat{
+    padding:0 clamp(16px, 2vw, 32px);
+    text-align:center;
+    border-right:1px solid var(--rule-soft);
+  }
+  .stat:last-child{ border-right:none; }
+  .stat__num{
+    display:block;
+    font-family:var(--display);
+    font-size:clamp(38px, 4.6vw, 60px);
+    font-weight:700;
+    line-height:1;
+    letter-spacing:-.02em;
+    background:linear-gradient(140deg, #8F6F14, #C9A227 45%, #DDB94C);
+    -webkit-background-clip:text;
+            background-clip:text;
+    -webkit-text-fill-color:transparent;
+    padding-bottom:.06em;
+  }
+  .stat__num sup{
+    font-size:.5em;
+    font-weight:500;
+    -webkit-text-fill-color:var(--gold-deep);
+    color:var(--gold-deep);
+    background:none;
+    -webkit-background-clip:unset;
+            background-clip:unset;
+    vertical-align:super;
+    margin-left:2px;
+  }
+  .stat__label{
+    display:block;
+    margin-top:14px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:2.4px;
+    text-transform:uppercase;
+    color:var(--ink);
+  }
+  .stat__note{
+    display:block;
+    margin-top:10px;
+    font-size:12.5px;
+    line-height:1.55;
+    color:var(--ink-faint);
+    font-weight:400;
+  }
+  @media (max-width:760px){
+    .stats{ grid-template-columns:repeat(2, 1fr); gap:32px 0; }
+    .stat{ border-right:none; }
+    .stat:nth-child(odd){ border-right:1px solid var(--rule-soft); }
+  }
+  @media (max-width:440px){
+    .stats{ grid-template-columns:1fr; gap:34px 0; }
+    .stat:nth-child(odd){ border-right:none; }
+  }
+
+  /* ══════════════════════════════════════════════
+     SECTION 03 — PROCESS (four steps, gold connector)
+  ══════════════════════════════════════════════ */
+  .process{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    position:relative;
+  }
+  .process::before{
+    content:"";
+    position:absolute;
+    top:22px;
+    left:6%;
+    right:6%;
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--rule) 15%, var(--rule) 85%, transparent);
+  }
+  .step{
+    position:relative;
+    padding:0 clamp(6px, 1.4vw, 20px);
+    text-align:center;
+  }
+  .step__mark{
+    position:relative;
+    width:44px; height:44px;
+    margin:0 auto 28px;
+    border-radius:50%;
+    background:var(--paper);
+    border:1px solid var(--gold-deep);
+    display:grid;
+    place-items:center;
+    z-index:1;
+  }
+  .step__mark span{
+    font-family:var(--display);
+    font-style:italic;
+    font-weight:500;
+    font-size:14px;
+    color:var(--gold-deep);
+    letter-spacing:.02em;
+  }
+  .step h3{
+    margin:0 0 12px;
+    font-family:var(--display);
+    font-size:21px;
+    font-weight:700;
+    letter-spacing:-.01em;
+    color:var(--ink);
+  }
+  .step p{
+    margin:0;
+    font-size:13.5px;
+    line-height:1.75;
+    color:var(--ink-mute);
+    font-weight:400;
+  }
+  @media (max-width:820px){
+    .process{ grid-template-columns:repeat(2, 1fr); gap:52px 0; }
+    .process::before{ display:none; }
+  }
+  @media (max-width:480px){
+    .process{ grid-template-columns:1fr; gap:44px; }
+  }
+
+  /* ══════════════════════════════════════════════
+     SECTION 04 — VOICES (pull quotes)
+  ══════════════════════════════════════════════ */
+  .voices{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:0;
+    border-top:1px solid var(--rule-soft);
+  }
+  .voice{
+    padding:48px clamp(20px, 2.5vw, 40px);
+    border-bottom:1px solid var(--rule-soft);
+    display:flex;
+    flex-direction:column;
+  }
+  .voice + .voice{ border-left:1px solid var(--rule-soft); }
+  .voice__mark{
+    font-family:var(--display);
+    font-style:italic;
+    font-size:64px;
+    line-height:.6;
+    color:var(--gold);
+    opacity:.65;
+    margin-bottom:16px;
+    height:26px;
+  }
+  .voice__text{
+    margin:0 0 30px;
+    font-family:var(--display);
+    font-style:italic;
+    font-size:clamp(17px, 1.4vw, 20px);
+    font-weight:400;
+    line-height:1.55;
+    color:var(--ink);
+    letter-spacing:-.005em;
+  }
+  .voice__by{
+    margin-top:auto;
+    padding-top:22px;
+    border-top:1px solid var(--rule-soft);
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .voice__av{
+    width:40px; height:40px;
+    flex:0 0 auto;
+    border-radius:50%;
+    display:grid; place-items:center;
+    font-family:var(--display);
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.02em;
+    color:var(--paper);
+    background:linear-gradient(140deg, #8F6F14, #C9A227);
+  }
+  .voice__by strong{
+    display:block;
+    font-size:13.5px;
+    font-weight:700;
+    letter-spacing:.02em;
+    color:var(--ink);
+  }
+  .voice__by span{
+    font-size:11.5px;
+    font-weight:400;
+    color:var(--ink-faint);
+    letter-spacing:.02em;
+  }
+  @media (max-width:820px){
+    .voices{ grid-template-columns:1fr; }
+    .voice + .voice{ border-left:none; }
+  }
+
+  /* ══════════════════════════════════════════════
+     SECTION 05 — FAQ (clean hairlines)
+  ══════════════════════════════════════════════ */
+  .faq{
+    max-width:840px;
+    margin:0 auto;
+    border-top:1px solid var(--rule);
+  }
+  .qa{
+    border-bottom:1px solid var(--rule-soft);
+  }
+  .qa summary{
+    list-style:none;
+    cursor:pointer;
+    padding:26px 40px 26px 0;
+    display:flex;
+    align-items:center;
+    gap:20px;
+    font-family:var(--display);
+    font-size:clamp(17px, 1.5vw, 21px);
+    font-weight:600;
+    letter-spacing:-.01em;
+    color:var(--ink);
+    position:relative;
+    transition:color .3s var(--ease);
+  }
+  .qa summary::-webkit-details-marker{ display:none; }
+  .qa summary:hover{ color:var(--gold-deep); }
+
+  .qa__mark{
+    position:absolute;
+    right:0;
+    top:50%;
+    transform:translateY(-50%);
+    width:22px; height:22px;
+    display:grid; place-items:center;
+    color:var(--gold-deep);
+    transition:transform .4s var(--ease);
+  }
+  .qa__mark::before,
+  .qa__mark::after{
+    content:"";
+    position:absolute;
+    background:currentColor;
+    transition:transform .3s var(--ease), opacity .3s var(--ease);
+  }
+  .qa__mark::before{ width:12px; height:1.5px; }
+  .qa__mark::after{ width:1.5px; height:12px; }
+  .qa[open] .qa__mark::after{ transform:scaleY(0); }
+
+  .qa__body{
+    padding:0 40px 32px 0;
+    font-size:14.5px;
+    line-height:1.82;
+    color:var(--ink-mute);
+    font-weight:400;
+    max-width:72ch;
+  }
+  .qa__body p{ margin:0; }
+  .qa__body p + p{ margin-top:14px; }
+
+  @media (max-width:640px){
+    .qa summary{ padding:22px 36px 22px 0; }
+    .qa__body{ padding:0 36px 26px 0; }
+  }
+
+  /* ══════════════════════════════════════════════
+     CTA — the invitation
+  ══════════════════════════════════════════════ */
+  .invite{
+    padding:clamp(96px, 14vh, 160px) 0 clamp(72px, 10vh, 120px);
+    text-align:center;
+    border-top:1px solid var(--rule-soft);
+    position:relative;
+  }
+  .invite__inner{ max-width:780px; margin:0 auto; }
+
+  .invite__title{
+    margin:0;
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(36px, 5.2vw, 68px);
+    line-height:1.05;
+    letter-spacing:-.025em;
+    color:var(--ink);
+  }
+  .invite__title em{
+    font-style:italic;
+    font-weight:500;
+    background:linear-gradient(96deg, #8F6F14, #C9A227 50%, #DDB94C);
+    -webkit-background-clip:text;
+            background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .invite__text{
+    margin:28px auto 0;
+    max-width:58ch;
+    font-size:15.5px;
+    line-height:1.82;
+    color:var(--ink-mute);
+    font-weight:400;
+  }
+  .invite__channels{
+    margin-top:clamp(40px, 6vh, 56px);
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:14px;
+  }
+
+  /* ══════════════════════════════════════════════
+     FOOTER
+  ══════════════════════════════════════════════ */
+  footer{
+    background:var(--paper-deep);
+    border-top:1px solid var(--rule);
+    padding:44px clamp(20px, 4vw, 48px) 40px;
+    text-align:center;
+    position:relative;
+    z-index:2;
+  }
+  .footer__star{
+    color:var(--gold);
+    font-size:13px;
+    letter-spacing:.6em;
+    margin-bottom:20px;
+  }
+  .footer__name{
+    font-family:var(--display);
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    margin-bottom:12px;
+  }
+  .footer__meta{
+    font-size:11.5px;
+    font-weight:400;
+    color:var(--ink-faint);
+    line-height:1.7;
+    max-width:560px;
+    margin:0 auto 20px;
+    letter-spacing:.04em;
+  }
+  .footer__links{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:8px 26px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1.8px;
+    text-transform:uppercase;
+  }
+  .footer__links a{
+    color:var(--ink-mute);
+    transition:color .25s var(--ease);
+  }
+  .footer__links a:hover{ color:var(--gold-deep); }
+
+  /* ══════════════════════════════════════════════
+     SCROLL REVEAL
+  ══════════════════════════════════════════════ */
+  [data-reveal]{
+    opacity:0;
+    transform:translateY(20px);
+    transition:opacity .9s var(--ease), transform .9s var(--ease);
+    transition-delay:var(--d, 0ms);
+  }
+  [data-reveal].in{ opacity:1; transform:translateY(0); }
+
+  @media (prefers-reduced-motion:reduce){
+    html{ scroll-behavior:auto; }
+    *, *::before, *::after{
+      animation-duration:.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.01ms !important;
+    }
+    [data-reveal]{ opacity:1; transform:none; }
+    .hero__eyebrow, .hero__title, .hero__ornament, .hero__tagline,
+    .hero__lede, .hero__channels, .hero__scroll{
+      opacity:1 !important;
+      animation:none !important;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- ══ Three.js golden dust canvas ══ -->
+<canvas id="scene" aria-hidden="true"></canvas>
+
+<!-- ══════════════════════════════════════════════
+     TICKER
+══════════════════════════════════════════════ -->
+<div class="ticker" role="status" aria-label="Now accepting new members">
+  <div class="ticker__track">
+    <div class="ticker__group">
+      <span class="ticker__item">Now accepting new members</span>
+      <span class="ticker__item">Wisdom · Wealth · Legacy</span>
+      <span class="ticker__item">Now accepting new members</span>
+      <span class="ticker__item">Wisdom · Wealth · Legacy</span>
+      <span class="ticker__item">Now accepting new members</span>
+      <span class="ticker__item">Wisdom · Wealth · Legacy</span>
+      <span class="ticker__item">Now accepting new members</span>
+      <span class="ticker__item">Wisdom · Wealth · Legacy</span>
+    </div>
+    <div class="ticker__group" aria-hidden="true">
+      <span class="ticker__item">Now accepting new members</span>
+      <span class="ticker__item">Wisdom · Wealth · Legacy</span>
+      <span class="ticker__item">Now accepting new members</span>
+      <span class="ticker__item">Wisdom · Wealth · Legacy</span>
+      <span class="ticker__item">Now accepting new members</span>
+      <span class="ticker__item">Wisdom · Wealth · Legacy</span>
+      <span class="ticker__item">Now accepting new members</span>
+      <span class="ticker__item">Wisdom · Wealth · Legacy</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MASTHEAD
+══════════════════════════════════════════════ -->
+<header class="masthead">
+  <div class="masthead__inner">
+    <a href="#top" class="brand" aria-label="Renaissance Investors Club home">
+      <svg class="brand__mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 2 4 10l8 12 8-12z"/>
+        <path d="M12 2v20"/>
+        <path d="M4 10h16"/>
+      </svg>
+      <span class="brand__name">Renaissance</span>
+      <span class="brand__tag">Investors Club</span>
+    </a>
+
+    <nav class="mastnav" aria-label="Primary">
+      <a href="#charter">The Charter</a>
+      <a href="#process">How It Works</a>
+      <a href="#voices">Members</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+
+    <a class="masthead__cta" href="#invitation">Join the Club</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ══════════════════════════════════════════════
+       HERO — editorial masthead
+  ══════════════════════════════════════════════ -->
+  <section class="hero" aria-label="Introduction">
+    <div class="hero__globe" aria-hidden="true"></div>
+
+    <div class="hero__inner">
+      <p class="hero__eyebrow">An invitation-only investment club</p>
+
+      <h1 class="hero__title">
+        <span class="hero__title-gold">RENAISSANCE</span>
+        <span class="hero__title-ink">Investors Club</span>
+      </h1>
+
+      <div class="hero__ornament" aria-hidden="true">
+        <span class="hero__ornament-line"></span>
+        <span class="hero__ornament-star">✦</span>
+        <span class="hero__ornament-line"></span>
+      </div>
+
+      <p class="hero__tagline">Wisdom · Wealth · Legacy</p>
+
+      <p class="hero__lede">
+        Renaissance Investors Club assists members during the accumulation phase of
+        their finances — focusing on <b>transformative investment strategies</b>,
+        different asset classes, and forward-thinking guidance for the journey ahead.
+        A community of personal finance and FIRE enthusiasts, dedicated to sharing
+        what actually works.
+      </p>
+
+      <div class="hero__channels">
+        <a class="channel channel--telegram" href="https://t.me/renaissanceinvestors" target="_blank" rel="noopener noreferrer" aria-label="Join the club on Telegram">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M21.94 4.3 18.9 19.1c-.23 1.02-.84 1.27-1.7.79l-4.7-3.46-2.27 2.18c-.25.25-.46.46-.94.46l.33-4.77 8.68-7.84c.38-.33-.08-.52-.58-.19L6.99 13.02 2.4 11.6c-1-.31-1.02-1 .21-1.48l18.1-6.98c.83-.3 1.55.2 1.23 1.16Z"/>
+          </svg>
+          <span>Join on Telegram</span>
+        </a>
+
+        <a class="channel channel--whatsapp" href="https://wa.me/15551234567?text=Hi%20Renaissance%2C%20I%27d%20like%20to%20learn%20more%20about%20membership." target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 1.67c2.2 0 4.27.86 5.83 2.42a8.2 8.2 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.25 8.24a8.23 8.23 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24Zm-3.6 4.2c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.68 2.68 4.08 3.66.57.24 1.01.38 1.36.49.57.18 1.09.16 1.5.1.46-.07 1.41-.58 1.61-1.13.2-.56.2-1.03.14-1.13-.06-.1-.22-.16-.46-.28-.24-.12-1.41-.7-1.63-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.93-1.19-.71-.64-1.19-1.42-1.33-1.66-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.46-.39-.4-.54-.41l-.46-.01Z"/>
+          </svg>
+          <span>Chat on WhatsApp</span>
+        </a>
+
+        <a class="channel channel--email" href="mailto:hello@renaissanceinvestorsclub.com?subject=Membership%20enquiry" aria-label="Email Renaissance Investors Club">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2.5" y="4.5" width="19" height="15" rx="3.2"/>
+            <path d="m3.6 7.2 7.3 5.2a2 2 0 0 0 2.2 0l7.3-5.2"/>
+          </svg>
+          <span>Write to Us</span>
+        </a>
+      </div>
+
+      <div class="hero__scroll" aria-hidden="true">
+        <span>Scroll</span>
+        <span class="hero__scroll-arrow"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       STATS BANNER
+  ══════════════════════════════════════════════ -->
+  <section class="wrap" style="padding-top:20px; padding-bottom:20px;">
+    <ul class="stats">
+      <li class="stat" data-reveal style="--d:0ms">
+        <span class="stat__num">12K<sup>+</sup></span>
+        <span class="stat__label">Active Members</span>
+        <span class="stat__note">Across 40+ countries, every stage of the accumulation journey.</span>
+      </li>
+      <li class="stat" data-reveal style="--d:80ms">
+        <span class="stat__num">$4.8B</span>
+        <span class="stat__label">Portfolios Analysed</span>
+        <span class="stat__note">Allocations, ideas and positions shared inside the club.</span>
+      </li>
+      <li class="stat" data-reveal style="--d:160ms">
+        <span class="stat__num">94%</span>
+        <span class="stat__label">Member Retention</span>
+        <span class="stat__note">Year on year. Most growth comes from referrals inside the club.</span>
+      </li>
+      <li class="stat" data-reveal style="--d:240ms">
+        <span class="stat__num">17</span>
+        <span class="stat__label">Years of Cycles</span>
+        <span class="stat__note">Combined experience through bull runs, corrections and between.</span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       CHAPTER 01 — THE CHARTER / SERVICES
+  ══════════════════════════════════════════════ -->
+  <section class="chapter" id="charter">
+    <div class="wrap">
+      <header class="chapter__head" data-reveal>
+        <span class="chapter__no">Chapter I</span>
+        <h2 class="chapter__title">What membership <em>gives you</em>.</h2>
+        <p class="chapter__lede">
+          The Club is deliberately narrow. These are the areas where our members
+          have done the work enough times to know what actually moves the needle —
+          and what's just expensive theatre.
+        </p>
+      </header>
+
+      <ol class="services">
+        <li class="svc" data-reveal style="--d:0ms">
+          <span class="svc__num">I.</span>
+          <div class="svc__body">
+            <h3>Market Insights</h3>
+            <p>Weekly analysis, deep dives and plain-English briefings on what's moving and why it matters. Signal over noise, every single week, so you can act instead of reacting.</p>
+            <ul class="svc__tags">
+              <li>Weekly briefings</li><li>Deep dives</li><li>Macro &amp; sectors</li>
+            </ul>
+          </div>
+        </li>
+
+        <li class="svc" data-reveal style="--d:70ms">
+          <span class="svc__num">II.</span>
+          <div class="svc__body">
+            <h3>Curated Education</h3>
+            <p>Structured learning paths on investing fundamentals, portfolio construction, tax, and the psychology of money. Built for members who want to understand what they own.</p>
+            <ul class="svc__tags">
+              <li>Fundamentals</li><li>Portfolio theory</li><li>Money psychology</li>
+            </ul>
+          </div>
+        </li>
+
+        <li class="svc" data-reveal style="--d:140ms">
+          <span class="svc__num">III.</span>
+          <div class="svc__body">
+            <h3>Passive Income Strategy</h3>
+            <p>Dividend, REIT, bond and income-focused portfolios designed for cash flow you can rely on. We build the strategy together, then hold each other to it through the cycle.</p>
+            <ul class="svc__tags">
+              <li>Dividend growth</li><li>Income portfolios</li><li>Cash flow</li>
+            </ul>
+          </div>
+        </li>
+
+        <li class="svc" data-reveal style="--d:0ms">
+          <span class="svc__num">IV.</span>
+          <div class="svc__body">
+            <h3>Portfolio Reviews</h3>
+            <p>Personal reviews of allocation against your goals, risk profile and time horizon. No template, no sales pitch — just a straight read on what's working and what isn't.</p>
+            <ul class="svc__tags">
+              <li>Allocation</li><li>Risk mapping</li><li>Rebalancing</li>
+            </ul>
+          </div>
+        </li>
+
+        <li class="svc" data-reveal style="--d:70ms">
+          <span class="svc__num">V.</span>
+          <div class="svc__body">
+            <h3>Syndicate Deal Flow</h3>
+            <p>Curated co-investment opportunities, vetted and debated with the community before any capital moves. You'll always see the downside case alongside the upside one.</p>
+            <ul class="svc__tags">
+              <li>Co-investment</li><li>Deal vetting</li><li>Deal rooms</li>
+            </ul>
+          </div>
+        </li>
+
+        <li class="svc" data-reveal style="--d:140ms">
+          <span class="svc__num">VI.</span>
+          <div class="svc__body">
+            <h3>Legacy &amp; Retirement</h3>
+            <p>Estate planning, tax-efficient structures and generational wealth transfer. Because the point of the journey isn't just your finish line — it's the one you draw for those who follow.</p>
+            <ul class="svc__tags">
+              <li>Estate planning</li><li>Tax structures</li><li>Generational wealth</li>
+            </ul>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       CHAPTER 02 — HOW IT WORKS
+  ══════════════════════════════════════════════ -->
+  <section class="chapter" id="process">
+    <div class="wrap">
+      <header class="chapter__head" data-reveal>
+        <span class="chapter__no">Chapter II</span>
+        <h2 class="chapter__title">Four phases, no <em>mystery</em>.</h2>
+        <p class="chapter__lede">
+          Every member's journey follows the same spine. It isn't glamorous, but
+          it's predictable — and predictability is exactly what lets you plan
+          around it.
+        </p>
+      </header>
+
+      <ol class="process">
+        <li class="step" data-reveal style="--d:0ms">
+          <div class="step__mark"><span>i</span></div>
+          <h3>Discover</h3>
+          <p>An honest intake: where you are, what you want, and how much risk you can genuinely stomach. The conversation comes before the spreadsheet.</p>
+        </li>
+        <li class="step" data-reveal style="--d:90ms">
+          <div class="step__mark"><span>ii</span></div>
+          <h3>Design</h3>
+          <p>A plan tailored to your timeline, not a template. Allocation, contributions, income targets and review points — pressure-tested against your own numbers.</p>
+        </li>
+        <li class="step" data-reveal style="--d:180ms">
+          <div class="step__mark"><span>iii</span></div>
+          <h3>Deploy</h3>
+          <p>Execute with the community at your side. Weekly rhythm, transparent reporting, named points of contact. If something isn't working, you'll hear it first.</p>
+        </li>
+        <li class="step" data-reveal style="--d:270ms">
+          <div class="step__mark"><span>iv</span></div>
+          <h3>Compound</h3>
+          <p>Stay the course. Reviews, rebalancing, and the discipline to let time do its work — plus the legacy planning that keeps it going after you.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       CHAPTER 03 — VOICES
+  ══════════════════════════════════════════════ -->
+  <section class="chapter" id="voices">
+    <div class="wrap">
+      <header class="chapter__head" data-reveal>
+        <span class="chapter__no">Chapter III</span>
+        <h2 class="chapter__title">What members say <em>afterwards</em>.</h2>
+        <p class="chapter__lede">
+          We ask every member for honest feedback after their first year — the
+          good, the bad and the uncomfortable. These are pulled from those
+          conversations, with permission.
+        </p>
+      </header>
+
+      <div class="voices">
+        <blockquote class="voice" data-reveal style="--d:0ms">
+          <div class="voice__mark" aria-hidden="true">&ldquo;</div>
+          <p class="voice__text">
+            Renaissance taught me more about investing in three months than ten
+            years of reading finance books managed to. The community is genuinely
+            generous with what they know.
+          </p>
+          <footer class="voice__by">
+            <span class="voice__av" aria-hidden="true">SA</span>
+            <span>
+              <strong>Sofia Adeyemi</strong>
+              <span>Member since 2021 · Lagos</span>
+            </span>
+          </footer>
+        </blockquote>
+
+        <blockquote class="voice" data-reveal style="--d:100ms">
+          <div class="voice__mark" aria-hidden="true">&ldquo;</div>
+          <p class="voice__text">
+            I came in with a scattered mess of positions I couldn't explain. Six
+            months later I have a plan I understand and cash flow I count on.
+          </p>
+          <footer class="voice__by">
+            <span class="voice__av" aria-hidden="true">MC</span>
+            <span>
+              <strong>Marcus Chen</strong>
+              <span>Member since 2020 · Singapore</span>
+            </span>
+          </footer>
+        </blockquote>
+
+        <blockquote class="voice" data-reveal style="--d:200ms">
+          <div class="voice__mark" aria-hidden="true">&ldquo;</div>
+          <p class="voice__text">
+            The retirement and legacy session changed how I think about my fifties.
+            For the first time, I'm not guessing about the next thirty years.
+          </p>
+          <footer class="voice__by">
+            <span class="voice__av" aria-hidden="true">AO</span>
+            <span>
+              <strong>Anna Okonkwo</strong>
+              <span>Member since 2019 · London</span>
+            </span>
+          </footer>
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       CHAPTER 04 — FAQ
+  ══════════════════════════════════════════════ -->
+  <section class="chapter" id="faq">
+    <div class="wrap">
+      <header class="chapter__head" data-reveal>
+        <span class="chapter__no">Chapter IV</span>
+        <h2 class="chapter__title">The questions we get <em>most</em>.</h2>
+        <p class="chapter__lede">
+          If yours isn't here, just ask — we'd rather answer it upfront than have
+          you guess.
+        </p>
+      </header>
+
+      <div class="faq" data-reveal>
+        <details class="qa">
+          <summary>
+            How do I become a member?
+            <span class="qa__mark" aria-hidden="true"></span>
+          </summary>
+          <div class="qa__body">
+            <p>
+              Reach out on Telegram or WhatsApp with two or three sentences about
+              where you are financially and what you're hoping to build. If the
+              Club is a good fit, we'll send you an invite to the community and a
+              short intake form. Most members are in within a week.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa">
+          <summary>
+            Do I need to be wealthy to join?
+            <span class="qa__mark" aria-hidden="true"></span>
+          </summary>
+          <div class="qa__body">
+            <p>
+              No. We have members at every stage — from their first £500 index
+              fund to seven-figure portfolios they're positioning for retirement.
+              The problems change in scale, but the principles don't, and the
+              conversation is far richer for the mix.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa">
+          <summary>
+            What does membership cost?
+            <span class="qa__mark" aria-hidden="true"></span>
+          </summary>
+          <div class="qa__body">
+            <p>
+              We run a small number of tiers depending on how much access and
+              support you want — from a self-serve community tier to a fully
+              managed one with regular portfolio reviews. We quote a flat monthly
+              figure, never a percentage of assets, so incentives stay aligned.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa">
+          <summary>
+            Is my information confidential?
+            <span class="qa__mark" aria-hidden="true"></span>
+          </summary>
+          <div class="qa__body">
+            <p>
+              Completely. Anything you share in a portfolio review or a one-to-one
+              stays between you and the practitioner you're speaking with. The
+              community itself operates on a simple rule: what's said inside, stays
+              inside.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa">
+          <summary>
+            Can I leave anytime?
+            <span class="qa__mark" aria-hidden="true"></span>
+          </summary>
+          <div class="qa__body">
+            <p>
+              Yes. Memberships are month-to-month after the first quarter, and
+              you're free to cancel at any point — no exit interview, no retention
+              call. We'd rather people come back when the timing is right than feel
+              stuck inside something that isn't working.
+            </p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       INVITATION / CTA
+  ══════════════════════════════════════════════ -->
+  <section class="invite" id="invitation">
+    <div class="wrap">
+      <div class="invite__inner" data-reveal>
+        <span class="chapter__no">The Invitation</span>
+        <h2 class="invite__title">Ready to begin your <em>Renaissance</em>?</h2>
+        <p class="invite__text">
+          The only thing standing between you and a clearer financial future is
+          one conversation. Tell us where you are and what you want to build —
+          we'll come back with a straight answer on whether the Club is the right
+          fit, and if it isn't, who might be.
+        </p>
+
+        <div class="invite__channels">
+          <a class="channel channel--telegram" href="https://t.me/renaissanceinvestors" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M21.94 4.3 18.9 19.1c-.23 1.02-.84 1.27-1.7.79l-4.7-3.46-2.27 2.18c-.25.25-.46.46-.94.46l.33-4.77 8.68-7.84c.38-.33-.08-.52-.58-.19L6.99 13.02 2.4 11.6c-1-.31-1.02-1 .21-1.48l18.1-6.98c.83-.3 1.55.2 1.23 1.16Z"/>
+            </svg>
+            <span>Join on Telegram</span>
+          </a>
+
+          <a class="channel channel--whatsapp" href="https://wa.me/15551234567?text=Hi%20Renaissance%2C%20I%27d%20like%20to%20learn%20more%20about%20membership." target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 1.67c2.2 0 4.27.86 5.83 2.42a8.2 8.2 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.25 8.24a8.23 8.23 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24Zm-3.6 4.2c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.68 2.68 4.08 3.66.57.24 1.01.38 1.36.49.57.18 1.09.16 1.5.1.46-.07 1.41-.58 1.61-1.13.2-.56.2-1.03.14-1.13-.06-.1-.22-.16-.46-.28-.24-.12-1.41-.7-1.63-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.93-1.19-.71-.64-1.19-1.42-1.33-1.66-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.46-.39-.4-.54-.41l-.46-.01Z"/>
+            </svg>
+            <span>Chat on WhatsApp</span>
+          </a>
+
+          <a class="channel channel--email" href="mailto:hello@renaissanceinvestorsclub.com?subject=Membership%20enquiry">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2.5" y="4.5" width="19" height="15" rx="3.2"/>
+              <path d="m3.6 7.2 7.3 5.2a2 2 0 0 0 2.2 0l7.3-5.2"/>
+            </svg>
+            <span>Write to Us</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ══════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════ -->
+<footer>
+  <div class="footer__star" aria-hidden="true">✦ ✦ ✦</div>
+  <div class="footer__name">Renaissance Investors Club</div>
+  <p class="footer__meta">
+    © <span id="yr">2025</span> Renaissance Investors Club · All rights reserved.
+    <br />
+    An invitation-only community for investors building wisdom, wealth, and legacy.
+  </p>
+  <nav class="footer__links" aria-label="Legal">
+    <a href="#">Terms</a>
+    <a href="#">Privacy</a>
+    <a href="#">Membership</a>
+  </nav>
+</footer>
+
+<!-- ══════════════════════════════════════════════
+     Three.js — golden dust on paper
+══════════════════════════════════════════════ -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+const canvas = document.getElementById('scene');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  antialias: true,
+  alpha: true,
+  powerPreference: 'high-performance'
+});
+
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+renderer.setPixelRatio(DPR);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000000, 0);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(0, 0, 7);
+
+const group = new THREE.Group();
+scene.add(group);
+
+/* ── Simplex noise (same as before) ── */
+const NOISE_GLSL = `
+vec3 mod289(vec3 x){ return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 mod289(vec4 x){ return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 permute(vec4 x){ return mod289(((x * 34.0) + 1.0) * x); }
+vec4 taylorInvSqrt(vec4 r){ return 1.79284291400159 - 0.85373472095314 * r; }
+float snoise(vec3 v){
+  const vec2  C = vec2(1.0/6.0, 1.0/3.0);
+  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+  vec3 i  = floor(v + dot(v, C.yyy));
+  vec3 x0 = v - i + dot(i, C.xxx);
+  vec3 g = step(x0.yzx, x0.xyz);
+  vec3 l = 1.0 - g;
+  vec3 i1 = min(g.xyz, l.zxy);
+  vec3 i2 = max(g.xyz, l.zxy);
+  vec3 x1 = x0 - i1 + C.xxx;
+  vec3 x2 = x0 - i2 + C.yyy;
+  vec3 x3 = x0 - D.yyy;
+  i = mod289(i);
+  vec4 p = permute(permute(permute(
+             i.z + vec4(0.0, i1.z, i2.z, 1.0))
+           + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+           + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+  float n_ = 0.142857142857;
+  vec3  ns = n_ * D.wyz - D.xzx;
+  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+  vec4 x_ = floor(j * ns.z);
+  vec4 y_ = floor(j - 7.0 * x_);
+  vec4 x = x_ * ns.x + ns.yyyy;
+  vec4 y = y_ * ns.x + ns.yyyy;
+  vec4 h = 1.0 - abs(x) - abs(y);
+  vec4 b0 = vec4(x.xy, y.xy);
+  vec4 b1 = vec4(x.zw, y.zw);
+  vec4 s0 = floor(b0) * 2.0 + 1.0;
+  vec4 s1 = floor(b1) * 2.0 + 1.0;
+  vec4 sh = -step(h, vec4(0.0));
+  vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
+  vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
+  vec3 p0 = vec3(a0.xy, h.x);
+  vec3 p1 = vec3(a0.zw, h.y);
+  vec3 p2 = vec3(a1.xy, h.z);
+  vec3 p3 = vec3(a1.zw, h.w);
+  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+  p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+  m = m * m;
+  return 42.0 * dot(m * m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+}
+`;
+
+const vertexShader = `
+uniform float uTime;
+uniform float uSize;
+uniform float uPixelRatio;
+attribute float aRandom;
+varying float vNoise;
+varying float vDepth;
+${NOISE_GLSL}
+void main(){
+  vec3 dir = normalize(position);
+  float n1 = snoise(dir * 1.55 + vec3(0.0, uTime * 0.115, uTime * 0.05));
+  float n2 = snoise(dir * 3.60 + vec3(uTime * 0.07, 0.0, 0.0));
+  vec3 p = position + dir * (n1 * 0.62 + n2 * 0.20);
+  vec4 mv = modelViewMatrix * vec4(p, 1.0);
+  gl_Position = projectionMatrix * mv;
+  float dist = max(-mv.z, 0.001);
+  gl_PointSize = uSize * uPixelRatio * (0.45 + aRandom * 1.05) * (1.0 / dist);
+  vNoise = clamp(n1 * 0.5 + 0.5, 0.0, 1.0);
+  vDepth = clamp(1.0 - (dist - 3.0) / 8.0, 0.0, 1.0);
+}
+`;
+
+/* ── Adjusted for cream background: no additive brightening ── */
+const fragmentShader = `
+uniform vec3 uColorA;
+uniform vec3 uColorB;
+uniform vec3 uColorC;
+varying float vNoise;
+varying float vDepth;
+void main(){
+  vec2 c = gl_PointCoord - 0.5;
+  float d = length(c);
+  if(d > 0.5) discard;
+  float alpha = smoothstep(0.5, 0.0, d);
+  alpha = pow(alpha, 2.4);
+  vec3 col = mix(uColorA, uColorB, vNoise);
+  col = mix(col, uColorC, pow(vNoise, 3.0) * 0.85);
+  gl_FragColor = vec4(col, alpha * (0.14 + vNoise * 0.44) * (0.30 + vDepth * 0.70));
+}
+`;
+
+const isSmall = window.innerWidth < 780;
+const COUNT = isSmall ? 3800 : 8200;
+const RADIUS = 2.45;
+
+const positions = new Float32Array(COUNT * 3);
+const randoms = new Float32Array(COUNT);
+const GOLDEN = Math.PI * (3 - Math.sqrt(5));
+
+for (let i = 0; i < COUNT; i++) {
+  const y = 1 - (i / (COUNT - 1)) * 2;
+  const r = Math.sqrt(Math.max(0, 1 - y * y));
+  const theta = GOLDEN * i;
+  const rr = RADIUS * (0.985 + Math.random() * 0.03);
+
+  positions[i * 3]     = Math.cos(theta) * r * rr;
+  positions[i * 3 + 1] = y * rr;
+  positions[i * 3 + 2] = Math.sin(theta) * r * rr;
+
+  randoms[i] = Math.random();
+}
+
+const geometry = new THREE.BufferGeometry();
+geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
+
+const uniforms = {
+  uTime:       { value: 0 },
+  uSize:       { value: 16.0 },
+  uPixelRatio: { value: DPR },
+  uColorA:     { value: new THREE.Color('#8F6F14') },
+  uColorB:     { value: new THREE.Color('#C9A227') },
+  uColorC:     { value: new THREE.Color('#5C4708') }
+};
+
+const material = new THREE.ShaderMaterial({
+  uniforms,
+  vertexShader,
+  fragmentShader,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.NormalBlending
+});
+
+const sphere = new THREE.Points(geometry, material);
+group.add(sphere);
+
+/* ── Faint wireframe shell ── */
+const shellGeo = new THREE.IcosahedronGeometry(RADIUS * 1.55, 1);
+const shell = new THREE.LineSegments(
+  new THREE.WireframeGeometry(shellGeo),
+  new THREE.LineBasicMaterial({
+    color: 0x8F6F14,
+    transparent: true,
+    opacity: 0.05,
+    depthWrite: false
+  })
+);
+group.add(shell);
+
+/* ── Dust drift ── */
+const DUST = isSmall ? 400 : 900;
+const dustPos = new Float32Array(DUST * 3);
+for (let i = 0; i < DUST; i++) {
+  const r = 5 + Math.random() * 9;
+  const t = Math.random() * Math.PI * 2;
+  const ph = Math.acos(2 * Math.random() - 1);
+  dustPos[i * 3]     = r * Math.sin(ph) * Math.cos(t);
+  dustPos[i * 3 + 1] = r * Math.sin(ph) * Math.sin(t) * 0.55;
+  dustPos[i * 3 + 2] = r * Math.cos(ph);
+}
+const dustGeo = new THREE.BufferGeometry();
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+const dust = new THREE.Points(
+  dustGeo,
+  new THREE.PointsMaterial({
+    size: 0.028,
+    color: 0xB18A22,
+    transparent: true,
+    opacity: 0.42,
+    depthWrite: false,
+    sizeAttenuation: true
+  })
+);
+scene.add(dust);
+
+/* ── Pointer parallax ── */
+const pointer = { x: 0, y: 0 };
+const smooth  = { x: 0, y: 0 };
+
+window.addEventListener('pointermove', (e) => {
+  pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+}, { passive: true });
+
+/* ── Resize ── */
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(w, h);
+  }, 120);
+});
+
+/* ── Render loop ── */
+const clock = new THREE.Clock();
+let running = true;
+
+document.addEventListener('visibilitychange', () => {
+  running = !document.hidden;
+  if (running) clock.getDelta();
+});
+
+function animate() {
+  requestAnimationFrame(animate);
+  if (!running) return;
+
+  const t = clock.getElapsedTime();
+  const speed = reduceMotion ? 0.12 : 1;
+
+  uniforms.uTime.value = t * speed;
+
+  smooth.x += (pointer.x - smooth.x) * 0.04;
+  smooth.y += (pointer.y - smooth.y) * 0.04;
+
+  group.rotation.y = t * 0.06 * speed + smooth.x * 0.36;
+  group.rotation.x = smooth.y * 0.22;
+  group.rotation.z = Math.sin(t * 0.12 * speed) * 0.05;
+
+  camera.position.x = smooth.x * 0.6;
+  camera.position.y = smooth.y * 0.4;
+  camera.lookAt(0, 0, 0);
+
+  shell.rotation.y -= 0.0014 * speed;
+  shell.rotation.x += 0.0008 * speed;
+
+  dust.rotation.y = t * 0.014 * speed;
+  dust.rotation.x = Math.sin(t * 0.05 * speed) * 0.07;
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+/* ── Scroll reveal ── */
+const revealEls = document.querySelectorAll('[data-reveal]');
+
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+
+  revealEls.forEach((el) => io.observe(el));
+} else {
+  revealEls.forEach((el) => el.classList.add('in'));
+}
+
+/* ── Year ── */
+const yr = document.getElementById('yr');
+if (yr) yr.textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
