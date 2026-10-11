@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meridian Consulting — Let's talk</title>
+<meta name="description" content="Strategy, operations and growth advisory. Reach us by email, WhatsApp or Telegram." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+<style>
+  :root{
+    --ink:#eaf0ff;
+    --muted:#8b97b8;
+    --line:rgba(255,255,255,.09);
+    --cyan:#4cc9f0;
+    --violet:#7b61ff;
+    --radius:32px;
+    --ease:cubic-bezier(.2,.8,.2,1);
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{ height:100%; }
+
+  body{
+    margin:0;
+    min-height:100svh;
+    display:grid;
+    place-items:center;
+    padding: clamp(14px, 3.5vw, 48px);
+    color:var(--ink);
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+    background:
+      radial-gradient(1200px 820px at 72% -12%, #12204a 0%, transparent 62%),
+      radial-gradient(980px 720px at 6% 108%, #1a1140 0%, transparent 60%),
+      radial-gradient(700px 500px at 50% 50%, #0a1024 0%, transparent 70%),
+      #04060d;
+  }
+
+  /* ---------- 3D canvas ---------- */
+  #scene{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:0;
+    display:block;
+    pointer-events:none;
+  }
+
+  .vignette{
+    position:fixed;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    background:radial-gradient(125% 95% at 50% 42%, transparent 28%, rgba(2,4,10,.78) 100%);
+  }
+
+  .grain{
+    position:fixed;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
+    opacity:.035;
+    mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- Card ---------- */
+  .card{
+    position:relative;
+    z-index:3;
+    width:min(940px, 100%);
+    padding: clamp(26px, 4.2vw, 56px);
+    border-radius:var(--radius);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.062), rgba(255,255,255,.016)),
+      rgba(9,13,26,.58);
+    -webkit-backdrop-filter: blur(26px) saturate(150%);
+    backdrop-filter: blur(26px) saturate(150%);
+    box-shadow:
+      0 60px 140px -50px rgba(0,0,0,.95),
+      0 0 90px -40px rgba(76,201,240,.35),
+      inset 0 1px 0 rgba(255,255,255,.09);
+    transform-style:preserve-3d;
+    transition: transform .5s var(--ease);
+
+    opacity:0;
+    translate:0 26px;
+    animation: cardIn 1.1s var(--ease) .08s forwards;
+  }
+
+  @keyframes cardIn{ to{ opacity:1; translate:0 0; } }
+
+  /* gradient hairline border */
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    padding:1px;
+    background:linear-gradient(135deg,
+      rgba(139,233,255,.55),
+      rgba(255,255,255,.04) 34%,
+      rgba(255,255,255,.02) 66%,
+      rgba(123,97,255,.55));
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+            mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite:exclude;
+    pointer-events:none;
+  }
+
+  .card > *{ position:relative; z-index:2; }
+
+  /* ---------- Top row ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    padding-bottom: clamp(18px, 2.4vw, 26px);
+    border-bottom:1px solid var(--line);
+  }
+
+  .brand{ display:flex; align-items:center; gap:12px; }
+
+  .brand__mark{
+    width:38px; height:38px;
+    display:grid; place-items:center;
+    border-radius:12px;
+    background:linear-gradient(140deg, rgba(76,201,240,.22), rgba(123,97,255,.22));
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 8px 24px -12px rgba(76,201,240,.7);
+  }
+  .brand__mark svg{ width:18px; height:18px; color:#bfe9ff; }
+
+  .brand__name{
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+  }
+  .brand__name span{
+    display:block;
+    font-size:10.5px;
+    font-weight:400;
+    letter-spacing:.26em;
+    color:var(--muted);
+    margin-top:3px;
+  }
+
+  .status{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    padding:9px 15px;
+    border-radius:999px;
+    font-size:12.5px;
+    letter-spacing:.015em;
+    color:#a9b8da;
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--line);
+  }
+  .status .dot{
+    width:7px; height:7px; border-radius:50%;
+    background:#3ddc97;
+    box-shadow:0 0 10px rgba(61,220,151,.9);
+    animation:pulse 2.6s ease-out infinite;
+  }
+  @keyframes pulse{
+    0%{ box-shadow:0 0 0 0 rgba(61,220,151,.55), 0 0 10px rgba(61,220,151,.9); }
+    70%{ box-shadow:0 0 0 10px rgba(61,220,151,0), 0 0 10px rgba(61,220,151,.9); }
+    100%{ box-shadow:0 0 0 0 rgba(61,220,151,0), 0 0 10px rgba(61,220,151,.9); }
+  }
+
+  /* ---------- Copy ---------- */
+  .eyebrow{
+    margin: clamp(26px, 3.6vw, 42px) 0 0;
+    font-size:11.5px;
+    font-weight:500;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:#6f80a6;
+    display:flex; align-items:center; gap:12px;
+  }
+  .eyebrow::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:linear-gradient(90deg, rgba(255,255,255,.14), transparent);
+  }
+
+  h1{
+    margin:18px 0 0;
+    font-size:clamp(31px, 4.7vw, 54px);
+    line-height:1.04;
+    letter-spacing:-.035em;
+    font-weight:600;
+    max-width:16ch;
+  }
+  h1 em{
+    font-family:'Instrument Serif', Georgia, 'Times New Roman', serif;
+    font-style:italic;
+    font-weight:400;
+    letter-spacing:-.01em;
+    padding-right:.05em;
+    background:linear-gradient(100deg,#9beeff 0%, #7b61ff 55%, #c79bff 100%);
+    -webkit-background-clip:text;
+            background-clip:text;
+    color:transparent;
+  }
+
+  .lede{
+    margin:20px 0 0;
+    max-width:56ch;
+    font-size:clamp(14.5px, 1.35vw, 16.5px);
+    line-height:1.68;
+    font-weight:300;
+    color:#9aa8c9;
+  }
+
+  /* ---------- Actions ---------- */
+  .actions{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:14px;
+    margin-top: clamp(30px, 4vw, 46px);
+  }
+
+  .action{
+    --accent:#4cc9f0;
+    --glow:76,201,240;
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:17px 18px;
+    border-radius:20px;
+    text-decoration:none;
+    color:var(--ink);
+    background:rgba(255,255,255,.032);
+    border:1px solid rgba(255,255,255,.075);
+    overflow:hidden;
+    isolation:isolate;
+    transition:
+      transform .4s var(--ease),
+      border-color .4s var(--ease),
+      background .4s var(--ease),
+      box-shadow .4s var(--ease);
+
+    opacity:0;
+    translate:0 18px;
+    animation: rise .85s var(--ease) forwards;
+  }
+
+  @keyframes rise{ to{ opacity:1; translate:0 0; } }
+
+  .action:nth-child(1){ animation-delay:.42s; }
+  .action:nth-child(2){ animation-delay:.54s; }
+  .action:nth-child(3){ animation-delay:.66s; }
+
+  .action[data-net="email"]   { --accent:#5fd3f7; --glow:76,201,240; }
+  .action[data-net="whatsapp"]{ --accent:#25D366; --glow:37,211,102; }
+  .action[data-net="telegram"]{ --accent:#2AABEE; --glow:42,171,238; }
+
+  /* accent wash */
+  .action::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:-1;
+    background:radial-gradient(120% 130% at 0% 0%, rgba(var(--glow),.20), transparent 62%);
+    opacity:0;
+    transition:opacity .45s var(--ease);
+  }
+
+  /* shine sweep */
+  .action::after{
+    content:"";
+    position:absolute;
+    top:0; left:-160%;
+    width:55%; height:100%;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+    transform:skewX(-22deg);
+    transition:left .75s var(--ease);
+    pointer-events:none;
+  }
+
+  .action:hover,
+  .action:focus-visible{
+    transform:translateY(-5px);
+    border-color:rgba(var(--glow), .55);
+    background:rgba(255,255,255,.055);
+    box-shadow:
+      0 24px 55px -24px rgba(var(--glow), .75),
+      0 0 0 1px rgba(var(--glow), .18) inset;
+    outline:none;
+  }
+  .action:hover::before,
+  .action:focus-visible::before{ opacity:1; }
+  .action:hover::after,
+  .action:focus-visible::after{ left:170%; }
+
+  .action:active{ transform:translateY(-2px) scale(.99); }
+
+  .action__icon{
+    flex:0 0 auto;
+    width:44px; height:44px;
+    display:grid; place-items:center;
+    border-radius:14px;
+    color:var(--accent);
+    background:rgba(var(--glow), .10);
+    border:1px solid rgba(var(--glow), .22);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+    transition:transform .45s var(--ease), background .45s var(--ease);
+  }
+  .action__icon svg{ width:21px; height:21px; }
+  .action:hover .action__icon{
+    transform:scale(1.07) rotate(-4deg);
+    background:rgba(var(--glow), .18);
+  }
+
+  .action__text{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    min-width:0;
+  }
+  .action__label{
+    font-size:14.5px;
+    font-weight:600;
+    letter-spacing:-.01em;
+  }
+  .action__sub{
+    font-size:11.5px;
+    font-weight:400;
+    color:#7f8dae;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    transition:color .4s var(--ease);
+  }
+  .action:hover .action__sub{ color:#a6b4d4; }
+
+  .action__arrow{
+    margin-left:auto;
+    flex:0 0 auto;
+    color:var(--accent);
+    opacity:0;
+    transform:translateX(-8px);
+    transition:opacity .4s var(--ease), transform .4s var(--ease);
+  }
+  .action__arrow svg{ width:16px; height:16px; display:block; }
+  .action:hover .action__arrow,
+  .action:focus-visible .action__arrow{
+    opacity:1;
+    transform:translateX(0);
+  }
+
+  /* ---------- Meta ---------- */
+  .meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 26px;
+    margin-top: clamp(26px, 3.4vw, 38px);
+    padding-top:22px;
+    border-top:1px solid var(--line);
+    font-size:12px;
+    letter-spacing:.03em;
+    color:#68769a;
+  }
+  .meta span{ display:inline-flex; align-items:center; gap:8px; }
+  .meta span::before{
+    content:"";
+    width:4px; height:4px;
+    border-radius:50%;
+    background:rgba(255,255,255,.2);
+  }
+  .meta span:first-child::before{ background:rgba(76,201,240,.75); box-shadow:0 0 8px rgba(76,201,240,.8); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 780px){
+    .actions{ grid-template-columns:1fr; }
+    .action{ padding:15px 16px; }
+    .action__arrow{ opacity:1; transform:none; }
+    h1{ max-width:none; }
+  }
+
+  @media (max-width: 420px){
+    .topbar{ flex-direction:column; align-items:flex-start; }
+    .action__sub{ font-size:11px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *,
+    *::before,
+    *::after{
+      animation-duration:.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.01ms !important;
+    }
+    .card{ opacity:1; translate:none; }
+    .action{ opacity:1; translate:none; }
+  }
+</style>
+</head>
+
+<body>
+
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<main class="card" id="card">
+
+  <div class="topbar">
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2.5 21 8v8l-9 5.5L3 16V8z"/>
+          <path d="M12 2.5V21.5M3 8l9 5.5L21 8"/>
+        </svg>
+      </span>
+      <span class="brand__name">
+        Meridian
+        <span>Consulting</span>
+      </span>
+    </div>
+
+    <div class="status">
+      <span class="dot" aria-hidden="true"></span>
+      Accepting new clients — Q3
+    </div>
+  </div>
+
+  <p class="eyebrow">Start a conversation</p>
+
+  <h1>Let's turn complexity into <em>clarity</em>.</h1>
+
+  <p class="lede">
+    Strategy, operations and growth advisory for teams that need to move fast
+    without breaking things. Tell us what you're working on — we usually reply
+    within one business day.
+  </p>
+
+  <div class="actions">
+
+    <a class="action" data-net="email" href="mailto:hello@meridian.consulting?subject=Project%20enquiry" aria-label="Email Meridian Consulting">
+      <span class="action__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2.5" y="4.5" width="19" height="15" rx="3.2"/>
+          <path d="m3.6 7.2 7.3 5.2a2 2 0 0 0 2.2 0l7.3-5.2"/>
+        </svg>
+      </span>
+      <span class="action__text">
+        <span class="action__label">Email us</span>
+        <span class="action__sub">hello@meridian.consulting</span>
+      </span>
+      <span class="action__arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h13M12 5l7 7-7 7"/>
+        </svg>
+      </span>
+    </a>
+
+    <a class="action" data-net="whatsapp" href="https://wa.me/15551234567?text=Hi%20Meridian%2C%20I%27d%20like%20to%20discuss%20a%20project." target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
+      <span class="action__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 1.67c2.2 0 4.27.86 5.83 2.42a8.2 8.2 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.25 8.24a8.23 8.23 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24Zm-3.6 4.2c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.68 2.68 4.08 3.66.57.24 1.01.38 1.36.49.57.18 1.09.16 1.5.1.46-.07 1.41-.58 1.61-1.13.2-.56.2-1.03.14-1.13-.06-.1-.22-.16-.46-.28-.24-.12-1.41-.7-1.63-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.93-1.19-.71-.64-1.19-1.42-1.33-1.66-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.46-.39-.4-.54-.41l-.46-.01Z"/>
+        </svg>
+      </span>
+      <span class="action__text">
+        <span class="action__label">WhatsApp</span>
+        <span class="action__sub">+1 555 123 4567</span>
+      </span>
+      <span class="action__arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h13M12 5l7 7-7 7"/>
+        </svg>
+      </span>
+    </a>
+
+    <a class="action" data-net="telegram" href="https://t.me/meridianconsulting" target="_blank" rel="noopener noreferrer" aria-label="Message on Telegram">
+      <span class="action__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21.94 4.3 18.9 19.1c-.23 1.02-.84 1.27-1.7.79l-4.7-3.46-2.27 2.18c-.25.25-.46.46-.94.46l.33-4.77 8.68-7.84c.38-.33-.08-.52-.58-.19L6.99 13.02 2.4 11.6c-1-.31-1.02-1 .21-1.48l18.1-6.98c.83-.3 1.55.2 1.23 1.16Z"/>
+        </svg>
+      </span>
+      <span class="action__text">
+        <span class="action__label">Telegram</span>
+        <span class="action__sub">@meridianconsulting</span>
+      </span>
+      <span class="action__arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h13M12 5l7 7-7 7"/>
+        </svg>
+      </span>
+    </a>
+
+  </div>
+
+  <div class="meta">
+    <span>Mon–Fri · 09:00–18:00 CET</span>
+    <span>Zürich · London · Remote</span>
+    <span>NDA on request</span>
+  </div>
+
+</main>
+
+<!-- ============ 3D BACKGROUND ============ -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ---------------- Setup ---------------- */
+const canvas = document.getElementById('scene');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true,
+    alpha: true,
+    powerPreference: 'high-performance'
+  });
+} catch (e) {
+  canvas.style.display = 'none';
+  throw e;
+}
+
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+renderer.setPixelRatio(DPR);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000000, 0);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(0, 0, 7);
+
+const group = new THREE.Group();
+scene.add(group);
+
+/* ---------------- Shaders ---------------- */
+const NOISE_GLSL = `
+vec3 mod289(vec3 x){ return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 mod289(vec4 x){ return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 permute(vec4 x){ return mod289(((x * 34.0) + 1.0) * x); }
+vec4 taylorInvSqrt(vec4 r){ return 1.79284291400159 - 0.85373472095314 * r; }
+
+float snoise(vec3 v){
+  const vec2  C = vec2(1.0/6.0, 1.0/3.0);
+  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+
+  vec3 i  = floor(v + dot(v, C.yyy));
+  vec3 x0 = v - i + dot(i, C.xxx);
+
+  vec3 g = step(x0.yzx, x0.xyz);
+  vec3 l = 1.0 - g;
+  vec3 i1 = min(g.xyz, l.zxy);
+  vec3 i2 = max(g.xyz, l.zxy);
+
+  vec3 x1 = x0 - i1 + C.xxx;
+  vec3 x2 = x0 - i2 + C.yyy;
+  vec3 x3 = x0 - D.yyy;
+
+  i = mod289(i);
+  vec4 p = permute(permute(permute(
+             i.z + vec4(0.0, i1.z, i2.z, 1.0))
+           + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+           + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+
+  float n_ = 0.142857142857;
+  vec3  ns = n_ * D.wyz - D.xzx;
+
+  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+
+  vec4 x_ = floor(j * ns.z);
+  vec4 y_ = floor(j - 7.0 * x_);
+
+  vec4 x = x_ * ns.x + ns.yyyy;
+  vec4 y = y_ * ns.x + ns.yyyy;
+  vec4 h = 1.0 - abs(x) - abs(y);
+
+  vec4 b0 = vec4(x.xy, y.xy);
+  vec4 b1 = vec4(x.zw, y.zw);
+
+  vec4 s0 = floor(b0) * 2.0 + 1.0;
+  vec4 s1 = floor(b1) * 2.0 + 1.0;
+  vec4 sh = -step(h, vec4(0.0));
+
+  vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
+  vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
+
+  vec3 p0 = vec3(a0.xy, h.x);
+  vec3 p1 = vec3(a0.zw, h.y);
+  vec3 p2 = vec3(a1.xy, h.z);
+  vec3 p3 = vec3(a1.zw, h.w);
+
+  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+  p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+
+  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+  m = m * m;
+  return 42.0 * dot(m * m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+}
+`;
+
+const vertexShader = `
+uniform float uTime;
+uniform float uSize;
+uniform float uPixelRatio;
+
+attribute float aRandom;
+
+varying float vNoise;
+varying float vDepth;
+
+${NOISE_GLSL}
+
+void main(){
+  vec3 dir = normalize(position);
+
+  float n1 = snoise(dir * 1.55 + vec3(0.0, uTime * 0.115, uTime * 0.05));
+  float n2 = snoise(dir * 3.60 + vec3(uTime * 0.07, 0.0, 0.0));
+
+  vec3 p = position + dir * (n1 * 0.62 + n2 * 0.20);
+
+  vec4 mv = modelViewMatrix * vec4(p, 1.0);
+  gl_Position = projectionMatrix * mv;
+
+  float dist = max(-mv.z, 0.001);
+  gl_PointSize = uSize * uPixelRatio * (0.45 + aRandom * 1.05) * (1.0 / dist);
+
+  vNoise = clamp(n1 * 0.5 + 0.5, 0.0, 1.0);
+  vDepth = clamp(1.0 - (dist - 3.0) / 8.0, 0.0, 1.0);
+}
+`;
+
+const fragmentShader = `
+uniform vec3 uColorA;
+uniform vec3 uColorB;
+uniform vec3 uColorC;
+
+varying float vNoise;
+varying float vDepth;
+
+void main(){
+  vec2 c = gl_PointCoord - 0.5;
+  float d = length(c);
+  if(d > 0.5) discard;
+
+  float alpha = smoothstep(0.5, 0.0, d);
+  alpha = pow(alpha, 2.2);
+
+  vec3 col = mix(uColorA, uColorB, vNoise);
+  col = mix(col, uColorC, pow(vNoise, 3.0) * 0.85);
+  col += vNoise * 0.18;
+
+  gl_FragColor = vec4(col, alpha * (0.22 + vNoise * 0.68) * (0.35 + vDepth * 0.65));
+}
+`;
+
+/* ---------------- Particle sphere ---------------- */
+const isSmall = window.innerWidth < 780;
+const COUNT = isSmall ? 4200 : 9500;
+const RADIUS = 2.45;
+
+const positions = new Float32Array(COUNT * 3);
+const randoms = new Float32Array(COUNT);
+const GOLDEN = Math.PI * (3 - Math.sqrt(5));
+
+for (let i = 0; i < COUNT; i++) {
+  // Fibonacci sphere distribution
+  const y = 1 - (i / (COUNT - 1)) * 2;
+  const r = Math.sqrt(Math.max(0, 1 - y * y));
+  const theta = GOLDEN * i;
+
+  const rr = RADIUS * (0.985 + Math.random() * 0.03);
+
+  positions[i * 3]     = Math.cos(theta) * r * rr;
+  positions[i * 3 + 1] = y * rr;
+  positions[i * 3 + 2] = Math.sin(theta) * r * rr;
+
+  randoms[i] = Math.random();
+}
+
+const geometry = new THREE.BufferGeometry();
+geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
+
+const uniforms = {
+  uTime:       { value: 0 },
+  uSize:       { value: 15.0 },
+  uPixelRatio: { value: DPR },
+  uColorA:     { value: new THREE.Color('#1b3a8f') },
+  uColorB:     { value: new THREE.Color('#4cc9f0') },
+  uColorC:     { value: new THREE.Color('#c9a7ff') }
+};
+
+const material = new THREE.ShaderMaterial({
+  uniforms,
+  vertexShader,
+  fragmentShader,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending
+});
+
+const sphere = new THREE.Points(geometry, material);
+group.add(sphere);
+
+/* ---------------- Wireframe shell ---------------- */
+const shellGeo = new THREE.IcosahedronGeometry(RADIUS * 1.55, 1);
+const shell = new THREE.LineSegments(
+  new THREE.WireframeGeometry(shellGeo),
+  new THREE.LineBasicMaterial({
+    color: 0x6ea8ff,
+    transparent: true,
+    opacity: 0.055,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  })
+);
+group.add(shell);
+
+/* ---------------- Ambient dust ---------------- */
+const DUST = isSmall ? 500 : 1200;
+const dustPos = new Float32Array(DUST * 3);
+for (let i = 0; i < DUST; i++) {
+  const r = 5 + Math.random() * 9;
+  const t = Math.random() * Math.PI * 2;
+  const ph = Math.acos(2 * Math.random() - 1);
+  dustPos[i * 3]     = r * Math.sin(ph) * Math.cos(t);
+  dustPos[i * 3 + 1] = r * Math.sin(ph) * Math.sin(t) * 0.55;
+  dustPos[i * 3 + 2] = r * Math.cos(ph);
+}
+const dustGeo = new THREE.BufferGeometry();
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+const dust = new THREE.Points(
+  dustGeo,
+  new THREE.PointsMaterial({
+    size: 0.035,
+    color: 0x8fb6ff,
+    transparent: true,
+    opacity: 0.5,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    sizeAttenuation: true
+  })
+);
+scene.add(dust);
+
+/* ---------------- Interaction ---------------- */
+const pointer = { x: 0, y: 0 };
+const smooth  = { x: 0, y: 0 };
+
+window.addEventListener('pointermove', (e) => {
+  pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+}, { passive: true });
+
+/* ---------------- Resize ---------------- */
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(w, h);
+  }, 120);
+});
+
+/* ---------------- Render loop ---------------- */
+const clock = new THREE.Clock();
+let running = true;
+
+document.addEventListener('visibilitychange', () => {
+  running = !document.hidden;
+  if (running) clock.getDelta(); // reset delta
+});
+
+function animate() {
+  requestAnimationFrame(animate);
+  if (!running) return;
+
+  const t = clock.getElapsedTime();
+  const speed = reduceMotion ? 0.12 : 1;
+
+  uniforms.uTime.value = t * speed;
+
+  // Eased pointer follow
+  smooth.x += (pointer.x - smooth.x) * 0.045;
+  smooth.y += (pointer.y - smooth.y) * 0.045;
+
+  // Group motion
+  group.rotation.y = t * 0.075 * speed + smooth.x * 0.42;
+  group.rotation.x = smooth.y * 0.26;
+  group.rotation.z = Math.sin(t * 0.12 * speed) * 0.06;
+
+  // Camera parallax
+  camera.position.x = smooth.x * 0.85;
+  camera.position.y = smooth.y * 0.55;
+  camera.lookAt(0, 0, 0);
+
+  // Shell counter-rotation
+  shell.rotation.y -= 0.0016 * speed;
+  shell.rotation.x += 0.0009 * speed;
+
+  // Dust drift
+  dust.rotation.y = t * 0.018 * speed;
+  dust.rotation.x = Math.sin(t * 0.05 * speed) * 0.08;
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+/* ---------------- Card tilt (pointer-fine only) ---------------- */
+const card = document.getElementById('card');
+const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+if (canHover && !reduceMotion) {
+  let raf = null;
+  let tx = 0, ty = 0;
+
+  window.addEventListener('pointermove', (e) => {
+    tx = (e.clientX / window.innerWidth) * 2 - 1;
+    ty = (e.clientY / window.innerHeight) * 2 - 1;
+
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      card.style.transform =
+        `perspective(1500px) rotateY(${tx * 2.2}deg) rotateX(${-ty * 1.8}deg)`;
+      raf = null;
+    });
+  }, { passive: true });
+
+  window.addEventListener('pointerleave', () => {
+    card.style.transform = 'perspective(1500px) rotateY(0deg) rotateX(0deg)';
+  });
+}
+</script>
+
+</body>
+</html>
